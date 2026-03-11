@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thermal-pad-and-stud-size-list</title>
+<title>Thermal pad and stud size list generator</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -450,7 +450,7 @@
 <div class="container">
 
   <div class="header">
-    <h1>Thermal-pad-and-stud-size-list</h1>
+    <h1>Thermal pad and stud size list generator</h1>
     <p>快速計算凸台 (Pedestal) 與導熱墊片 (Thermal Pad) 標準尺寸</p>
   </div>
 
@@ -574,9 +574,9 @@
 <!-- SheetJS for Excel export -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
-<!-- jsPDF + autoTable for PDF export -->
+<!-- html2canvas + jsPDF for PDF export (supports Chinese fonts natively) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 /* ============================
@@ -1107,24 +1107,22 @@ function onToggleHide(el) {
   }
 }
 
-/* ---- 收集匯出資料（排除隱藏元件） ---- */
-function collectExportData() {
-  const rows = [];
-  let idx = 0;
+/* ---- 收集匯出資料（按分類，排除隱藏元件） ---- */
+function collectExportDataByCategory() {
+  const result = [];
   for (const [catKey, catInfo] of Object.entries(CATEGORIES)) {
     const items = currentProjectData[catInfo.field] || [];
     if (items.length === 0) continue;
 
-    items.forEach(comp => {
+    const catRows = [];
+    items.forEach((comp, idx) => {
       const compName = comp.Component || '';
       const specKey = compName.replace(/ /g, '_').replace(/\//g, '-');
-      if (hiddenComponents[specKey]) return; // 跳過隱藏元件
+      if (hiddenComponents[specKey]) return;
 
       const spec = thermalSpecs[specKey] || {};
-      idx++;
-      rows.push({
-        index: idx,
-        category: catInfo.label,
+      catRows.push({
+        index: idx + 1,
         component: compName,
         qty: comp.Qty || '—',
         power: comp['Power(W)'] || '—',
@@ -1138,8 +1136,12 @@ function collectExportData() {
         note: spec.note || ''
       });
     });
+
+    if (catRows.length > 0) {
+      result.push({ catKey, label: catInfo.label, css: catInfo.css, rows: catRows });
+    }
   }
-  return rows;
+  return result;
 }
 
 function getExportTitle() {
@@ -1155,38 +1157,40 @@ function getDateString() {
   return d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
 }
 
-/* ---- 匯出 Excel ---- */
+/* ---- 匯出 Excel（分三大區塊） ---- */
 function exportExcel() {
-  const rows = collectExportData();
-  if (rows.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
+  const categories = collectExportDataByCategory();
+  if (categories.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
 
-  const headers = ['#', '分類', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '凸台大小(mm)',
+  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '凸台大小(mm)',
     'TIM 種類', 'TIM 厚度(mm)', 'TIM Size(mm)', '散熱方向', 'IC距離HSK', '備註'];
 
   const wsData = [
     [getExportTitle()],
-    ['案名：' + getProjectName(), '', '', '', '', '', '', '', '', '', '', '', '日期：' + getDateString()],
-    [],
-    headers
+    ['案名：' + getProjectName(), '', '', '', '', '', '', '', '', '', '', '日期：' + getDateString()],
+    []
   ];
 
-  rows.forEach(r => {
-    wsData.push([r.index, r.category, r.component, r.qty, r.power,
-      r.heatSourceSize, r.bossSize, r.timType, r.timThickness, r.timSize,
-      r.heatDirection, r.icToHSK, r.note]);
+  categories.forEach(cat => {
+    wsData.push([cat.label + '（' + cat.rows.length + ' 項）']);
+    wsData.push(headers);
+    cat.rows.forEach(r => {
+      wsData.push([r.index, r.component, r.qty, r.power,
+        r.heatSourceSize, r.bossSize, r.timType, r.timThickness, r.timSize,
+        r.heatDirection, r.icToHSK, r.note]);
+    });
+    wsData.push([]);
   });
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-  // 合併標題列
   ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }
   ];
 
-  // 設定欄寬
   ws['!cols'] = [
-    { wch: 4 }, { wch: 14 }, { wch: 22 }, { wch: 6 }, { wch: 10 },
+    { wch: 4 }, { wch: 22 }, { wch: 6 }, { wch: 10 },
     { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
     { wch: 10 }, { wch: 10 }, { wch: 16 }
   ];
@@ -1195,52 +1199,138 @@ function exportExcel() {
   XLSX.writeFile(wb, getProjectName() + '_熱設計TIM凸台標準尺寸表.xlsx');
 }
 
-/* ---- 匯出 PDF ---- */
-function exportPDF() {
-  const rows = collectExportData();
-  if (rows.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
+/* ---- 建立 PDF 用的 HTML 內容（分三大區塊，與工具畫面一致） ---- */
+function buildPdfHtml(categories) {
+  const CAT_COLORS = { rf: '#c0392b', digital: '#2e6bb5', pwr: '#e67e22' };
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  let html = `
+    <div style="font-family:'Segoe UI','Microsoft JhengHei','PingFang TC','Noto Sans TC',sans-serif;
+                padding:24px 32px;background:#fff;color:#333;width:1400px;">
+      <h1 style="text-align:center;font-size:22px;color:#1a3a6b;margin-bottom:4px;">
+        ${getExportTitle()}
+      </h1>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:18px;">
+        <span>案名：${escapeHtml(getProjectName())}</span>
+        <span>日期：${getDateString()}</span>
+      </div>`;
 
-  // 載入中文字型（使用內建支援）
-  doc.setFont('helvetica', 'normal');
+  categories.forEach(cat => {
+    const color = CAT_COLORS[cat.css] || '#2e6bb5';
+    html += `
+      <div style="margin-bottom:20px;">
+        <div style="background:${color};color:#fff;font-weight:700;font-size:13px;
+                    padding:8px 14px;border-radius:6px 6px 0 0;">
+          ${escapeHtml(cat.label)}（${cat.rows.length} 項）
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead>
+            <tr style="background:#e8f0f8;">
+              <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;white-space:nowrap;">#</th>
+              <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;text-align:left;">元件名稱</th>
+              <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">數量</th>
+              <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">發熱瓦數(W)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源大小(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台大小(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM 種類</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM 厚度(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM Size(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">散熱方向</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">IC距離HSK</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">備註</th>
+            </tr>
+          </thead>
+          <tbody>`;
 
-  // 標題
-  doc.setFontSize(16);
-  doc.text(getExportTitle(), 148, 15, { align: 'center' });
+    cat.rows.forEach(r => {
+      html += `
+            <tr>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;background:#fafbfc;">${r.index}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:left;font-weight:600;color:#1a3a6b;background:#fafbfc;">${escapeHtml(r.component)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;background:#fafbfc;">${r.qty}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;background:#fafbfc;">${r.power}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.heatSourceSize)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.bossSize)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.timType)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.timThickness)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.timSize)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.heatDirection)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.icToHSK)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:left;">${escapeHtml(r.note)}</td>
+            </tr>`;
+    });
 
-  // 案名與日期
-  doc.setFontSize(10);
-  doc.text('Project: ' + getProjectName(), 14, 24);
-  doc.text('Date: ' + getDateString(), 283, 24, { align: 'right' });
-
-  // 表格
-  const headers = [['#', 'Category', 'Component', 'Qty', 'Power\n(W)', 'Heat Src\n(mm)', 'Boss Size\n(mm)',
-    'TIM Type', 'TIM Thick\n(mm)', 'TIM Size\n(mm)', 'Heat Dir', 'IC-HSK', 'Note']];
-
-  const body = rows.map(r => [
-    r.index, r.category, r.component, r.qty, r.power,
-    r.heatSourceSize, r.bossSize, r.timType, r.timThickness, r.timSize,
-    r.heatDirection, r.icToHSK, r.note
-  ]);
-
-  doc.autoTable({
-    head: headers,
-    body: body,
-    startY: 28,
-    theme: 'grid',
-    styles: { fontSize: 7, cellPadding: 2, halign: 'center', font: 'helvetica' },
-    headStyles: { fillColor: [46, 107, 181], textColor: 255, fontStyle: 'bold', fontSize: 7 },
-    columnStyles: {
-      0: { cellWidth: 8 },
-      2: { cellWidth: 35, halign: 'left' },
-      12: { cellWidth: 25, halign: 'left' }
-    },
-    margin: { left: 14, right: 14 }
+    html += '</tbody></table></div>';
   });
 
-  doc.save(getProjectName() + '_thermal_TIM_stud_spec.pdf');
+  html += '</div>';
+  return html;
+}
+
+/* ---- 匯出 PDF（使用 html2canvas 支援中文） ---- */
+async function exportPDF() {
+  const categories = collectExportDataByCategory();
+  if (categories.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
+
+  // 建立隱藏的 DOM 容器
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;';
+  wrapper.innerHTML = buildPdfHtml(categories);
+  document.body.appendChild(wrapper);
+  const content = wrapper.firstElementChild;
+
+  try {
+    const canvas = await html2canvas(content, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const imgW = canvas.width;
+    const imgH = canvas.height;
+
+    // A4 landscape: 297 x 210 mm
+    const { jsPDF } = window.jspdf;
+    const pageW = 297;
+    const pageH = 210;
+    const margin = 10;
+    const contentW = pageW - margin * 2;
+    const ratio = contentW / imgW;
+    const scaledH = imgH * ratio;
+
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    // 如果內容超過一頁，分頁
+    const pageContentH = pageH - margin * 2;
+    let srcY = 0;
+    let page = 0;
+
+    while (srcY < imgH) {
+      if (page > 0) doc.addPage();
+      const sliceH = Math.min(pageContentH / ratio, imgH - srcY);
+
+      // 建立裁切 canvas
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = imgW;
+      sliceCanvas.height = sliceH;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.drawImage(canvas, 0, srcY, imgW, sliceH, 0, 0, imgW, sliceH);
+
+      const sliceData = sliceCanvas.toDataURL('image/png');
+      doc.addImage(sliceData, 'PNG', margin, margin, contentW, sliceH * ratio);
+
+      srcY += sliceH;
+      page++;
+    }
+
+    doc.save(getProjectName() + '_熱設計TIM凸台標準尺寸表.pdf');
+  } finally {
+    document.body.removeChild(wrapper);
+  }
 }
 
 /* ---- Utilities ---- */
