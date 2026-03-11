@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>熱設計標準尺寸評估工具</title>
+<title>Thermal-pad-and-stud-size-list</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -400,6 +400,46 @@
 
   .tim-size-col { min-width: 80px; }
 
+  /* Hide checkbox */
+  .hide-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #c0392b;
+  }
+  .comp-table tr.row-hidden td {
+    opacity: 0.35;
+    text-decoration: line-through;
+  }
+  .comp-table th.hide-col, .comp-table td.hide-col {
+    width: 40px;
+    min-width: 40px;
+  }
+
+  /* Export buttons */
+  .export-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .btn-export {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #fff;
+  }
+  .btn-export.pdf { background: #c0392b; }
+  .btn-export.pdf:hover { background: #a93226; }
+  .btn-export.excel { background: #217346; }
+  .btn-export.excel:hover { background: #196035; }
+  .btn-export:disabled { background: #b0c4de; cursor: not-allowed; }
+
   @media (max-width: 900px) {
     .comp-table { font-size: 0.78rem; }
     .comp-table th, .comp-table td { padding: 8px 3px; }
@@ -410,7 +450,7 @@
 <div class="container">
 
   <div class="header">
-    <h1>熱設計標準尺寸評估工具</h1>
+    <h1>Thermal-pad-and-stud-size-list</h1>
     <p>快速計算凸台 (Pedestal) 與導熱墊片 (Thermal Pad) 標準尺寸</p>
   </div>
 
@@ -507,6 +547,13 @@
       </div>
     </div>
 
+    <!-- Export Toolbar -->
+    <div id="export-toolbar" class="export-toolbar" style="display:none;">
+      <button class="btn-export pdf" onclick="exportPDF()">&#128196; 匯出 PDF</button>
+      <button class="btn-export excel" onclick="exportExcel()">&#128202; 匯出 Excel</button>
+      <span style="font-size:0.82rem;color:#888;">（被勾選「隱藏」的元件不會出現在匯出表格中）</span>
+    </div>
+
     <!-- Component Tables by Category -->
     <div id="comp-container">
       <div class="empty-state">
@@ -523,6 +570,13 @@
 <!-- Firebase SDK (v9 compat mode) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+<!-- jsPDF + autoTable for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 /* ============================
@@ -748,6 +802,7 @@ async function onProjectChange() {
       </div>`;
     legendEl.style.display = 'none';
     saveBtn.style.display = 'none';
+    document.getElementById('export-toolbar').style.display = 'none';
     return;
   }
 
@@ -777,9 +832,13 @@ async function onProjectChange() {
 }
 
 /* ---- 渲染所有分類 ---- */
+/* 記錄隱藏的元件 */
+let hiddenComponents = {};
+
 function renderAllCategories() {
   const container = document.getElementById('comp-container');
   const summaryEl = document.getElementById('comp-summary');
+  const exportToolbar = document.getElementById('export-toolbar');
 
   let totalComponents = 0;
   let totalQuantity = 0;
@@ -806,6 +865,7 @@ function renderAllCategories() {
         <p>\u6b64\u5c08\u6848\u5c1a\u7121\u5143\u4ef6\u8cc7\u6599\u3002</p>
       </div>`;
     summaryEl.innerHTML = '';
+    exportToolbar.style.display = 'none';
     return;
   }
 
@@ -815,6 +875,7 @@ function renderAllCategories() {
     <div class="summary-chip">\u7e3d\u529f\u8017\uff1a<span>${fmt(totalPower)} W</span></div>
   `;
   container.innerHTML = html;
+  exportToolbar.style.display = 'flex';
 }
 
 /* ---- 渲染單一分類表格 ---- */
@@ -825,6 +886,7 @@ function renderCategoryTable(catKey, catInfo, items) {
       <div class="comp-table-wrap">
       <table class="comp-table">
         <thead><tr>
+          <th class="readonly-col hide-col">隱藏</th>
           <th class="readonly-col">#</th>
           <th class="readonly-col">元件名稱</th>
           <th class="readonly-col">數量</th>
@@ -860,8 +922,16 @@ function renderCategoryTable(catKey, catInfo, items) {
     const note         = spec.note           || '';
     const showTimSize  = (timType === 'Pad');
 
+    const isHidden = !!hiddenComponents[specKey];
     html += `
-          <tr data-speckey="${escapeAttr(specKey)}">
+          <tr data-speckey="${escapeAttr(specKey)}" class="${isHidden ? 'row-hidden' : ''}">
+            <td class="readonly-cell hide-col">
+              <input type="checkbox" class="hide-checkbox"
+                data-comp="${escapeAttr(specKey)}"
+                ${isHidden ? 'checked' : ''}
+                onchange="onToggleHide(this)"
+                title="勾選以隱藏此元件（匯出時不包含）">
+            </td>
             <td class="readonly-cell">${idx + 1}</td>
             <td class="name-cell readonly-cell">${escapeHtml(compName)}</td>
             <td class="readonly-cell">${qty}</td>
@@ -1022,6 +1092,155 @@ async function saveThermalSpecs() {
 
   btn.disabled = false;
   btn.textContent = '\u5132\u5b58\u71b1\u8a2d\u8a08\u8cc7\u6599';
+}
+
+/* ---- 隱藏元件切換 ---- */
+function onToggleHide(el) {
+  const compKey = el.dataset.comp;
+  const row = el.closest('tr');
+  if (el.checked) {
+    hiddenComponents[compKey] = true;
+    row.classList.add('row-hidden');
+  } else {
+    delete hiddenComponents[compKey];
+    row.classList.remove('row-hidden');
+  }
+}
+
+/* ---- 收集匯出資料（排除隱藏元件） ---- */
+function collectExportData() {
+  const rows = [];
+  let idx = 0;
+  for (const [catKey, catInfo] of Object.entries(CATEGORIES)) {
+    const items = currentProjectData[catInfo.field] || [];
+    if (items.length === 0) continue;
+
+    items.forEach(comp => {
+      const compName = comp.Component || '';
+      const specKey = compName.replace(/ /g, '_').replace(/\//g, '-');
+      if (hiddenComponents[specKey]) return; // 跳過隱藏元件
+
+      const spec = thermalSpecs[specKey] || {};
+      idx++;
+      rows.push({
+        index: idx,
+        category: catInfo.label,
+        component: compName,
+        qty: comp.Qty || '—',
+        power: comp['Power(W)'] || '—',
+        heatSourceSize: spec.heatSourceSize || '',
+        bossSize: spec.bossSize || '',
+        timType: spec.timType || '',
+        timThickness: spec.timThickness || '',
+        timSize: spec.timSize || '',
+        heatDirection: spec.heatDirection || '',
+        icToHSK: spec.icToHSK || '',
+        note: spec.note || ''
+      });
+    });
+  }
+  return rows;
+}
+
+function getExportTitle() {
+  return '熱設計TIM&凸台標準尺寸表';
+}
+
+function getProjectName() {
+  return currentProjectData ? (currentProjectData.project_name || currentProjectId) : '';
+}
+
+function getDateString() {
+  const d = new Date();
+  return d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
+}
+
+/* ---- 匯出 Excel ---- */
+function exportExcel() {
+  const rows = collectExportData();
+  if (rows.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
+
+  const headers = ['#', '分類', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '凸台大小(mm)',
+    'TIM 種類', 'TIM 厚度(mm)', 'TIM Size(mm)', '散熱方向', 'IC距離HSK', '備註'];
+
+  const wsData = [
+    [getExportTitle()],
+    ['案名：' + getProjectName(), '', '', '', '', '', '', '', '', '', '', '', '日期：' + getDateString()],
+    [],
+    headers
+  ];
+
+  rows.forEach(r => {
+    wsData.push([r.index, r.category, r.component, r.qty, r.power,
+      r.heatSourceSize, r.bossSize, r.timType, r.timThickness, r.timSize,
+      r.heatDirection, r.icToHSK, r.note]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // 合併標題列
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }
+  ];
+
+  // 設定欄寬
+  ws['!cols'] = [
+    { wch: 4 }, { wch: 14 }, { wch: 22 }, { wch: 6 }, { wch: 10 },
+    { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
+    { wch: 10 }, { wch: 10 }, { wch: 16 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, '總表');
+  XLSX.writeFile(wb, getProjectName() + '_熱設計TIM凸台標準尺寸表.xlsx');
+}
+
+/* ---- 匯出 PDF ---- */
+function exportPDF() {
+  const rows = collectExportData();
+  if (rows.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  // 載入中文字型（使用內建支援）
+  doc.setFont('helvetica', 'normal');
+
+  // 標題
+  doc.setFontSize(16);
+  doc.text(getExportTitle(), 148, 15, { align: 'center' });
+
+  // 案名與日期
+  doc.setFontSize(10);
+  doc.text('Project: ' + getProjectName(), 14, 24);
+  doc.text('Date: ' + getDateString(), 283, 24, { align: 'right' });
+
+  // 表格
+  const headers = [['#', 'Category', 'Component', 'Qty', 'Power\n(W)', 'Heat Src\n(mm)', 'Boss Size\n(mm)',
+    'TIM Type', 'TIM Thick\n(mm)', 'TIM Size\n(mm)', 'Heat Dir', 'IC-HSK', 'Note']];
+
+  const body = rows.map(r => [
+    r.index, r.category, r.component, r.qty, r.power,
+    r.heatSourceSize, r.bossSize, r.timType, r.timThickness, r.timSize,
+    r.heatDirection, r.icToHSK, r.note
+  ]);
+
+  doc.autoTable({
+    head: headers,
+    body: body,
+    startY: 28,
+    theme: 'grid',
+    styles: { fontSize: 7, cellPadding: 2, halign: 'center', font: 'helvetica' },
+    headStyles: { fillColor: [46, 107, 181], textColor: 255, fontStyle: 'bold', fontSize: 7 },
+    columnStyles: {
+      0: { cellWidth: 8 },
+      2: { cellWidth: 35, halign: 'left' },
+      12: { cellWidth: 25, halign: 'left' }
+    },
+    margin: { left: 14, right: 14 }
+  });
+
+  doc.save(getProjectName() + '_thermal_TIM_stud_spec.pdf');
 }
 
 /* ---- Utilities ---- */
