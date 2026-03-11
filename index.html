@@ -13,7 +13,7 @@
     padding: 32px 20px;
     color: #333;
   }
-  .container { max-width: 1200px; margin: 0 auto; }
+  .container { max-width: 1400px; margin: 0 auto; }
 
   .header { text-align: center; margin-bottom: 28px; }
   .header h1 { font-size: 2rem; color: #1a3a6b; font-weight: 700; margin-bottom: 6px; }
@@ -182,7 +182,6 @@
     gap: 12px;
     align-items: flex-end;
     flex-wrap: wrap;
-    margin-bottom: 20px;
   }
   .comp-toolbar .field { margin-bottom: 0; flex: 1; min-width: 200px; }
   .comp-toolbar .field select { font-size: 0.95rem; }
@@ -207,39 +206,48 @@
     color: #217346;
   }
 
-  .category-section {
-    margin-bottom: 20px;
-  }
+  .category-section { margin-bottom: 24px; }
   .category-title {
     font-size: 0.95rem;
     font-weight: 700;
     color: #fff;
-    background: #2e6bb5;
     padding: 10px 16px;
     border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
+  .category-title.rf      { background: #c0392b; }
+  .category-title.digital { background: #2e6bb5; }
+  .category-title.pwr     { background: #e67e22; }
 
-  .comp-table {
-    width: 100%;
-    border-collapse: collapse;
+  .comp-table-wrap {
+    overflow-x: auto;
     background: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     border-radius: 0 0 8px 8px;
-    overflow: hidden;
+  }
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 0.85rem;
+    min-width: 950px;
   }
   .comp-table th {
     background: #e8f0f8;
     color: #1a3a6b;
     font-weight: 700;
-    padding: 10px 8px;
+    padding: 10px 6px;
     text-align: center;
     border-bottom: 2px solid #c5d9ee;
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
   }
+  .comp-table th.readonly-col { background: #e8f0f8; }
+  .comp-table th.editable-col { background: #fff3e0; color: #e65100; }
+
   .comp-table td {
-    padding: 10px 8px;
+    padding: 8px 6px;
     text-align: center;
     border-bottom: 1px solid #eee;
     color: #444;
@@ -251,21 +259,55 @@
     text-align: left;
     font-weight: 600;
     color: #1a3a6b;
-  }
-  .comp-table td.note-cell {
-    text-align: left;
-    font-size: 0.8rem;
-    color: #888;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .comp-table td.readonly-cell {
+    background: #fafbfc;
+    color: #555;
+  }
 
-  .load-btn {
+  /* Editable cell inputs */
+  .comp-table td.editable-cell { padding: 4px 3px; }
+  .cell-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    color: #333;
+    background: #fff;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .cell-input:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 2px rgba(230,126,34,0.15);
+  }
+  .cell-input.changed {
+    border-color: #e67e22;
+    background: #fff8f0;
+  }
+  .cell-select {
+    width: 100%;
+    padding: 6px 4px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    color: #333;
+    background: #fff;
+    text-align: center;
+    outline: none;
+    cursor: pointer;
+  }
+  .cell-select:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 2px rgba(230,126,34,0.15);
+  }
+
+  /* Buttons */
+  .btn {
     padding: 10px 20px;
-    background: #2e6bb5;
-    color: #fff;
     border: none;
     border-radius: 8px;
     font-size: 0.95rem;
@@ -274,11 +316,11 @@
     transition: background 0.2s;
     white-space: nowrap;
   }
-  .load-btn:hover { background: #1a5298; }
-  .load-btn:disabled {
-    background: #b0c4de;
-    cursor: not-allowed;
-  }
+  .btn-primary { background: #2e6bb5; color: #fff; }
+  .btn-primary:hover { background: #1a5298; }
+  .btn-save { background: #e67e22; color: #fff; }
+  .btn-save:hover { background: #d35400; }
+  .btn:disabled { background: #b0c4de; cursor: not-allowed; }
 
   .loading-spinner {
     display: inline-block;
@@ -318,9 +360,47 @@
   }
   .summary-chip span { color: #c00000; font-size: 1.1rem; }
 
+  .toolbar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.82rem;
+    color: #666;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+  .legend-dot.readonly { background: #e8f0f8; border: 1px solid #c5d9ee; }
+  .legend-dot.editable { background: #fff3e0; border: 1px solid #ffcc80; }
+
+  .save-status {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: none;
+  }
+  .save-status.saving { display: inline-block; background: #fff3e0; color: #e65100; }
+  .save-status.saved  { display: inline-block; background: #e8f5e9; color: #217346; }
+  .save-status.err    { display: inline-block; background: #fce8e8; color: #c00000; }
+
   @media (max-width: 900px) {
     .comp-table { font-size: 0.78rem; }
-    .comp-table th, .comp-table td { padding: 8px 4px; }
+    .comp-table th, .comp-table td { padding: 8px 3px; }
   }
 </style>
 </head>
@@ -338,14 +418,11 @@
     <button class="tab-btn" onclick="switchTab('complist')">專案元件清單</button>
   </div>
 
-  <!-- Tab 1: Original Calculator -->
+  <!-- ==================== Tab 1: Original Calculator ==================== -->
   <div id="tab-calc" class="tab-content active">
-
     <div class="main-grid">
-
-      <!-- 輸入參數 -->
       <div class="card">
-        <div class="card-header blue">✏️ 輸入參數</div>
+        <div class="card-header blue">&#9999;&#65039; 輸入參數</div>
         <div class="card-body">
           <div class="field">
             <label>IC 長度 L (mm)</label>
@@ -367,35 +444,25 @@
           </div>
         </div>
       </div>
-
-      <!-- 評估結果 -->
       <div class="card">
-        <div class="card-header green">✅ 評估結果</div>
+        <div class="card-header green">&#9989; 評估結果</div>
         <div class="card-body">
           <div id="power-badge" class="power-badge low">低功率模式 (≤ 5W)</div>
-
           <div class="result-section">
             <div class="result-label">建議凸台尺寸 (BOSS SIZE)</div>
             <div class="result-value" id="boss-result">—</div>
           </div>
-
           <hr class="divider">
-
           <div class="result-section">
             <div class="result-label">建議 Thermal Pad 尺寸</div>
             <div class="result-value blue-val" id="pad-result">—</div>
           </div>
-
           <hr class="divider">
-
           <div class="note-label">設計備註 / 說明</div>
           <div class="note-box" id="note-result">—</div>
         </div>
       </div>
-
     </div>
-
-    <!-- 規範 -->
     <div class="rules-card">
       <div class="rules-header">設計規範概覽</div>
       <div class="rules-body">
@@ -406,14 +473,13 @@
         <div class="rule-row">• <strong>長寬差 &gt; 1.5mm</strong> 時，依 IC 外型保持矩形，不做正方形化。</div>
       </div>
     </div>
-
   </div>
 
-  <!-- Tab 2: Component List -->
+  <!-- ==================== Tab 2: Component List ==================== -->
   <div id="tab-complist" class="tab-content">
 
     <div class="card" style="margin-bottom: 20px;">
-      <div class="card-header blue">📋 專案元件清單（Firebase 共用資料庫）</div>
+      <div class="card-header blue">&#128203; 專案元件熱設計清單</div>
       <div class="card-body">
         <div class="comp-toolbar">
           <div class="field">
@@ -422,20 +488,28 @@
               <option value="">-- 請先載入專案列表 --</option>
             </select>
           </div>
-          <button class="load-btn" id="load-projects-btn" onclick="loadProjects()">載入專案</button>
+          <button class="btn btn-primary" id="load-projects-btn" onclick="loadProjects()">載入專案</button>
+          <button class="btn btn-save" id="save-btn" onclick="saveThermalSpecs()" style="display:none;">儲存熱設計資料</button>
+          <span id="save-status" class="save-status"></span>
         </div>
         <div id="comp-status" class="comp-status" style="display:none;"></div>
       </div>
     </div>
 
-    <!-- Summary -->
-    <div id="comp-summary" class="comp-summary" style="display:none;"></div>
+    <!-- Legend & Summary -->
+    <div id="comp-legend" class="toolbar-row" style="display:none;">
+      <div class="comp-summary" id="comp-summary"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot readonly"></div> 資料庫既有（唯讀）</div>
+        <div class="legend-item"><div class="legend-dot editable"></div> 本工具新增（可編輯）</div>
+      </div>
+    </div>
 
     <!-- Component Tables by Category -->
     <div id="comp-container">
       <div class="empty-state">
-        <div class="icon">📦</div>
-        <p>請先連線至 Firebase 並選擇專案，即可載入元件清單。</p>
+        <div class="icon">&#128230;</div>
+        <p>請先載入專案列表並選擇專案，即可載入元件清單。</p>
         <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
       </div>
     </div>
@@ -451,24 +525,47 @@
 <script>
 /* ============================
    Firebase Configuration
+   共用 g-quick-volume-evaluation 專案
    ============================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCxE5LPqdShHOmMRFb_aSfOWfP78QZMCQY",
-  authDomain: "rru-component-spec.firebaseapp.com",
-  projectId: "rru-component-spec",
-  storageBucket: "rru-component-spec.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyCXRb5WNCl7otxPwjMCVsutvT0VHQEseUU",
+  authDomain: "g-quick-volume-evaluation.firebaseapp.com",
+  projectId: "g-quick-volume-evaluation",
+  storageBucket: "g-quick-volume-evaluation.firebasestorage.app",
+  messagingSenderId: "325375750956",
+  appId: "1:325375750956:web:cfae2ed9cc05501a0bb289",
+  measurementId: "G-HJBCDHTZPZ"
 };
 
 let db = null;
 let firebaseReady = false;
 
+/* 目前載入的專案資料 */
+let currentProjectId = null;
+let currentProjectData = null;    // 原始 project document
+let thermalSpecs = {};            // thermal_specs map (本工具專用)
+
+/* 三大分類對應 */
+const CATEGORIES = {
+  RF:      { field: 'rf_data',      label: 'RF 射頻元件',    icon: '&#128225;', css: 'rf' },
+  Digital: { field: 'digital_data', label: 'Digital 數位元件', icon: '&#128178;', css: 'digital' },
+  PWR:     { field: 'pwr_data',     label: 'PWR 電源元件',   icon: '&#9889;',   css: 'pwr' }
+};
+
+/* 散熱方向選項 */
+const HEAT_DIR_OPTIONS = ['Top', 'Bottom', 'Both', '—'];
+
+/* TIM 種類選項（沿用原始資料庫 + 擴充） */
+const TIM_TYPE_OPTIONS = ['Grease', 'Pad', 'Pad2', 'Putty', 'None', '—'];
+
 function initFirebase() {
   try {
-    firebase.initializeApp(firebaseConfig);
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+    }
     db = firebase.firestore();
     firebaseReady = true;
+    console.log('Firebase connected: g-quick-volume-evaluation');
   } catch (e) {
     console.error('Firebase init error:', e);
     showStatus('Firebase 初始化失敗：' + e.message, 'error');
@@ -483,7 +580,6 @@ initFirebase();
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-
   if (tab === 'calc') {
     document.querySelectorAll('.tab-btn')[0].classList.add('active');
     document.getElementById('tab-calc').classList.add('active');
@@ -525,30 +621,30 @@ function calc() {
 
   let boss;
   if (highPower) {
-    boss = `${fmt(L + 2*t)} × ${fmt(W + 2*t)} mm（45 度法則）`;
+    boss = `${fmt(L + 2*t)} \u00d7 ${fmt(W + 2*t)} mm\uff0845 \u5ea6\u6cd5\u5247\uff09`;
   } else {
     const mx = Math.max(L, W);
-    if (mx < 6)                   boss = '6 × 6 mm（最小極限）';
-    else if (Math.abs(L-W) > 1.5) boss = `${fmt(L)} × ${fmt(W)} mm（依 IC 外型）`;
-    else                          boss = `${fmt(mx)} × ${fmt(mx)} mm（正方形）`;
+    if (mx < 6)                   boss = '6 \u00d7 6 mm\uff08\u6700\u5c0f\u6975\u9650\uff09';
+    else if (Math.abs(L-W) > 1.5) boss = `${fmt(L)} \u00d7 ${fmt(W)} mm\uff08\u4f9d IC \u5916\u578b\uff09`;
+    else                          boss = `${fmt(mx)} \u00d7 ${fmt(mx)} mm\uff08\u6b63\u65b9\u5f62\uff09`;
   }
 
   let pad;
   if (highPower) {
-    pad = `需客製（覆蓋 ${fmt(L)} × ${fmt(W)} mm）`;
+    pad = `\u9700\u5ba2\u88fd\uff08\u8986\u84cb ${fmt(L)} \u00d7 ${fmt(W)} mm\uff09`;
   } else {
     const mx = Math.max(L, W);
-    if      (mx <= 6)  pad = 'Level A：6 × 6 mm';
-    else if (mx <= 10) pad = 'Level B：10 × 10 mm';
-    else if (mx <= 14) pad = 'Level C：14 × 14 mm';
-    else               pad = '特殊規格（長邊 > 14mm）';
+    if      (mx <= 6)  pad = 'Level A\uff1a6 \u00d7 6 mm';
+    else if (mx <= 10) pad = 'Level B\uff1a10 \u00d7 10 mm';
+    else if (mx <= 14) pad = 'Level C\uff1a14 \u00d7 14 mm';
+    else               pad = '\u7279\u6b8a\u898f\u683c\uff08\u9577\u908a > 14mm\uff09';
   }
 
   let note;
   if (!highPower) {
-    note = 'Pad 厚度 2.5mm → 壓縮後 1.7mm（壓縮率 32%）';
+    note = 'Pad \u539a\u5ea6 2.5mm \u2192 \u58d3\u7e2e\u5f8c 1.7mm\uff08\u58d3\u7e2e\u7387 32%\uff09';
   } else {
-    note = `高功率熱擴散區 – 需注意淨空。建議評估擴散熱阻對溫升之影響。\n凸台與熱源設計間距 1mm，電子零件淨空區寬度為 ${fmt(t)} mm。`;
+    note = `\u9ad8\u529f\u7387\u71b1\u64f4\u6563\u5340 \u2013 \u9700\u6ce8\u610f\u6de8\u7a7a\u3002\u5efa\u8b70\u8a55\u4f30\u64f4\u6563\u71b1\u963b\u5c0d\u6eab\u5347\u4e4b\u5f71\u97ff\u3002\n\u51f8\u53f0\u8207\u71b1\u6e90\u8a2d\u8a08\u9593\u8ddd 1mm\uff0c\u96fb\u5b50\u96f6\u4ef6\u6de8\u7a7a\u5340\u5bec\u5ea6\u70ba ${fmt(t)} mm\u3002`;
   }
 
   document.getElementById('boss-result').textContent = boss;
@@ -567,11 +663,20 @@ function showStatus(msg, type) {
   el.textContent = msg;
   el.className = 'comp-status' + (type ? ' ' + type : '');
 }
-
 function hideStatus() {
   document.getElementById('comp-status').style.display = 'none';
 }
 
+function showSaveStatus(msg, type) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.className = 'save-status ' + type;
+  if (type === 'saved') {
+    setTimeout(() => { el.className = 'save-status'; }, 3000);
+  }
+}
+
+/* ---- 載入專案列表 ---- */
 async function loadProjects() {
   if (!firebaseReady) {
     showStatus('Firebase 尚未初始化，請檢查設定。', 'error');
@@ -580,18 +685,18 @@ async function loadProjects() {
 
   const btn = document.getElementById('load-projects-btn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="loading-spinner"></span>載入中...';
-  showStatus('正在從 Firebase 讀取專案列表...', '');
+  btn.innerHTML = '<span class="loading-spinner"></span>\u8f09\u5165\u4e2d...';
+  showStatus('\u6b63\u5728\u5f9e Firebase \u8b80\u53d6\u5c08\u6848\u5217\u8868...', '');
 
   try {
     const snapshot = await db.collection('projects').get();
     const select = document.getElementById('project-select');
-    select.innerHTML = '<option value="">-- 請選擇專案 --</option>';
+    select.innerHTML = '<option value="">-- \u8acb\u9078\u64c7\u5c08\u6848 --</option>';
 
     if (snapshot.empty) {
-      showStatus('資料庫中尚無專案資料。', 'error');
+      showStatus('\u8cc7\u6599\u5eab\u4e2d\u5c1a\u7121\u5c08\u6848\u8cc7\u6599\u3002', 'error');
       btn.disabled = false;
-      btn.textContent = '載入專案';
+      btn.textContent = '\u8f09\u5165\u5c08\u6848';
       return;
     }
 
@@ -599,149 +704,249 @@ async function loadProjects() {
       const data = doc.data();
       const opt = document.createElement('option');
       opt.value = doc.id;
-      opt.textContent = data.name || data.projectName || doc.id;
+      opt.textContent = data.project_name || doc.id;
       select.appendChild(opt);
     });
 
-    showStatus(`成功載入 ${snapshot.size} 個專案。`, 'success');
+    showStatus(`\u6210\u529f\u8f09\u5165 ${snapshot.size} \u500b\u5c08\u6848\u3002`, 'success');
   } catch (e) {
     console.error('Load projects error:', e);
-    showStatus('載入專案失敗：' + e.message, 'error');
+    showStatus('\u8f09\u5165\u5c08\u6848\u5931\u6557\uff1a' + e.message, 'error');
   }
 
   btn.disabled = false;
-  btn.textContent = '載入專案';
+  btn.textContent = '\u8f09\u5165\u5c08\u6848';
 }
 
+/* ---- 選擇專案後載入元件 ---- */
 async function onProjectChange() {
   const projectId = document.getElementById('project-select').value;
   const container = document.getElementById('comp-container');
-  const summaryEl = document.getElementById('comp-summary');
+  const legendEl  = document.getElementById('comp-legend');
+  const saveBtn   = document.getElementById('save-btn');
 
   if (!projectId) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="icon">📦</div>
-        <p>請選擇一個專案以載入元件清單。</p>
+        <div class="icon">&#128230;</div>
+        <p>\u8acb\u9078\u64c7\u4e00\u500b\u5c08\u6848\u4ee5\u8f09\u5165\u5143\u4ef6\u6e05\u55ae\u3002</p>
       </div>`;
-    summaryEl.style.display = 'none';
+    legendEl.style.display = 'none';
+    saveBtn.style.display = 'none';
     return;
   }
 
-  showStatus('正在載入元件資料...', '');
+  showStatus('\u6b63\u5728\u8f09\u5165\u5c08\u6848\u5143\u4ef6\u8cc7\u6599...', '');
 
   try {
-    const compSnapshot = await db.collection('projects').doc(projectId)
-      .collection('components').get();
+    const doc = await db.collection('projects').doc(projectId).get();
 
-    if (compSnapshot.empty) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">📭</div>
-          <p>此專案尚無元件資料。</p>
-        </div>`;
-      summaryEl.style.display = 'none';
-      hideStatus();
+    if (!doc.exists) {
+      showStatus('\u5c08\u6848\u4e0d\u5b58\u5728\u3002', 'error');
       return;
     }
 
-    const components = [];
-    compSnapshot.forEach(doc => {
-      components.push({ id: doc.id, ...doc.data() });
-    });
+    currentProjectId = projectId;
+    currentProjectData = doc.data();
+    thermalSpecs = currentProjectData.thermal_specs || {};
 
-    renderComponents(components);
+    renderAllCategories();
+    legendEl.style.display = 'flex';
+    saveBtn.style.display = '';
     hideStatus();
+
   } catch (e) {
-    console.error('Load components error:', e);
-    showStatus('載入元件失敗：' + e.message, 'error');
+    console.error('Load project error:', e);
+    showStatus('\u8f09\u5165\u5c08\u6848\u5931\u6557\uff1a' + e.message, 'error');
   }
 }
 
-function renderComponents(components) {
+/* ---- 渲染所有分類 ---- */
+function renderAllCategories() {
   const container = document.getElementById('comp-container');
   const summaryEl = document.getElementById('comp-summary');
 
-  // Group by category
-  const grouped = {};
-  components.forEach(comp => {
-    const cat = comp.category || comp.type || '未分類';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(comp);
-  });
-
-  // Summary
-  const totalComponents = components.length;
-  const totalQuantity = components.reduce((sum, c) => sum + (parseFloat(c.quantity) || 0), 0);
-  const totalPower = components.reduce((sum, c) => sum + (parseFloat(c.power) || 0), 0);
-  const categoryCount = Object.keys(grouped).length;
-
-  summaryEl.style.display = 'flex';
-  summaryEl.innerHTML = `
-    <div class="summary-chip">元件種類：<span>${totalComponents}</span></div>
-    <div class="summary-chip">元件總數：<span>${totalQuantity}</span></div>
-    <div class="summary-chip">總功耗：<span>${fmt(totalPower)} W</span></div>
-    <div class="summary-chip">分類數：<span>${categoryCount}</span></div>
-  `;
-
-  // Render tables by category
+  let totalComponents = 0;
+  let totalQuantity = 0;
+  let totalPower = 0;
   let html = '';
-  const categoryOrder = Object.keys(grouped).sort();
 
-  categoryOrder.forEach(cat => {
-    const items = grouped[cat];
-    html += `
-      <div class="category-section">
-        <div class="category-title">${escapeHtml(cat)}（${items.length} 項）</div>
-        <table class="comp-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>元件名稱</th>
-              <th>數量</th>
-              <th>發熱瓦數<br>(W)</th>
-              <th>熱源大小<br>(mm)</th>
-              <th>凸台大小<br>(mm)</th>
-              <th>TIM 種類</th>
-              <th>TIM 厚度<br>(mm)</th>
-              <th>散熱方向</th>
-              <th>IC 距離<br>HSK (mm)</th>
-              <th>備註</th>
-            </tr>
-          </thead>
-          <tbody>`;
+  for (const [catKey, catInfo] of Object.entries(CATEGORIES)) {
+    const items = currentProjectData[catInfo.field] || [];
+    if (items.length === 0) continue;
 
-    items.forEach((comp, idx) => {
-      html += `
-            <tr>
-              <td>${idx + 1}</td>
-              <td class="name-cell">${escapeHtml(comp.name || comp.componentName || '—')}</td>
-              <td>${comp.quantity || '—'}</td>
-              <td>${comp.power || comp.wattage || '—'}</td>
-              <td>${comp.heatSourceSize || comp.thermalSourceSize || '—'}</td>
-              <td>${comp.bossSize || comp.pedestalSize || '—'}</td>
-              <td>${escapeHtml(comp.timType || comp.TIMType || '—')}</td>
-              <td>${comp.timThickness || comp.TIMThickness || '—'}</td>
-              <td>${escapeHtml(comp.heatDirection || comp.coolingDirection || '—')}</td>
-              <td>${comp.icToHSK || comp.distanceToHSK || '—'}</td>
-              <td class="note-cell" title="${escapeHtml(comp.note || comp.remark || '')}">${escapeHtml(comp.note || comp.remark || '—')}</td>
-            </tr>`;
+    totalComponents += items.length;
+    items.forEach(item => {
+      totalQuantity += parseInt(item.Qty) || 0;
+      totalPower += (parseFloat(item['Power(W)']) || 0) * (parseInt(item.Qty) || 1);
     });
 
-    html += `
-          </tbody>
-        </table>
-      </div>`;
-  });
+    html += renderCategoryTable(catKey, catInfo, items);
+  }
 
+  if (!html) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">&#128237;</div>
+        <p>\u6b64\u5c08\u6848\u5c1a\u7121\u5143\u4ef6\u8cc7\u6599\u3002</p>
+      </div>`;
+    summaryEl.innerHTML = '';
+    return;
+  }
+
+  summaryEl.innerHTML = `
+    <div class="summary-chip">\u5143\u4ef6\u7a2e\u985e\uff1a<span>${totalComponents}</span></div>
+    <div class="summary-chip">\u5143\u4ef6\u7e3d\u6578\uff1a<span>${totalQuantity}</span></div>
+    <div class="summary-chip">\u7e3d\u529f\u8017\uff1a<span>${fmt(totalPower)} W</span></div>
+  `;
   container.innerHTML = html;
 }
 
+/* ---- 渲染單一分類表格 ---- */
+function renderCategoryTable(catKey, catInfo, items) {
+  let html = `
+    <div class="category-section">
+      <div class="category-title ${catInfo.css}">${catInfo.icon} ${catInfo.label}\uff08${items.length} \u9805\uff09</div>
+      <div class="comp-table-wrap">
+      <table class="comp-table">
+        <thead><tr>
+          <th class="readonly-col">#</th>
+          <th class="readonly-col">\u5143\u4ef6\u540d\u7a31</th>
+          <th class="readonly-col">\u6578\u91cf</th>
+          <th class="readonly-col">\u767c\u71b1\u74e6\u6578<br>(W)</th>
+          <th class="readonly-col">\u71b1\u6e90\u5927\u5c0f<br>(mm)</th>
+          <th class="editable-col">\u51f8\u53f0\u5927\u5c0f<br>(mm)</th>
+          <th class="readonly-col">TIM \u7a2e\u985e</th>
+          <th class="editable-col">TIM \u539a\u5ea6<br>(mm)</th>
+          <th class="editable-col">\u6563\u71b1\u65b9\u5411</th>
+          <th class="editable-col">IC \u8ddd\u96e2<br>HSK (mm)</th>
+          <th class="editable-col">\u5099\u8a3b</th>
+        </tr></thead>
+        <tbody>`;
+
+  items.forEach((comp, idx) => {
+    const compName = comp.Component || '';
+    const specKey = compName.replace(/ /g, '_').replace(/\//g, '-');
+    const spec = thermalSpecs[specKey] || {};
+
+    // 唯讀欄位（從資料庫讀取）
+    const qty = comp.Qty || '—';
+    const power = comp['Power(W)'] || '—';
+    const padL = comp.Pad_L || '';
+    const padW = comp.Pad_W || '';
+    const heatSize = (padL && padW) ? `${padL} \u00d7 ${padW}` : '\u2014';
+    const timType = comp.TIM_Type || '\u2014';
+
+    // 可編輯欄位（thermal_specs）
+    const bossSize     = spec.bossSize     || '';
+    const timThickness = spec.timThickness  || '';
+    const heatDir      = spec.heatDirection || '';
+    const icToHSK      = spec.icToHSK       || '';
+    const note         = spec.note          || '';
+
+    html += `
+          <tr>
+            <td class="readonly-cell">${idx + 1}</td>
+            <td class="name-cell readonly-cell">${escapeHtml(compName)}</td>
+            <td class="readonly-cell">${qty}</td>
+            <td class="readonly-cell">${power}</td>
+            <td class="readonly-cell">${heatSize}</td>
+            <td class="editable-cell">
+              <input class="cell-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="bossSize"
+                value="${escapeAttr(bossSize)}"
+                placeholder="L\u00d7W" onchange="onCellChange(this)">
+            </td>
+            <td class="readonly-cell">${escapeHtml(timType)}</td>
+            <td class="editable-cell">
+              <input class="cell-input" type="number" step="0.1"
+                data-comp="${escapeAttr(specKey)}" data-field="timThickness"
+                value="${escapeAttr(timThickness)}"
+                placeholder="mm" onchange="onCellChange(this)">
+            </td>
+            <td class="editable-cell">
+              <select class="cell-select"
+                data-comp="${escapeAttr(specKey)}" data-field="heatDirection"
+                onchange="onCellChange(this)">
+                <option value="">—</option>
+                ${HEAT_DIR_OPTIONS.filter(o => o !== '\u2014').map(o =>
+                  `<option value="${o}" ${heatDir === o ? 'selected' : ''}>${o}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td class="editable-cell">
+              <input class="cell-input" type="number" step="0.1"
+                data-comp="${escapeAttr(specKey)}" data-field="icToHSK"
+                value="${escapeAttr(icToHSK)}"
+                placeholder="mm" onchange="onCellChange(this)">
+            </td>
+            <td class="editable-cell">
+              <input class="cell-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="note"
+                value="${escapeAttr(note)}"
+                placeholder="\u2014" onchange="onCellChange(this)">
+            </td>
+          </tr>`;
+  });
+
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+/* ---- 欄位變更處理 ---- */
+function onCellChange(el) {
+  const compKey = el.dataset.comp;
+  const field   = el.dataset.field;
+  const value   = el.value.trim();
+
+  if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+
+  if (value) {
+    thermalSpecs[compKey][field] = value;
+  } else {
+    delete thermalSpecs[compKey][field];
+    if (Object.keys(thermalSpecs[compKey]).length === 0) {
+      delete thermalSpecs[compKey];
+    }
+  }
+
+  el.classList.toggle('changed', !!value);
+}
+
+/* ---- 儲存至 Firebase ---- */
+async function saveThermalSpecs() {
+  if (!currentProjectId || !firebaseReady) return;
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>\u5132\u5b58\u4e2d...';
+  showSaveStatus('\u6b63\u5728\u5132\u5b58...', 'saving');
+
+  try {
+    await db.collection('projects').doc(currentProjectId).update({
+      thermal_specs: thermalSpecs
+    });
+    showSaveStatus('\u5132\u5b58\u6210\u529f\uff01', 'saved');
+  } catch (e) {
+    console.error('Save error:', e);
+    showSaveStatus('\u5132\u5b58\u5931\u6557\uff1a' + e.message, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '\u5132\u5b58\u71b1\u8a2d\u8a08\u8cc7\u6599';
+}
+
+/* ---- Utilities ---- */
 function escapeHtml(str) {
   if (!str) return '';
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+function escapeAttr(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 </script>
 </body>
