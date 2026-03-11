@@ -13,12 +13,41 @@
     padding: 32px 20px;
     color: #333;
   }
-  .container { max-width: 900px; margin: 0 auto; }
+  .container { max-width: 1400px; margin: 0 auto; }
 
   .header { text-align: center; margin-bottom: 28px; }
   .header h1 { font-size: 2rem; color: #1a3a6b; font-weight: 700; margin-bottom: 6px; }
   .header p  { font-size: 0.95rem; color: #666; }
 
+  /* === Tab Navigation === */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #d6e4f0;
+    padding-bottom: 0;
+  }
+  .tab-btn {
+    padding: 10px 24px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: #1a3a6b; }
+  .tab-btn.active {
+    color: #1a3a6b;
+    border-bottom-color: #2e6bb5;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* === Original Tool Styles === */
   .main-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -53,7 +82,7 @@
     margin-bottom: 6px;
     font-weight: 500;
   }
-  .field input {
+  .field input, .field select {
     width: 100%;
     padding: 10px 14px;
     border: 1.5px solid #c5d9ee;
@@ -63,8 +92,9 @@
     color: #1a3a6b;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
   }
-  .field input:focus {
+  .field input:focus, .field select:focus {
     border-color: #5b9bd5;
     box-shadow: 0 0 0 3px rgba(91,155,213,0.18);
   }
@@ -145,6 +175,235 @@
   }
   .rule-row:nth-child(odd)  { background: #f2f7fb; }
   .rule-row:nth-child(even) { background: #fff; }
+
+  /* === Component List Styles === */
+  .comp-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .comp-toolbar .field { margin-bottom: 0; flex: 1; min-width: 200px; }
+  .comp-toolbar .field select { font-size: 0.95rem; }
+
+  .comp-status {
+    padding: 12px 20px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+    color: #7b6b00;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+  .comp-status.error {
+    background: #fce8e8;
+    border-color: #ef9a9a;
+    color: #c00000;
+  }
+  .comp-status.success {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+    color: #217346;
+  }
+
+  .category-section { margin-bottom: 24px; }
+  .category-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .category-title.rf      { background: #c0392b; }
+  .category-title.digital { background: #2e6bb5; }
+  .category-title.pwr     { background: #e67e22; }
+
+  .comp-table-wrap {
+    overflow-x: auto;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-radius: 0 0 8px 8px;
+  }
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 1100px;
+  }
+  .comp-table th {
+    background: #e8f0f8;
+    color: #1a3a6b;
+    font-weight: 700;
+    padding: 10px 6px;
+    text-align: center;
+    border-bottom: 2px solid #c5d9ee;
+    white-space: nowrap;
+    font-size: 0.78rem;
+  }
+  .comp-table th.readonly-col { background: #e8f0f8; }
+  .comp-table th.editable-col { background: #fff3e0; color: #e65100; }
+
+  .comp-table td {
+    padding: 8px 6px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    color: #444;
+  }
+  .comp-table tr:hover td { background: #f7fafd; }
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  .comp-table td.name-cell {
+    text-align: left;
+    font-weight: 600;
+    color: #1a3a6b;
+    white-space: nowrap;
+  }
+  .comp-table td.readonly-cell {
+    background: #fafbfc;
+    color: #555;
+  }
+
+  /* Editable cell inputs */
+  .comp-table td.editable-cell { padding: 4px 3px; }
+  .cell-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    color: #333;
+    background: #fff;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .cell-input:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 2px rgba(230,126,34,0.15);
+  }
+  .cell-input.changed {
+    border-color: #e67e22;
+    background: #fff8f0;
+  }
+  .cell-select {
+    width: 100%;
+    padding: 6px 4px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    color: #333;
+    background: #fff;
+    text-align: center;
+    outline: none;
+    cursor: pointer;
+  }
+  .cell-select:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 2px rgba(230,126,34,0.15);
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: #2e6bb5; color: #fff; }
+  .btn-primary:hover { background: #1a5298; }
+  .btn-save { background: #e67e22; color: #fff; }
+  .btn-save:hover { background: #d35400; }
+  .btn:disabled { background: #b0c4de; cursor: not-allowed; }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaa;
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.95rem; }
+
+  .comp-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .summary-chip {
+    background: #fff;
+    border: 1px solid #d6e4f0;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    color: #1a3a6b;
+    font-weight: 600;
+  }
+  .summary-chip span { color: #c00000; font-size: 1.1rem; }
+
+  .toolbar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.82rem;
+    color: #666;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+  .legend-dot.readonly { background: #e8f0f8; border: 1px solid #c5d9ee; }
+  .legend-dot.editable { background: #fff3e0; border: 1px solid #ffcc80; }
+
+  .save-status {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: none;
+  }
+  .save-status.saving { display: inline-block; background: #fff3e0; color: #e65100; }
+  .save-status.saved  { display: inline-block; background: #e8f5e9; color: #217346; }
+  .save-status.err    { display: inline-block; background: #fce8e8; color: #c00000; }
+
+  .tim-size-col { min-width: 80px; }
+
+  @media (max-width: 900px) {
+    .comp-table { font-size: 0.78rem; }
+    .comp-table th, .comp-table td { padding: 8px 3px; }
+  }
 </style>
 </head>
 <body>
@@ -155,74 +414,199 @@
     <p>快速計算凸台 (Pedestal) 與導熱墊片 (Thermal Pad) 標準尺寸</p>
   </div>
 
-  <div class="main-grid">
-
-    <!-- 輸入參數 -->
-    <div class="card">
-      <div class="card-header blue">✏️ 輸入參數</div>
-      <div class="card-body">
-        <div class="field">
-          <label>IC 長度 L (mm)</label>
-          <input type="number" id="L" value="10" step="0.1" oninput="calc()">
-        </div>
-        <div class="field">
-          <label>IC 寬度 W (mm)</label>
-          <input type="number" id="W" value="10" step="0.1" oninput="calc()">
-        </div>
-        <div class="field">
-          <label>功率 P (W)</label>
-          <input type="number" id="P" value="5" step="0.1" oninput="calc()">
-        </div>
-        <div class="field">
-          <label>凸台高度 t (mm)
-            <span id="t-hint" style="color:#aaa; font-weight:400">（僅適用於 &gt; 5W）</span>
-          </label>
-          <input type="number" id="t" value="5" step="0.1" oninput="calc()" class="disabled-input">
-        </div>
-      </div>
-    </div>
-
-    <!-- 評估結果 -->
-    <div class="card">
-      <div class="card-header green">✅ 評估結果</div>
-      <div class="card-body">
-        <div id="power-badge" class="power-badge low">低功率模式 (≤ 5W)</div>
-
-        <div class="result-section">
-          <div class="result-label">建議凸台尺寸 (BOSS SIZE)</div>
-          <div class="result-value" id="boss-result">—</div>
-        </div>
-
-        <hr class="divider">
-
-        <div class="result-section">
-          <div class="result-label">建議 Thermal Pad 尺寸</div>
-          <div class="result-value blue-val" id="pad-result">—</div>
-        </div>
-
-        <hr class="divider">
-
-        <div class="note-label">設計備註 / 說明</div>
-        <div class="note-box" id="note-result">—</div>
-      </div>
-    </div>
-
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('calc')">尺寸評估計算</button>
+    <button class="tab-btn" onclick="switchTab('complist')">專案元件清單</button>
   </div>
 
-  <!-- 規範 -->
-  <div class="rules-card">
-    <div class="rules-header">設計規範概覽</div>
-    <div class="rules-body">
-      <div class="rule-row">• <strong>高功率 (&gt; 5W)</strong>：採用 45 度擴散法則，凸台尺寸為 (L + 2t) × (W + 2t)。</div>
-      <div class="rule-row">• <strong>低功率 (≤ 5W)</strong>：最小加工尺寸為 6 × 6 mm。</div>
-      <div class="rule-row">• <strong>Thermal Pad 分級</strong>：Level A ≤ 6mm ／ Level B ≤ 10mm ／ Level C ≤ 14mm ／ 超出為特殊規格。</div>
-      <div class="rule-row">• <strong>低功率 Pad 厚度</strong>：標準 2.5mm，壓縮後 1.7mm（壓縮率 32%）。</div>
-      <div class="rule-row">• <strong>長寬差 &gt; 1.5mm</strong> 時，依 IC 外型保持矩形，不做正方形化。</div>
+  <!-- ==================== Tab 1: Original Calculator ==================== -->
+  <div id="tab-calc" class="tab-content active">
+    <div class="main-grid">
+      <div class="card">
+        <div class="card-header blue">&#9999;&#65039; 輸入參數</div>
+        <div class="card-body">
+          <div class="field">
+            <label>IC 長度 L (mm)</label>
+            <input type="number" id="L" value="10" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>IC 寬度 W (mm)</label>
+            <input type="number" id="W" value="10" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>功率 P (W)</label>
+            <input type="number" id="P" value="5" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>凸台高度 t (mm)
+              <span id="t-hint" style="color:#aaa; font-weight:400">（僅適用於 &gt; 5W）</span>
+            </label>
+            <input type="number" id="t" value="5" step="0.1" oninput="calc()" class="disabled-input">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header green">&#9989; 評估結果</div>
+        <div class="card-body">
+          <div id="power-badge" class="power-badge low">低功率模式 (≤ 5W)</div>
+          <div class="result-section">
+            <div class="result-label">建議凸台尺寸 (BOSS SIZE)</div>
+            <div class="result-value" id="boss-result">—</div>
+          </div>
+          <hr class="divider">
+          <div class="result-section">
+            <div class="result-label">建議 Thermal Pad 尺寸</div>
+            <div class="result-value blue-val" id="pad-result">—</div>
+          </div>
+          <hr class="divider">
+          <div class="note-label">設計備註 / 說明</div>
+          <div class="note-box" id="note-result">—</div>
+        </div>
+      </div>
     </div>
+    <div class="rules-card">
+      <div class="rules-header">設計規範概覽</div>
+      <div class="rules-body">
+        <div class="rule-row">• <strong>高功率 (&gt; 5W)</strong>：採用 45 度擴散法則，凸台尺寸為 (L + 2t) × (W + 2t)。</div>
+        <div class="rule-row">• <strong>低功率 (≤ 5W)</strong>：最小加工尺寸為 6 × 6 mm。</div>
+        <div class="rule-row">• <strong>Thermal Pad 分級</strong>：Level A ≤ 6mm ／ Level B ≤ 10mm ／ Level C ≤ 14mm ／ 超出為特殊規格。</div>
+        <div class="rule-row">• <strong>低功率 Pad 厚度</strong>：標準 2.5mm，壓縮後 1.7mm（壓縮率 32%）。</div>
+        <div class="rule-row">• <strong>長寬差 &gt; 1.5mm</strong> 時，依 IC 外型保持矩形，不做正方形化。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Tab 2: Component List ==================== -->
+  <div id="tab-complist" class="tab-content">
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-header blue">&#128203; 專案元件熱設計清單</div>
+      <div class="card-body">
+        <div class="comp-toolbar">
+          <div class="field">
+            <label>選擇專案</label>
+            <select id="project-select" onchange="onProjectChange()">
+              <option value="">-- 請先載入專案列表 --</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="load-projects-btn" onclick="loadProjects()">載入專案</button>
+          <button class="btn btn-save" id="save-btn" onclick="saveThermalSpecs()" style="display:none;">儲存熱設計資料</button>
+          <span id="save-status" class="save-status"></span>
+        </div>
+        <div id="comp-status" class="comp-status" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Legend & Summary -->
+    <div id="comp-legend" class="toolbar-row" style="display:none;">
+      <div class="comp-summary" id="comp-summary"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot readonly"></div> 資料庫既有（唯讀）</div>
+        <div class="legend-item"><div class="legend-dot editable"></div> 本工具新增（可編輯）</div>
+      </div>
+    </div>
+
+    <!-- Component Tables by Category -->
+    <div id="comp-container">
+      <div class="empty-state">
+        <div class="icon">&#128230;</div>
+        <p>請先載入專案列表並選擇專案，即可載入元件清單。</p>
+        <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
+      </div>
+    </div>
+
   </div>
 
 </div>
+
+<!-- Firebase SDK (v9 compat mode) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
+/* ============================
+   Firebase Configuration
+   共用 g-quick-volume-evaluation 專案
+   ============================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCXRb5WNCl7otxPwjMCVsutvT0VHQEseUU",
+  authDomain: "g-quick-volume-evaluation.firebaseapp.com",
+  projectId: "g-quick-volume-evaluation",
+  storageBucket: "g-quick-volume-evaluation.firebasestorage.app",
+  messagingSenderId: "325375750956",
+  appId: "1:325375750956:web:cfae2ed9cc05501a0bb289",
+  measurementId: "G-HJBCDHTZPZ"
+};
+
+let db = null;
+let firebaseReady = false;
+
+/* 目前載入的專案資料 */
+let currentProjectId = null;
+let currentProjectData = null;    // 原始 project document
+let thermalSpecs = {};            // thermal_specs map (本工具專用)
+
+/* 三大分類對應 */
+const CATEGORIES = {
+  RF:      { field: 'rf_data',      label: 'RF 射頻元件',    icon: '&#128225;', css: 'rf' },
+  Digital: { field: 'digital_data', label: 'Digital 數位元件', icon: '&#128178;', css: 'digital' },
+  PWR:     { field: 'pwr_data',     label: 'PWR 電源元件',   icon: '&#9889;',   css: 'pwr' }
+};
+
+/* 散熱方向選項 */
+const HEAT_DIR_OPTIONS = ['IC top', 'IC bot', '雙向'];
+
+/* TIM 種類選項 */
+const TIM_TYPE_OPTIONS = ['Grease', 'Pad', 'Putty', 'None'];
+
+/* TIM 厚度選項 */
+const TIM_THICKNESS_OPTIONS = ['0.05mm以下', '0.5', '1.0', '1.5', '1.7', '2.0', '2.5', '3.0'];
+
+/* IC 距離 HSK 選項 */
+const IC_TO_HSK_OPTIONS = ['0.5', '1', '1.7', '直觸'];
+
+/* TIM 種類 → 預設對應 */
+const TIM_PRESETS = {
+  Putty:  { timThickness: '0.5',       icToHSK: '0.5' },
+  Grease: { timThickness: '0.05mm以下', icToHSK: '直觸' },
+  Pad:    { timThickness: '2.5',        icToHSK: '1.7' }
+};
+
+function initFirebase() {
+  try {
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.firestore();
+    firebaseReady = true;
+    console.log('Firebase connected: g-quick-volume-evaluation');
+  } catch (e) {
+    console.error('Firebase init error:', e);
+    showStatus('Firebase 初始化失敗：' + e.message, 'error');
+  }
+}
+
+initFirebase();
+
+/* ============================
+   Tab Switching
+   ============================ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  if (tab === 'calc') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('tab-calc').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab-complist').classList.add('active');
+  }
+}
+
+/* ============================
+   Original Calculator
+   ============================ */
 function fmt(n) {
   return Number.isInteger(n) ? n.toString() : parseFloat(n.toFixed(1)).toString();
 }
@@ -250,35 +634,32 @@ function calc() {
     hint.style.display = '';
   }
 
-  // 凸台尺寸
   let boss;
   if (highPower) {
-    boss = `${fmt(L + 2*t)} × ${fmt(W + 2*t)} mm（45 度法則）`;
+    boss = `${fmt(L + 2*t)} \u00d7 ${fmt(W + 2*t)} mm\uff0845 \u5ea6\u6cd5\u5247\uff09`;
   } else {
     const mx = Math.max(L, W);
-    if (mx < 6)                   boss = '6 × 6 mm（最小極限）';
-    else if (Math.abs(L-W) > 1.5) boss = `${fmt(L)} × ${fmt(W)} mm（依 IC 外型）`;
-    else                          boss = `${fmt(mx)} × ${fmt(mx)} mm（正方形）`;
+    if (mx < 6)                   boss = '6 \u00d7 6 mm\uff08\u6700\u5c0f\u6975\u9650\uff09';
+    else if (Math.abs(L-W) > 1.5) boss = `${fmt(L)} \u00d7 ${fmt(W)} mm\uff08\u4f9d IC \u5916\u578b\uff09`;
+    else                          boss = `${fmt(mx)} \u00d7 ${fmt(mx)} mm\uff08\u6b63\u65b9\u5f62\uff09`;
   }
 
-  // Thermal Pad
   let pad;
   if (highPower) {
-    pad = `需客製（覆蓋 ${fmt(L)} × ${fmt(W)} mm）`;
+    pad = `\u9700\u5ba2\u88fd\uff08\u8986\u84cb ${fmt(L)} \u00d7 ${fmt(W)} mm\uff09`;
   } else {
     const mx = Math.max(L, W);
-    if      (mx <= 6)  pad = 'Level A：6 × 6 mm';
-    else if (mx <= 10) pad = 'Level B：10 × 10 mm';
-    else if (mx <= 14) pad = 'Level C：14 × 14 mm';
-    else               pad = '特殊規格（長邊 > 14mm）';
+    if      (mx <= 6)  pad = 'Level A\uff1a6 \u00d7 6 mm';
+    else if (mx <= 10) pad = 'Level B\uff1a10 \u00d7 10 mm';
+    else if (mx <= 14) pad = 'Level C\uff1a14 \u00d7 14 mm';
+    else               pad = '\u7279\u6b8a\u898f\u683c\uff08\u9577\u908a > 14mm\uff09';
   }
 
-  // 備註
   let note;
   if (!highPower) {
-    note = 'Pad 厚度 2.5mm → 壓縮後 1.7mm（壓縮率 32%）';
+    note = 'Pad \u539a\u5ea6 2.5mm \u2192 \u58d3\u7e2e\u5f8c 1.7mm\uff08\u58d3\u7e2e\u7387 32%\uff09';
   } else {
-    note = `高功率熱擴散區 – 需注意淨空。建議評估擴散熱阻對溫升之影響。\n凸台與熱源設計間距 1mm，電子零件淨空區寬度為 ${fmt(t)} mm。`;
+    note = `\u9ad8\u529f\u7387\u71b1\u64f4\u6563\u5340 \u2013 \u9700\u6ce8\u610f\u6de8\u7a7a\u3002\u5efa\u8b70\u8a55\u4f30\u64f4\u6563\u71b1\u963b\u5c0d\u6eab\u5347\u4e4b\u5f71\u97ff\u3002\n\u51f8\u53f0\u8207\u71b1\u6e90\u8a2d\u8a08\u9593\u8ddd 1mm\uff0c\u96fb\u5b50\u96f6\u4ef6\u6de8\u7a7a\u5340\u5bec\u5ea6\u70ba ${fmt(t)} mm\u3002`;
   }
 
   document.getElementById('boss-result').textContent = boss;
@@ -287,6 +668,374 @@ function calc() {
 }
 
 calc();
+
+/* ============================
+   Component List - Firebase
+   ============================ */
+function showStatus(msg, type) {
+  const el = document.getElementById('comp-status');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.className = 'comp-status' + (type ? ' ' + type : '');
+}
+function hideStatus() {
+  document.getElementById('comp-status').style.display = 'none';
+}
+
+function showSaveStatus(msg, type) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.className = 'save-status ' + type;
+  if (type === 'saved') {
+    setTimeout(() => { el.className = 'save-status'; }, 3000);
+  }
+}
+
+/* ---- 載入專案列表 ---- */
+async function loadProjects() {
+  if (!firebaseReady) {
+    showStatus('Firebase 尚未初始化，請檢查設定。', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('load-projects-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>\u8f09\u5165\u4e2d...';
+  showStatus('\u6b63\u5728\u5f9e Firebase \u8b80\u53d6\u5c08\u6848\u5217\u8868...', '');
+
+  try {
+    const snapshot = await db.collection('projects').get();
+    const select = document.getElementById('project-select');
+    select.innerHTML = '<option value="">-- \u8acb\u9078\u64c7\u5c08\u6848 --</option>';
+
+    if (snapshot.empty) {
+      showStatus('\u8cc7\u6599\u5eab\u4e2d\u5c1a\u7121\u5c08\u6848\u8cc7\u6599\u3002', 'error');
+      btn.disabled = false;
+      btn.textContent = '\u8f09\u5165\u5c08\u6848';
+      return;
+    }
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const opt = document.createElement('option');
+      opt.value = doc.id;
+      opt.textContent = data.project_name || doc.id;
+      select.appendChild(opt);
+    });
+
+    showStatus(`\u6210\u529f\u8f09\u5165 ${snapshot.size} \u500b\u5c08\u6848\u3002`, 'success');
+  } catch (e) {
+    console.error('Load projects error:', e);
+    showStatus('\u8f09\u5165\u5c08\u6848\u5931\u6557\uff1a' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '\u8f09\u5165\u5c08\u6848';
+}
+
+/* ---- 選擇專案後載入元件 ---- */
+async function onProjectChange() {
+  const projectId = document.getElementById('project-select').value;
+  const container = document.getElementById('comp-container');
+  const legendEl  = document.getElementById('comp-legend');
+  const saveBtn   = document.getElementById('save-btn');
+
+  if (!projectId) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">&#128230;</div>
+        <p>\u8acb\u9078\u64c7\u4e00\u500b\u5c08\u6848\u4ee5\u8f09\u5165\u5143\u4ef6\u6e05\u55ae\u3002</p>
+      </div>`;
+    legendEl.style.display = 'none';
+    saveBtn.style.display = 'none';
+    return;
+  }
+
+  showStatus('\u6b63\u5728\u8f09\u5165\u5c08\u6848\u5143\u4ef6\u8cc7\u6599...', '');
+
+  try {
+    const doc = await db.collection('projects').doc(projectId).get();
+
+    if (!doc.exists) {
+      showStatus('\u5c08\u6848\u4e0d\u5b58\u5728\u3002', 'error');
+      return;
+    }
+
+    currentProjectId = projectId;
+    currentProjectData = doc.data();
+    thermalSpecs = currentProjectData.thermal_specs || {};
+
+    renderAllCategories();
+    legendEl.style.display = 'flex';
+    saveBtn.style.display = '';
+    hideStatus();
+
+  } catch (e) {
+    console.error('Load project error:', e);
+    showStatus('\u8f09\u5165\u5c08\u6848\u5931\u6557\uff1a' + e.message, 'error');
+  }
+}
+
+/* ---- 渲染所有分類 ---- */
+function renderAllCategories() {
+  const container = document.getElementById('comp-container');
+  const summaryEl = document.getElementById('comp-summary');
+
+  let totalComponents = 0;
+  let totalQuantity = 0;
+  let totalPower = 0;
+  let html = '';
+
+  for (const [catKey, catInfo] of Object.entries(CATEGORIES)) {
+    const items = currentProjectData[catInfo.field] || [];
+    if (items.length === 0) continue;
+
+    totalComponents += items.length;
+    items.forEach(item => {
+      totalQuantity += parseInt(item.Qty) || 0;
+      totalPower += (parseFloat(item['Power(W)']) || 0) * (parseInt(item.Qty) || 1);
+    });
+
+    html += renderCategoryTable(catKey, catInfo, items);
+  }
+
+  if (!html) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">&#128237;</div>
+        <p>\u6b64\u5c08\u6848\u5c1a\u7121\u5143\u4ef6\u8cc7\u6599\u3002</p>
+      </div>`;
+    summaryEl.innerHTML = '';
+    return;
+  }
+
+  summaryEl.innerHTML = `
+    <div class="summary-chip">\u5143\u4ef6\u7a2e\u985e\uff1a<span>${totalComponents}</span></div>
+    <div class="summary-chip">\u5143\u4ef6\u7e3d\u6578\uff1a<span>${totalQuantity}</span></div>
+    <div class="summary-chip">\u7e3d\u529f\u8017\uff1a<span>${fmt(totalPower)} W</span></div>
+  `;
+  container.innerHTML = html;
+}
+
+/* ---- 渲染單一分類表格 ---- */
+function renderCategoryTable(catKey, catInfo, items) {
+  let html = `
+    <div class="category-section">
+      <div class="category-title ${catInfo.css}">${catInfo.icon} ${catInfo.label}\uff08${items.length} \u9805\uff09</div>
+      <div class="comp-table-wrap">
+      <table class="comp-table">
+        <thead><tr>
+          <th class="readonly-col">#</th>
+          <th class="readonly-col">元件名稱</th>
+          <th class="readonly-col">數量</th>
+          <th class="readonly-col">發熱瓦數<br>(W)</th>
+          <th class="editable-col">熱源大小<br>(mm)</th>
+          <th class="editable-col">凸台大小<br>(mm)</th>
+          <th class="editable-col">TIM 種類</th>
+          <th class="editable-col">TIM 厚度<br>(mm)</th>
+          <th class="editable-col tim-size-col">TIM Size<br>(mm)</th>
+          <th class="editable-col">散熱方向</th>
+          <th class="editable-col">IC 距離<br>HSK</th>
+          <th class="editable-col">備註</th>
+        </tr></thead>
+        <tbody>`;
+
+  items.forEach((comp, idx) => {
+    const compName = comp.Component || '';
+    const specKey = compName.replace(/ /g, '_').replace(/\//g, '-');
+    const spec = thermalSpecs[specKey] || {};
+
+    // 唯讀欄位（從資料庫讀取）
+    const qty = comp.Qty || '—';
+    const power = comp['Power(W)'] || '—';
+
+    // 可編輯欄位（thermal_specs）
+    const heatSrcSize  = spec.heatSourceSize || '';
+    const bossSize     = spec.bossSize       || '';
+    const timType      = spec.timType        || '';
+    const timThickness = spec.timThickness   || '';
+    const timSize      = spec.timSize        || '';
+    const heatDir      = spec.heatDirection  || '';
+    const icToHSK      = spec.icToHSK        || '';
+    const note         = spec.note           || '';
+    const showTimSize  = (timType === 'Pad');
+
+    html += `
+          <tr data-speckey="${escapeAttr(specKey)}">
+            <td class="readonly-cell">${idx + 1}</td>
+            <td class="name-cell readonly-cell">${escapeHtml(compName)}</td>
+            <td class="readonly-cell">${qty}</td>
+            <td class="readonly-cell">${power}</td>
+            <td class="editable-cell">
+              <input class="cell-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="heatSourceSize"
+                value="${escapeAttr(heatSrcSize)}"
+                placeholder="L×W" onchange="onCellChange(this)">
+            </td>
+            <td class="editable-cell">
+              <input class="cell-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="bossSize"
+                value="${escapeAttr(bossSize)}"
+                placeholder="L×W" onchange="onCellChange(this)">
+            </td>
+            <td class="editable-cell">
+              <select class="cell-select"
+                data-comp="${escapeAttr(specKey)}" data-field="timType"
+                onchange="onTimTypeChange(this)">
+                <option value="">—</option>
+                ${TIM_TYPE_OPTIONS.map(o =>
+                  `<option value="${o}" ${timType === o ? 'selected' : ''}>${o}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td class="editable-cell">
+              <select class="cell-select"
+                data-comp="${escapeAttr(specKey)}" data-field="timThickness"
+                onchange="onCellChange(this)">
+                <option value="">—</option>
+                ${TIM_THICKNESS_OPTIONS.map(o =>
+                  `<option value="${o}" ${timThickness === o ? 'selected' : ''}>${o}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td class="editable-cell tim-size-col">
+              <input class="cell-input tim-size-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="timSize"
+                value="${escapeAttr(timSize)}"
+                placeholder="L×W"
+                ${showTimSize ? '' : 'disabled style="background:#f0f0f0;color:#ccc;"'}
+                onchange="onCellChange(this)">
+            </td>
+            <td class="editable-cell">
+              <select class="cell-select"
+                data-comp="${escapeAttr(specKey)}" data-field="heatDirection"
+                onchange="onCellChange(this)">
+                <option value="">—</option>
+                ${HEAT_DIR_OPTIONS.map(o =>
+                  `<option value="${o}" ${heatDir === o ? 'selected' : ''}>${o}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td class="editable-cell">
+              <select class="cell-select"
+                data-comp="${escapeAttr(specKey)}" data-field="icToHSK"
+                onchange="onCellChange(this)">
+                <option value="">—</option>
+                ${IC_TO_HSK_OPTIONS.map(o =>
+                  `<option value="${o}" ${icToHSK === o ? 'selected' : ''}>${o}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td class="editable-cell">
+              <input class="cell-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="note"
+                value="${escapeAttr(note)}"
+                placeholder="—" onchange="onCellChange(this)">
+            </td>
+          </tr>`;
+  });
+
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+/* ---- 欄位變更處理 ---- */
+function onCellChange(el) {
+  const compKey = el.dataset.comp;
+  const field   = el.dataset.field;
+  const value   = el.value.trim();
+
+  if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+
+  if (value) {
+    thermalSpecs[compKey][field] = value;
+  } else {
+    delete thermalSpecs[compKey][field];
+    if (Object.keys(thermalSpecs[compKey]).length === 0) {
+      delete thermalSpecs[compKey];
+    }
+  }
+
+  el.classList.toggle('changed', !!value);
+}
+
+/* ---- TIM 種類變更 → 連動預設 TIM厚度 / IC距離HSK / TIM Size 啟用 ---- */
+function onTimTypeChange(el) {
+  const compKey = el.dataset.comp;
+  const timType = el.value;
+  const row = el.closest('tr');
+
+  // 先儲存 TIM 種類
+  onCellChange(el);
+
+  const preset = TIM_PRESETS[timType];
+
+  // TIM 厚度預設
+  const thicknessSelect = row.querySelector('[data-field="timThickness"]');
+  if (preset && thicknessSelect) {
+    thicknessSelect.value = preset.timThickness;
+    onCellChange(thicknessSelect);
+  }
+
+  // IC 距離 HSK 預設
+  const hskSelect = row.querySelector('[data-field="icToHSK"]');
+  if (preset && hskSelect) {
+    hskSelect.value = preset.icToHSK;
+    onCellChange(hskSelect);
+  }
+
+  // TIM Size 欄位：僅 Pad 時啟用
+  const timSizeInput = row.querySelector('[data-field="timSize"]');
+  if (timSizeInput) {
+    const isPad = (timType === 'Pad');
+    timSizeInput.disabled = !isPad;
+    timSizeInput.style.background = isPad ? '#fff' : '#f0f0f0';
+    timSizeInput.style.color = isPad ? '#333' : '#ccc';
+    if (!isPad) {
+      timSizeInput.value = '';
+      // 清除 thermal_specs 中的 timSize
+      if (thermalSpecs[compKey]) {
+        delete thermalSpecs[compKey].timSize;
+      }
+    }
+  }
+}
+
+/* ---- 儲存至 Firebase ---- */
+async function saveThermalSpecs() {
+  if (!currentProjectId || !firebaseReady) return;
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>\u5132\u5b58\u4e2d...';
+  showSaveStatus('\u6b63\u5728\u5132\u5b58...', 'saving');
+
+  try {
+    await db.collection('projects').doc(currentProjectId).update({
+      thermal_specs: thermalSpecs
+    });
+    showSaveStatus('\u5132\u5b58\u6210\u529f\uff01', 'saved');
+  } catch (e) {
+    console.error('Save error:', e);
+    showSaveStatus('\u5132\u5b58\u5931\u6557\uff1a' + e.message, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '\u5132\u5b58\u71b1\u8a2d\u8a08\u8cc7\u6599';
+}
+
+/* ---- Utilities ---- */
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escapeAttr(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 </script>
 </body>
 </html>
