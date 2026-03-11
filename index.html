@@ -13,12 +13,41 @@
     padding: 32px 20px;
     color: #333;
   }
-  .container { max-width: 900px; margin: 0 auto; }
+  .container { max-width: 1200px; margin: 0 auto; }
 
   .header { text-align: center; margin-bottom: 28px; }
   .header h1 { font-size: 2rem; color: #1a3a6b; font-weight: 700; margin-bottom: 6px; }
   .header p  { font-size: 0.95rem; color: #666; }
 
+  /* === Tab Navigation === */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #d6e4f0;
+    padding-bottom: 0;
+  }
+  .tab-btn {
+    padding: 10px 24px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: #1a3a6b; }
+  .tab-btn.active {
+    color: #1a3a6b;
+    border-bottom-color: #2e6bb5;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* === Original Tool Styles === */
   .main-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -53,7 +82,7 @@
     margin-bottom: 6px;
     font-weight: 500;
   }
-  .field input {
+  .field input, .field select {
     width: 100%;
     padding: 10px 14px;
     border: 1.5px solid #c5d9ee;
@@ -63,8 +92,9 @@
     color: #1a3a6b;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
   }
-  .field input:focus {
+  .field input:focus, .field select:focus {
     border-color: #5b9bd5;
     box-shadow: 0 0 0 3px rgba(91,155,213,0.18);
   }
@@ -145,6 +175,153 @@
   }
   .rule-row:nth-child(odd)  { background: #f2f7fb; }
   .rule-row:nth-child(even) { background: #fff; }
+
+  /* === Component List Styles === */
+  .comp-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .comp-toolbar .field { margin-bottom: 0; flex: 1; min-width: 200px; }
+  .comp-toolbar .field select { font-size: 0.95rem; }
+
+  .comp-status {
+    padding: 12px 20px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+    color: #7b6b00;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+  .comp-status.error {
+    background: #fce8e8;
+    border-color: #ef9a9a;
+    color: #c00000;
+  }
+  .comp-status.success {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+    color: #217346;
+  }
+
+  .category-section {
+    margin-bottom: 20px;
+  }
+  .category-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    background: #2e6bb5;
+    padding: 10px 16px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+  .comp-table th {
+    background: #e8f0f8;
+    color: #1a3a6b;
+    font-weight: 700;
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 2px solid #c5d9ee;
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+  .comp-table td {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    color: #444;
+  }
+  .comp-table tr:hover td { background: #f7fafd; }
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  .comp-table td.name-cell {
+    text-align: left;
+    font-weight: 600;
+    color: #1a3a6b;
+  }
+  .comp-table td.note-cell {
+    text-align: left;
+    font-size: 0.8rem;
+    color: #888;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .load-btn {
+    padding: 10px 20px;
+    background: #2e6bb5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .load-btn:hover { background: #1a5298; }
+  .load-btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaa;
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.95rem; }
+
+  .comp-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .summary-chip {
+    background: #fff;
+    border: 1px solid #d6e4f0;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    color: #1a3a6b;
+    font-weight: 600;
+  }
+  .summary-chip span { color: #c00000; font-size: 1.1rem; }
+
+  @media (max-width: 900px) {
+    .comp-table { font-size: 0.78rem; }
+    .comp-table th, .comp-table td { padding: 8px 4px; }
+  }
 </style>
 </head>
 <body>
@@ -155,74 +332,170 @@
     <p>快速計算凸台 (Pedestal) 與導熱墊片 (Thermal Pad) 標準尺寸</p>
   </div>
 
-  <div class="main-grid">
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('calc')">尺寸評估計算</button>
+    <button class="tab-btn" onclick="switchTab('complist')">專案元件清單</button>
+  </div>
 
-    <!-- 輸入參數 -->
-    <div class="card">
-      <div class="card-header blue">✏️ 輸入參數</div>
-      <div class="card-body">
-        <div class="field">
-          <label>IC 長度 L (mm)</label>
-          <input type="number" id="L" value="10" step="0.1" oninput="calc()">
-        </div>
-        <div class="field">
-          <label>IC 寬度 W (mm)</label>
-          <input type="number" id="W" value="10" step="0.1" oninput="calc()">
-        </div>
-        <div class="field">
-          <label>功率 P (W)</label>
-          <input type="number" id="P" value="5" step="0.1" oninput="calc()">
-        </div>
-        <div class="field">
-          <label>凸台高度 t (mm)
-            <span id="t-hint" style="color:#aaa; font-weight:400">（僅適用於 &gt; 5W）</span>
-          </label>
-          <input type="number" id="t" value="5" step="0.1" oninput="calc()" class="disabled-input">
+  <!-- Tab 1: Original Calculator -->
+  <div id="tab-calc" class="tab-content active">
+
+    <div class="main-grid">
+
+      <!-- 輸入參數 -->
+      <div class="card">
+        <div class="card-header blue">✏️ 輸入參數</div>
+        <div class="card-body">
+          <div class="field">
+            <label>IC 長度 L (mm)</label>
+            <input type="number" id="L" value="10" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>IC 寬度 W (mm)</label>
+            <input type="number" id="W" value="10" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>功率 P (W)</label>
+            <input type="number" id="P" value="5" step="0.1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>凸台高度 t (mm)
+              <span id="t-hint" style="color:#aaa; font-weight:400">（僅適用於 &gt; 5W）</span>
+            </label>
+            <input type="number" id="t" value="5" step="0.1" oninput="calc()" class="disabled-input">
+          </div>
         </div>
       </div>
+
+      <!-- 評估結果 -->
+      <div class="card">
+        <div class="card-header green">✅ 評估結果</div>
+        <div class="card-body">
+          <div id="power-badge" class="power-badge low">低功率模式 (≤ 5W)</div>
+
+          <div class="result-section">
+            <div class="result-label">建議凸台尺寸 (BOSS SIZE)</div>
+            <div class="result-value" id="boss-result">—</div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="result-section">
+            <div class="result-label">建議 Thermal Pad 尺寸</div>
+            <div class="result-value blue-val" id="pad-result">—</div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="note-label">設計備註 / 說明</div>
+          <div class="note-box" id="note-result">—</div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- 評估結果 -->
-    <div class="card">
-      <div class="card-header green">✅ 評估結果</div>
-      <div class="card-body">
-        <div id="power-badge" class="power-badge low">低功率模式 (≤ 5W)</div>
-
-        <div class="result-section">
-          <div class="result-label">建議凸台尺寸 (BOSS SIZE)</div>
-          <div class="result-value" id="boss-result">—</div>
-        </div>
-
-        <hr class="divider">
-
-        <div class="result-section">
-          <div class="result-label">建議 Thermal Pad 尺寸</div>
-          <div class="result-value blue-val" id="pad-result">—</div>
-        </div>
-
-        <hr class="divider">
-
-        <div class="note-label">設計備註 / 說明</div>
-        <div class="note-box" id="note-result">—</div>
+    <!-- 規範 -->
+    <div class="rules-card">
+      <div class="rules-header">設計規範概覽</div>
+      <div class="rules-body">
+        <div class="rule-row">• <strong>高功率 (&gt; 5W)</strong>：採用 45 度擴散法則，凸台尺寸為 (L + 2t) × (W + 2t)。</div>
+        <div class="rule-row">• <strong>低功率 (≤ 5W)</strong>：最小加工尺寸為 6 × 6 mm。</div>
+        <div class="rule-row">• <strong>Thermal Pad 分級</strong>：Level A ≤ 6mm ／ Level B ≤ 10mm ／ Level C ≤ 14mm ／ 超出為特殊規格。</div>
+        <div class="rule-row">• <strong>低功率 Pad 厚度</strong>：標準 2.5mm，壓縮後 1.7mm（壓縮率 32%）。</div>
+        <div class="rule-row">• <strong>長寬差 &gt; 1.5mm</strong> 時，依 IC 外型保持矩形，不做正方形化。</div>
       </div>
     </div>
 
   </div>
 
-  <!-- 規範 -->
-  <div class="rules-card">
-    <div class="rules-header">設計規範概覽</div>
-    <div class="rules-body">
-      <div class="rule-row">• <strong>高功率 (&gt; 5W)</strong>：採用 45 度擴散法則，凸台尺寸為 (L + 2t) × (W + 2t)。</div>
-      <div class="rule-row">• <strong>低功率 (≤ 5W)</strong>：最小加工尺寸為 6 × 6 mm。</div>
-      <div class="rule-row">• <strong>Thermal Pad 分級</strong>：Level A ≤ 6mm ／ Level B ≤ 10mm ／ Level C ≤ 14mm ／ 超出為特殊規格。</div>
-      <div class="rule-row">• <strong>低功率 Pad 厚度</strong>：標準 2.5mm，壓縮後 1.7mm（壓縮率 32%）。</div>
-      <div class="rule-row">• <strong>長寬差 &gt; 1.5mm</strong> 時，依 IC 外型保持矩形，不做正方形化。</div>
+  <!-- Tab 2: Component List -->
+  <div id="tab-complist" class="tab-content">
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-header blue">📋 專案元件清單（Firebase 共用資料庫）</div>
+      <div class="card-body">
+        <div class="comp-toolbar">
+          <div class="field">
+            <label>選擇專案</label>
+            <select id="project-select" onchange="onProjectChange()">
+              <option value="">-- 請先載入專案列表 --</option>
+            </select>
+          </div>
+          <button class="load-btn" id="load-projects-btn" onclick="loadProjects()">載入專案</button>
+        </div>
+        <div id="comp-status" class="comp-status" style="display:none;"></div>
+      </div>
     </div>
+
+    <!-- Summary -->
+    <div id="comp-summary" class="comp-summary" style="display:none;"></div>
+
+    <!-- Component Tables by Category -->
+    <div id="comp-container">
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <p>請先連線至 Firebase 並選擇專案，即可載入元件清單。</p>
+        <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
+      </div>
+    </div>
+
   </div>
 
 </div>
+
+<!-- Firebase SDK (v9 compat mode) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
+/* ============================
+   Firebase Configuration
+   ============================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCxE5LPqdShHOmMRFb_aSfOWfP78QZMCQY",
+  authDomain: "rru-component-spec.firebaseapp.com",
+  projectId: "rru-component-spec",
+  storageBucket: "rru-component-spec.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef123456"
+};
+
+let db = null;
+let firebaseReady = false;
+
+function initFirebase() {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebaseReady = true;
+  } catch (e) {
+    console.error('Firebase init error:', e);
+    showStatus('Firebase 初始化失敗：' + e.message, 'error');
+  }
+}
+
+initFirebase();
+
+/* ============================
+   Tab Switching
+   ============================ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+  if (tab === 'calc') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('tab-calc').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab-complist').classList.add('active');
+  }
+}
+
+/* ============================
+   Original Calculator
+   ============================ */
 function fmt(n) {
   return Number.isInteger(n) ? n.toString() : parseFloat(n.toFixed(1)).toString();
 }
@@ -250,7 +523,6 @@ function calc() {
     hint.style.display = '';
   }
 
-  // 凸台尺寸
   let boss;
   if (highPower) {
     boss = `${fmt(L + 2*t)} × ${fmt(W + 2*t)} mm（45 度法則）`;
@@ -261,7 +533,6 @@ function calc() {
     else                          boss = `${fmt(mx)} × ${fmt(mx)} mm（正方形）`;
   }
 
-  // Thermal Pad
   let pad;
   if (highPower) {
     pad = `需客製（覆蓋 ${fmt(L)} × ${fmt(W)} mm）`;
@@ -273,7 +544,6 @@ function calc() {
     else               pad = '特殊規格（長邊 > 14mm）';
   }
 
-  // 備註
   let note;
   if (!highPower) {
     note = 'Pad 厚度 2.5mm → 壓縮後 1.7mm（壓縮率 32%）';
@@ -287,6 +557,192 @@ function calc() {
 }
 
 calc();
+
+/* ============================
+   Component List - Firebase
+   ============================ */
+function showStatus(msg, type) {
+  const el = document.getElementById('comp-status');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.className = 'comp-status' + (type ? ' ' + type : '');
+}
+
+function hideStatus() {
+  document.getElementById('comp-status').style.display = 'none';
+}
+
+async function loadProjects() {
+  if (!firebaseReady) {
+    showStatus('Firebase 尚未初始化，請檢查設定。', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('load-projects-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>載入中...';
+  showStatus('正在從 Firebase 讀取專案列表...', '');
+
+  try {
+    const snapshot = await db.collection('projects').get();
+    const select = document.getElementById('project-select');
+    select.innerHTML = '<option value="">-- 請選擇專案 --</option>';
+
+    if (snapshot.empty) {
+      showStatus('資料庫中尚無專案資料。', 'error');
+      btn.disabled = false;
+      btn.textContent = '載入專案';
+      return;
+    }
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const opt = document.createElement('option');
+      opt.value = doc.id;
+      opt.textContent = data.name || data.projectName || doc.id;
+      select.appendChild(opt);
+    });
+
+    showStatus(`成功載入 ${snapshot.size} 個專案。`, 'success');
+  } catch (e) {
+    console.error('Load projects error:', e);
+    showStatus('載入專案失敗：' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '載入專案';
+}
+
+async function onProjectChange() {
+  const projectId = document.getElementById('project-select').value;
+  const container = document.getElementById('comp-container');
+  const summaryEl = document.getElementById('comp-summary');
+
+  if (!projectId) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <p>請選擇一個專案以載入元件清單。</p>
+      </div>`;
+    summaryEl.style.display = 'none';
+    return;
+  }
+
+  showStatus('正在載入元件資料...', '');
+
+  try {
+    const compSnapshot = await db.collection('projects').doc(projectId)
+      .collection('components').get();
+
+    if (compSnapshot.empty) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <p>此專案尚無元件資料。</p>
+        </div>`;
+      summaryEl.style.display = 'none';
+      hideStatus();
+      return;
+    }
+
+    const components = [];
+    compSnapshot.forEach(doc => {
+      components.push({ id: doc.id, ...doc.data() });
+    });
+
+    renderComponents(components);
+    hideStatus();
+  } catch (e) {
+    console.error('Load components error:', e);
+    showStatus('載入元件失敗：' + e.message, 'error');
+  }
+}
+
+function renderComponents(components) {
+  const container = document.getElementById('comp-container');
+  const summaryEl = document.getElementById('comp-summary');
+
+  // Group by category
+  const grouped = {};
+  components.forEach(comp => {
+    const cat = comp.category || comp.type || '未分類';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(comp);
+  });
+
+  // Summary
+  const totalComponents = components.length;
+  const totalQuantity = components.reduce((sum, c) => sum + (parseFloat(c.quantity) || 0), 0);
+  const totalPower = components.reduce((sum, c) => sum + (parseFloat(c.power) || 0), 0);
+  const categoryCount = Object.keys(grouped).length;
+
+  summaryEl.style.display = 'flex';
+  summaryEl.innerHTML = `
+    <div class="summary-chip">元件種類：<span>${totalComponents}</span></div>
+    <div class="summary-chip">元件總數：<span>${totalQuantity}</span></div>
+    <div class="summary-chip">總功耗：<span>${fmt(totalPower)} W</span></div>
+    <div class="summary-chip">分類數：<span>${categoryCount}</span></div>
+  `;
+
+  // Render tables by category
+  let html = '';
+  const categoryOrder = Object.keys(grouped).sort();
+
+  categoryOrder.forEach(cat => {
+    const items = grouped[cat];
+    html += `
+      <div class="category-section">
+        <div class="category-title">${escapeHtml(cat)}（${items.length} 項）</div>
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>元件名稱</th>
+              <th>數量</th>
+              <th>發熱瓦數<br>(W)</th>
+              <th>熱源大小<br>(mm)</th>
+              <th>凸台大小<br>(mm)</th>
+              <th>TIM 種類</th>
+              <th>TIM 厚度<br>(mm)</th>
+              <th>散熱方向</th>
+              <th>IC 距離<br>HSK (mm)</th>
+              <th>備註</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+    items.forEach((comp, idx) => {
+      html += `
+            <tr>
+              <td>${idx + 1}</td>
+              <td class="name-cell">${escapeHtml(comp.name || comp.componentName || '—')}</td>
+              <td>${comp.quantity || '—'}</td>
+              <td>${comp.power || comp.wattage || '—'}</td>
+              <td>${comp.heatSourceSize || comp.thermalSourceSize || '—'}</td>
+              <td>${comp.bossSize || comp.pedestalSize || '—'}</td>
+              <td>${escapeHtml(comp.timType || comp.TIMType || '—')}</td>
+              <td>${comp.timThickness || comp.TIMThickness || '—'}</td>
+              <td>${escapeHtml(comp.heatDirection || comp.coolingDirection || '—')}</td>
+              <td>${comp.icToHSK || comp.distanceToHSK || '—'}</td>
+              <td class="note-cell" title="${escapeHtml(comp.note || comp.remark || '')}">${escapeHtml(comp.note || comp.remark || '—')}</td>
+            </tr>`;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 </script>
 </body>
 </html>
