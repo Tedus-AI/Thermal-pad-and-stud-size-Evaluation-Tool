@@ -231,7 +231,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85rem;
-    min-width: 1100px;
+    min-width: 1400px;
   }
   .comp-table th {
     background: #e8f0f8;
@@ -245,8 +245,11 @@
   }
   .comp-table th.readonly-col { background: #e8f0f8; }
   .comp-table th.editable-col { background: #fff3e0; color: #e65100; }
-  .comp-table .boss-size-col { width: 180px; max-width: 180px; }
   .comp-table .heat-source-col { width: 180px; max-width: 180px; }
+  .comp-table .boss-size-col { width: 180px; max-width: 180px; }
+  .comp-table .boss-surface-col { min-width: 110px; }
+  .comp-table .tim-thickness-col { min-width: 110px; }
+  .comp-table .note-col { min-width: 150px; }
 
   .comp-table td {
     padding: 8px 6px;
@@ -400,7 +403,7 @@
   .save-status.saved  { display: inline-block; background: #e8f5e9; color: #217346; }
   .save-status.err    { display: inline-block; background: #fce8e8; color: #c00000; }
 
-  .tim-size-col { min-width: 80px; }
+  .tim-size-col { min-width: 100px; }
 
   /* Hide checkbox */
   .hide-checkbox {
@@ -902,13 +905,13 @@ function renderCategoryTable(catKey, catInfo, items) {
           <th class="readonly-col">發熱瓦數<br>(W)</th>
           <th class="editable-col heat-source-col">熱源大小<br>(mm)</th>
           <th class="editable-col boss-size-col">凸台大小<br>(mm)</th>
-          <th class="editable-col">凸台表面處理</th>
+          <th class="editable-col boss-surface-col">凸台表面處理</th>
           <th class="editable-col">TIM 種類</th>
-          <th class="editable-col">TIM 厚度<br>(mm)</th>
+          <th class="editable-col tim-thickness-col">TIM 厚度<br>(mm)</th>
           <th class="editable-col tim-size-col">TIM Size<br>(mm)</th>
           <th class="editable-col">散熱方向</th>
           <th class="editable-col">IC 距離<br>HSK</th>
-          <th class="editable-col">備註</th>
+          <th class="editable-col note-col">備註</th>
         </tr></thead>
         <tbody>`;
 
@@ -972,7 +975,7 @@ function renderCategoryTable(catKey, catInfo, items) {
                 ${showBossCustom ? 'style="margin-top:2px;"' : ''}
                 onchange="onCellChange(this)">
             </td>
-            <td class="editable-cell">
+            <td class="editable-cell boss-surface-col">
               <select class="cell-select"
                 data-comp="${escapeAttr(specKey)}" data-field="bossSurface"
                 onchange="onCellChange(this)">
@@ -992,7 +995,7 @@ function renderCategoryTable(catKey, catInfo, items) {
                 ).join('')}
               </select>
             </td>
-            <td class="editable-cell">
+            <td class="editable-cell tim-thickness-col">
               <select class="cell-select"
                 data-comp="${escapeAttr(specKey)}" data-field="timThickness"
                 onchange="onCellChange(this)">
@@ -1030,7 +1033,7 @@ function renderCategoryTable(catKey, catInfo, items) {
                 ).join('')}
               </select>
             </td>
-            <td class="editable-cell">
+            <td class="editable-cell note-col">
               <input class="cell-input" type="text"
                 data-comp="${escapeAttr(specKey)}" data-field="note"
                 value="${escapeAttr(note)}"
