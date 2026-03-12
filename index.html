@@ -245,6 +245,7 @@
   }
   .comp-table th.readonly-col { background: #e8f0f8; }
   .comp-table th.editable-col { background: #fff3e0; color: #e65100; }
+  .comp-table .boss-size-col { width: 80px; max-width: 80px; }
 
   .comp-table td {
     padding: 8px 6px;
@@ -899,7 +900,7 @@ function renderCategoryTable(catKey, catInfo, items) {
           <th class="readonly-col">數量</th>
           <th class="readonly-col">發熱瓦數<br>(W)</th>
           <th class="editable-col">熱源大小<br>(mm)</th>
-          <th class="editable-col">凸台大小<br>(mm)</th>
+          <th class="editable-col boss-size-col">凸台大小<br>(mm)</th>
           <th class="editable-col">凸台表面處理</th>
           <th class="editable-col">TIM 種類</th>
           <th class="editable-col">TIM 厚度<br>(mm)</th>
@@ -953,7 +954,7 @@ function renderCategoryTable(catKey, catInfo, items) {
                 value="${escapeAttr(heatSrcSize)}"
                 placeholder="L×W" onchange="onCellChange(this)">
             </td>
-            <td class="editable-cell">
+            <td class="editable-cell boss-size-col">
               <select class="cell-select"
                 data-comp="${escapeAttr(specKey)}" data-field="bossSizeType"
                 onchange="onBossSizeChange(this)">
@@ -1256,7 +1257,7 @@ function exportExcel() {
 
   ws['!cols'] = [
     { wch: 4 }, { wch: 22 }, { wch: 6 }, { wch: 10 },
-    { wch: 12 }, { wch: 16 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
+    { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
     { wch: 10 }, { wch: 10 }, { wch: 16 }
   ];
 
