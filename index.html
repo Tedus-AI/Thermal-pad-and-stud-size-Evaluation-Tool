@@ -250,6 +250,8 @@
   .comp-table .boss-surface-col { min-width: 120px; }
   .comp-table .tim-type-col { min-width: 100px; }
   .comp-table .tim-thickness-col { min-width: 140px; }
+  .comp-table .heat-dir-col { min-width: 100px; }
+  .comp-table .ic-hsk-col { min-width: 90px; }
   .comp-table .note-col { min-width: 150px; }
 
   .comp-table td {
@@ -910,8 +912,8 @@ function renderCategoryTable(catKey, catInfo, items) {
           <th class="editable-col tim-type-col">TIM 種類</th>
           <th class="editable-col tim-thickness-col">TIM 厚度<br>(mm)</th>
           <th class="editable-col tim-size-col">TIM Size<br>(mm)</th>
-          <th class="editable-col">散熱方向</th>
-          <th class="editable-col">IC 距離<br>HSK</th>
+          <th class="editable-col heat-dir-col">散熱方向</th>
+          <th class="editable-col ic-hsk-col">IC 距離<br>HSK</th>
           <th class="editable-col note-col">備註</th>
         </tr></thead>
         <tbody>`;
@@ -1014,7 +1016,7 @@ function renderCategoryTable(catKey, catInfo, items) {
                 ${showTimSize ? '' : 'disabled style="background:#f0f0f0;color:#ccc;"'}
                 onchange="onCellChange(this)">
             </td>
-            <td class="editable-cell">
+            <td class="editable-cell heat-dir-col">
               <select class="cell-select"
                 data-comp="${escapeAttr(specKey)}" data-field="heatDirection"
                 onchange="onCellChange(this)">
@@ -1024,7 +1026,7 @@ function renderCategoryTable(catKey, catInfo, items) {
                 ).join('')}
               </select>
             </td>
-            <td class="editable-cell">
+            <td class="editable-cell ic-hsk-col">
               <select class="cell-select"
                 data-comp="${escapeAttr(specKey)}" data-field="icToHSK"
                 onchange="onCellChange(this)">
