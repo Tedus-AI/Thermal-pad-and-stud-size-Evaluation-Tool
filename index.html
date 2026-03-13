@@ -161,6 +161,59 @@
     vertical-align: middle;
   }
 
+  /* === Password Protection Bar === */
+  .protect-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fce8e8;
+    border: 1.5px solid #ef9a9a;
+    border-radius: 8px;
+    padding: 10px 18px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: #c00000;
+    font-weight: 600;
+    flex-wrap: wrap;
+  }
+  .protect-bar.unlocked {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+    color: #217346;
+  }
+  .protect-bar .protect-status {
+    flex: 1;
+    min-width: 160px;
+  }
+  .protect-bar input {
+    padding: 6px 10px;
+    border: 1.5px solid #d0d8e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    width: 120px;
+    outline: none;
+  }
+  .protect-bar input:focus { border-color: #2e6bb5; }
+  .protect-bar button {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .protect-unlock-btn {
+    background: #2e6bb5;
+    color: #fff;
+  }
+  .protect-unlock-btn:hover { background: #245a9a; }
+  .protect-lock-btn {
+    background: #e0e0e0;
+    color: #555;
+  }
+  .protect-lock-btn:hover { background: #d0d0d0; }
+
   /* === Original Tool Styles === */
   .main-grid {
     display: grid;
@@ -643,6 +696,13 @@
   <!-- ==================== Tab 2: Component List ==================== -->
   <div id="tab-complist" class="tab-content">
 
+    <!-- Password Protection Bar -->
+    <div id="protect-bar" class="protect-bar">
+      <span class="protect-status" id="protect-status">&#128274; 密碼保護：啟用中（僅可讀取，無法儲存）</span>
+      <input type="password" id="protect-pwd" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')toggleProtection()">
+      <button class="protect-unlock-btn" id="protect-btn" onclick="toggleProtection()">解鎖</button>
+    </div>
+
     <div class="card" style="margin-bottom: 20px;">
       <div class="card-header blue">&#128203; 專案元件熱設計清單</div>
       <div class="card-body">
@@ -746,6 +806,45 @@ let firebaseReady = false;
 let currentProjectId = null;
 let currentProjectData = null;    // 原始 project document
 let thermalSpecs = {};            // thermal_specs map (本工具專用)
+
+/* 密碼保護 */
+const PROTECT_PASSWORD = '0420';
+let isProtected = true;          // 預設啟用保護
+
+function toggleProtection() {
+  const pwdInput = document.getElementById('protect-pwd');
+  const bar = document.getElementById('protect-bar');
+  const statusEl = document.getElementById('protect-status');
+  const btn = document.getElementById('protect-btn');
+  const saveBtn = document.getElementById('save-btn');
+
+  if (isProtected) {
+    // 嘗試解鎖
+    if (pwdInput.value !== PROTECT_PASSWORD) {
+      alert('密碼錯誤，請重新輸入');
+      pwdInput.value = '';
+      pwdInput.focus();
+      return;
+    }
+    isProtected = false;
+    bar.classList.add('unlocked');
+    statusEl.innerHTML = '&#128275; 密碼保護：已關閉（可儲存）';
+    btn.textContent = '鎖定';
+    btn.className = 'protect-lock-btn';
+    pwdInput.value = '';
+    pwdInput.style.display = 'none';
+    if (saveBtn) saveBtn.disabled = false;
+  } else {
+    // 重新鎖定
+    isProtected = true;
+    bar.classList.remove('unlocked');
+    statusEl.innerHTML = '&#128274; 密碼保護：啟用中（僅可讀取，無法儲存）';
+    btn.textContent = '解鎖';
+    btn.className = 'protect-unlock-btn';
+    pwdInput.style.display = '';
+    if (saveBtn) saveBtn.disabled = true;
+  }
+}
 
 /* 三大分類對應 */
 const CATEGORIES = {
@@ -975,6 +1074,7 @@ async function onProjectChange() {
     renderAllCategories();
     legendEl.style.display = 'flex';
     saveBtn.style.display = '';
+    saveBtn.disabled = isProtected;
     hideStatus();
 
   } catch (e) {
@@ -1374,6 +1474,10 @@ function deleteCustomComponent(catKey, customIdx) {
 
 /* ---- 儲存至 Firebase ---- */
 async function saveThermalSpecs() {
+  if (isProtected) {
+    alert('\u5bc6\u78bc\u4fdd\u8b77\u555f\u7528\u4e2d\uff0c\u8acb\u5148\u89e3\u9396\u5f8c\u624d\u80fd\u5132\u5b58\u3002');
+    return;
+  }
   if (!currentProjectId || !firebaseReady) return;
 
   const btn = document.getElementById('save-btn');
