@@ -413,6 +413,7 @@
   .comp-table th.readonly-col { background: #e8f0f8; }
   .comp-table th.editable-col { background: #fff3e0; color: #e65100; }
   .comp-table .heat-source-col { width: 180px; max-width: 180px; }
+  .comp-table .heat-source-height-col { min-width: 90px; }
   .comp-table .boss-size-col { width: 180px; max-width: 180px; }
   .comp-table .boss-surface-col { min-width: 120px; }
   .comp-table .tim-type-col { min-width: 100px; }
@@ -1157,6 +1158,7 @@ function renderCategoryTable(catKey, catInfo, items, customItems) {
           <th class="readonly-col">數量</th>
           <th class="readonly-col">發熱瓦數<br>(W)</th>
           <th class="editable-col heat-source-col">熱源大小<br>(mm)</th>
+          <th class="editable-col heat-source-height-col">熱源高度<br>(mm)</th>
           <th class="editable-col boss-size-col">凸台大小<br>(mm)</th>
           <th class="editable-col boss-surface-col">凸台表面處理</th>
           <th class="editable-col tim-type-col">TIM 種類</th>
@@ -1194,6 +1196,7 @@ function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
     const power = comp['Power(W)'] || '\u2014';
 
     const heatSrcSize  = spec.heatSourceSize || '';
+    const heatSrcHeight = spec.heatSourceHeight || '';
     const bossSize     = spec.bossSize       || '';
     const bossSizeType = spec.bossSizeType   || '';
     const bossSurface  = spec.bossSurface    || '';
@@ -1230,6 +1233,12 @@ function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
                 data-comp="${escapeAttr(specKey)}" data-field="heatSourceSize"
                 value="${escapeAttr(heatSrcSize)}"
                 placeholder="L\u00d7W" onchange="onCellChange(this)">
+            </td>
+            <td class="editable-cell heat-source-height-col">
+              <input class="cell-input" type="text"
+                data-comp="${escapeAttr(specKey)}" data-field="heatSourceHeight"
+                value="${escapeAttr(heatSrcHeight)}"
+                placeholder="H" onchange="onCellChange(this)">
             </td>
             <td class="editable-cell boss-size-col">
               <select class="cell-select"
@@ -1394,7 +1403,15 @@ function onBossSizeChange(el) {
     bossSizeInput.disabled = !isCustom;
     bossSizeInput.style.background = isCustom ? '#fff' : '#f0f0f0';
     bossSizeInput.style.color = isCustom ? '#333' : '#ccc';
-    if (!isCustom) {
+    if (isCustom) {
+      // 自動填入熱源大小的值
+      const heatSrcInput = row.querySelector('[data-field="heatSourceSize"]');
+      if (heatSrcInput && heatSrcInput.value && !bossSizeInput.value) {
+        bossSizeInput.value = heatSrcInput.value;
+        if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+        thermalSpecs[compKey].bossSize = heatSrcInput.value;
+      }
+    } else {
       bossSizeInput.value = '';
       if (thermalSpecs[compKey]) {
         delete thermalSpecs[compKey].bossSize;
@@ -1541,6 +1558,7 @@ function collectExportDataByCategory() {
         qty: comp.Qty || '—',
         power: comp['Power(W)'] || '—',
         heatSourceSize: spec.heatSourceSize || '-',
+        heatSourceHeight: spec.heatSourceHeight || '-',
         bossSize: bossSizeDisplay,
         bossSurface: spec.bossSurface || '-',
         timType: spec.timType || '-',
@@ -1577,12 +1595,12 @@ function exportExcel() {
   const categories = collectExportDataByCategory();
   if (categories.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
 
-  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '凸台大小(mm)', '凸台表面處理',
+  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '熱源高度(mm)', '凸台大小(mm)', '凸台表面處理',
     'TIM 種類', 'TIM 厚度(mm)', 'TIM Size(mm)', '散熱方向', 'IC距離HSK', '備註'];
 
   const wsData = [
     [getExportTitle()],
-    ['案名：' + getProjectName(), '', '', '', '', '', '', '', '', '', '', '', '日期：' + getDateString()],
+    ['案名：' + getProjectName(), '', '', '', '', '', '', '', '', '', '', '', '', '日期：' + getDateString()],
     []
   ];
 
@@ -1591,7 +1609,7 @@ function exportExcel() {
     wsData.push(headers);
     cat.rows.forEach(r => {
       wsData.push([r.index, r.component, r.qty, r.power,
-        r.heatSourceSize, r.bossSize, r.bossSurface, r.timType, r.timThickness, r.timSize,
+        r.heatSourceSize, r.heatSourceHeight, r.bossSize, r.bossSurface, r.timType, r.timThickness, r.timSize,
         r.heatDirection, r.icToHSK, r.note]);
     });
     wsData.push([]);
@@ -1603,7 +1621,7 @@ function exportExcel() {
   const ws = XLSX.utils.aoa_to_sheet(wsData);
 
   ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }
   ];
 
   ws['!cols'] = [
@@ -1647,6 +1665,7 @@ function buildPdfHtml(categories) {
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">數量</th>
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">發熱瓦數(W)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源大小(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源高度(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台大小(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台表面處理</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM 種類</th>
@@ -1667,6 +1686,7 @@ function buildPdfHtml(categories) {
               <td style="border:1px solid #eee;padding:5px 4px;text-align:center;background:#fafbfc;">${r.qty}</td>
               <td style="border:1px solid #eee;padding:5px 4px;text-align:center;background:#fafbfc;">${r.power}</td>
               <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.heatSourceSize)}</td>
+              <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.heatSourceHeight)}</td>
               <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.bossSize)}</td>
               <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.bossSurface)}</td>
               <td style="border:1px solid #eee;padding:5px 4px;text-align:center;">${escapeHtml(r.timType)}</td>
