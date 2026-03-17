@@ -1180,7 +1180,7 @@ function renderCategoryTable(catKey, catInfo, items, customItems) {
           <th class="readonly-col">數量</th>
           <th class="readonly-col">發熱瓦數<br>(W)</th>
           <th class="editable-col heat-source-col">熱源大小<br>(mm)</th>
-          <th class="editable-col heat-source-height-col">熱源高度<br>(mm)</th>
+          <th class="editable-col heat-source-height-col">熱源高度Max<br>(mm)</th>
           <th class="editable-col boss-size-col">凸台大小<br>(mm)</th>
           <th class="editable-col boss-surface-col">凸台表面處理</th>
           <th class="editable-col tim-type-col">TIM 種類</th>
@@ -1679,7 +1679,7 @@ function exportExcel() {
   const categories = collectExportDataByCategory();
   if (categories.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
 
-  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '熱源高度(mm)', '凸台大小(mm)', '凸台表面處理',
+  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '熱源高度Max(mm)', '凸台大小(mm)', '凸台表面處理',
     'TIM 種類', 'TIM 厚度(mm)', 'TIM Size(mm)', '散熱方向', 'IC距離HSK', '備註'];
 
   const wsData = [
@@ -1749,7 +1749,7 @@ function buildPdfHtml(categories) {
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">數量</th>
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">發熱瓦數(W)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源大小(mm)</th>
-              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源高度(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源高度Max(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台大小(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台表面處理</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM 種類</th>
