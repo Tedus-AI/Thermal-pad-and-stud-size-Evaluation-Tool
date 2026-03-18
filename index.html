@@ -886,7 +886,7 @@ const TIM_TYPE_OPTIONS = ['Grease', 'Pad', 'Putty', 'None'];
 const TIM_THICKNESS_OPTIONS = ['0.05mm以下', '0.5', '1.0', '1.5', '1.7', '2.0', '2.5', '3.0'];
 
 /* IC 距離 HSK 選項 */
-const IC_TO_HSK_OPTIONS = ['0.5', '1', '1.7', '直觸'];
+const IC_TO_HSK_OPTIONS = ['0.5', '1', '1.7', '直觸', '自訂'];
 
 /* 凸台大小選項 */
 const BOSS_SIZE_OPTIONS = ['無凸台，刻花定位', '自訂'];
@@ -1180,11 +1180,11 @@ function renderCategoryTable(catKey, catInfo, items, customItems) {
           <th class="readonly-col">元件名稱</th>
           <th class="readonly-col">數量</th>
           <th class="readonly-col">發熱瓦數<br>(W)</th>
-          <th class="editable-col heat-source-col">熱源大小<br>(mm)</th>
-          <th class="editable-col heat-source-height-col">熱源高度Max<br>(mm)</th>
+          <th class="editable-col heat-source-col">元件大小<br>(mm)</th>
+          <th class="editable-col heat-source-height-col">元件高度(max)<br>(mm)</th>
           <th class="editable-col boss-size-col">凸台大小<br>(mm)</th>
           <th class="editable-col boss-surface-col">凸台表面處理</th>
-          <th class="editable-col tim-type-col">TIM 種類</th>
+          <th class="editable-col tim-type-col">TIM Type</th>
           <th class="editable-col tim-thickness-col">TIM 厚度<br>(mm)</th>
           <th class="editable-col tim-size-col">TIM Size<br>(mm)</th>
           <th class="editable-col heat-dir-col">散熱方向</th>
@@ -1229,6 +1229,9 @@ function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
     const timSize      = spec.timSize        || '';
     const heatDir      = spec.heatDirection  || '';
     const icToHSK      = spec.icToHSK        || '';
+    const icHskPresets = ['0.5', '1', '1.7', '\u76f4\u89f8'];
+    const icHskIsCustom = icToHSK && !icHskPresets.includes(icToHSK);
+    const icHskSelVal = icHskIsCustom ? '\u81ea\u8a02' : icToHSK;
     const note         = spec.note           || '';
     const showTimSize  = (timType === 'Pad');
     const showBossCustom = (bossSizeType === '\u81ea\u8a02');
@@ -1338,12 +1341,16 @@ function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
             <td class="editable-cell ic-hsk-col">
               <select class="cell-select"
                 data-comp="${escapeAttr(specKey)}" data-field="icToHSK"
-                onchange="onCellChange(this)">
+                onchange="onIcToHskChange(this)">
                 <option value="">\u2014</option>
                 ${IC_TO_HSK_OPTIONS.map(o =>
-                  `<option value="${o}" ${icToHSK === o ? 'selected' : ''}>${o}</option>`
+                  `<option value="${o}" ${icHskSelVal === o ? 'selected' : ''}>${o}</option>`
                 ).join('')}
               </select>
+              <input class="cell-input" type="text" style="width:60px;margin-top:2px;display:${icHskIsCustom ? '' : 'none'};"
+                data-comp="${escapeAttr(specKey)}" data-field="icToHSK_custom"
+                value="${escapeAttr(icHskIsCustom ? icToHSK : '')}"
+                placeholder="\u8f38\u5165\u503c" onchange="onIcToHskCustomInput(this)">
             </td>
             <td class="editable-cell note-col">
               <input class="cell-input" type="text"
@@ -1375,6 +1382,47 @@ function onCellChange(el) {
   el.classList.toggle('changed', !!value);
 }
 
+/* ---- IC距離HSK 下拉變更（支援自訂） ---- */
+function onIcToHskChange(el) {
+  const compKey = el.dataset.comp;
+  const value = el.value;
+  const customInput = el.parentElement.querySelector('[data-field="icToHSK_custom"]');
+
+  if (value === '\u81ea\u8a02') {
+    // 顯示自訂輸入框，先不寫入值
+    if (customInput) {
+      customInput.style.display = '';
+      customInput.focus();
+    }
+  } else {
+    // 預設選項：直接存值，隱藏自訂輸入
+    if (customInput) {
+      customInput.style.display = 'none';
+      customInput.value = '';
+    }
+    if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+    if (value) {
+      thermalSpecs[compKey].icToHSK = value;
+    } else {
+      delete thermalSpecs[compKey].icToHSK;
+    }
+    el.classList.toggle('changed', !!value);
+  }
+}
+
+function onIcToHskCustomInput(el) {
+  const compKey = el.dataset.comp;
+  const value = el.value.trim();
+  if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+  if (value) {
+    thermalSpecs[compKey].icToHSK = value;
+  } else {
+    delete thermalSpecs[compKey].icToHSK;
+  }
+  const select = el.parentElement.querySelector('[data-field="icToHSK"]');
+  if (select) select.classList.toggle('changed', !!value);
+}
+
 /* ---- TIM 種類變更 → 連動預設 TIM厚度 / IC距離HSK / TIM Size 啟用 ---- */
 function onTimTypeChange(el) {
   const compKey = el.dataset.comp;
@@ -1397,7 +1445,7 @@ function onTimTypeChange(el) {
   const hskSelect = row.querySelector('[data-field="icToHSK"]');
   if (preset && hskSelect) {
     hskSelect.value = preset.icToHSK;
-    onCellChange(hskSelect);
+    onIcToHskChange(hskSelect);
   }
 
   // TIM Size 欄位：僅 Pad 時啟用
@@ -1685,8 +1733,8 @@ function exportExcel() {
   const categories = collectExportDataByCategory();
   if (categories.length === 0) { alert('沒有可匯出的元件（全部被隱藏或無資料）'); return; }
 
-  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '熱源大小(mm)', '熱源高度Max(mm)', '凸台大小(mm)', '凸台表面處理',
-    'TIM 種類', 'TIM 厚度(mm)', 'TIM Size(mm)', '散熱方向', 'IC距離HSK', '備註'];
+  const headers = ['#', '元件名稱', '數量', '發熱瓦數(W)', '元件大小(mm)', '元件高度(max)(mm)', '凸台大小(mm)', '凸台表面處理',
+    'TIM Type', 'TIM 厚度(mm)', 'TIM Size(mm)', '散熱方向', 'IC距離HSK', '備註'];
 
   const wsData = [
     [getExportTitle()],
@@ -1754,11 +1802,11 @@ function buildPdfHtml(categories) {
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;text-align:left;">元件名稱</th>
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">數量</th>
               <th style="border:1px solid #c5d9ee;padding:6px 4px;color:#1a3a6b;font-size:10px;">發熱瓦數(W)</th>
-              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源大小(mm)</th>
-              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">熱源高度Max(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">元件大小(mm)</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">元件高度(max)(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台大小(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">凸台表面處理</th>
-              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM 種類</th>
+              <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM Type</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM 厚度(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">TIM Size(mm)</th>
               <th style="border:1px solid #ffcc80;padding:6px 4px;color:#e65100;font-size:10px;background:#fff3e0;">散熱方向</th>
