@@ -946,9 +946,18 @@ async function initFirebase() {
   //   showStatus('Firebase 初始化失敗：' + e.message, 'error');
   // }
 
-  // ── 本機資料庫初始化 ──
-  // 注意：Tab 1 不需要資料庫，這裡不自動初始化
-  // 使用者切換到 Tab 2 時，若點「資料庫目錄」才開始初始化
+  // ── 本機資料庫：嘗試自動恢復上次開啟的檔案 ──
+  try {
+    const result = await dbAdapter.init();
+    if (result && result.success) {
+      console.log('[initFirebase] 自動恢復資料庫：' + result.filename);
+      updateDbStatusText('✅ ' + result.filename, 'success');
+      await loadProjects();
+      return;
+    }
+  } catch (e) {
+    console.log('[initFirebase] 自動恢復失敗，等待使用者手動選擇', e);
+  }
   console.log('[initFirebase] 本機模式，等待使用者選擇資料庫');
 }
 
