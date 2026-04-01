@@ -723,6 +723,23 @@
   <!-- ==================== Tab 2: Component List ==================== -->
   <div id="tab-complist" class="tab-content">
 
+    <div style="display:flex; align-items:center; gap:8px; float:right; margin-bottom:8px;">
+      <span id="db-status-text" style="font-size:12px; color:#888;">未選擇資料庫</span>
+      <button onclick="handlePickDb()"
+        style="font-size:12px; padding:3px 12px; border-radius:4px;
+               border:1px solid #2357A7; background:transparent;
+               color:#2357A7; cursor:pointer;">
+        📂 資料庫目錄
+      </button>
+      <button onclick="dbAdapter.exportBackup()"
+        style="font-size:12px; padding:3px 12px; border-radius:4px;
+               border:1px solid #2357A7; background:transparent;
+               color:#2357A7; cursor:pointer;">
+        💾 備份資料庫
+      </button>
+    </div>
+    <div style="clear:both;"></div>
+
     <!-- Password Protection Bar -->
     <div id="protect-bar" class="protect-bar">
       <span class="protect-status" id="protect-status">&#128274; 密碼保護：啟用中（僅可讀取，無法儲存）</span>
@@ -784,6 +801,8 @@
 <!-- Firebase SDK (v9 compat mode) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="fileDb.js"></script>
+<script src="dbAdapter.js"></script>
 
 <!-- SheetJS for Excel export -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -913,18 +932,24 @@ const TIM_PRESETS = {
   Pad:    { timThickness: '2.5',        icToHSK: '1.7' }
 };
 
-function initFirebase() {
-  try {
-    if (firebase.apps.length === 0) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    db = firebase.firestore();
-    firebaseReady = true;
-    console.log('Firebase connected: g-quick-volume-evaluation');
-  } catch (e) {
-    console.error('Firebase init error:', e);
-    showStatus('Firebase 初始化失敗：' + e.message, 'error');
-  }
+async function initFirebase() {
+  // ── 原 Firebase 程式碼（已註解保留）──
+  // try {
+  //   if (firebase.apps.length === 0) {
+  //     firebase.initializeApp(firebaseConfig);
+  //   }
+  //   db = firebase.firestore();
+  //   firebaseReady = true;
+  //   console.log('Firebase connected: g-quick-volume-evaluation');
+  // } catch (e) {
+  //   console.error('Firebase init error:', e);
+  //   showStatus('Firebase 初始化失敗：' + e.message, 'error');
+  // }
+
+  // ── 本機資料庫初始化 ──
+  // 注意：Tab 1 不需要資料庫，這裡不自動初始化
+  // 使用者切換到 Tab 2 時，若點「資料庫目錄」才開始初始化
+  console.log('[initFirebase] 本機模式，等待使用者選擇資料庫');
 }
 
 initFirebase();
