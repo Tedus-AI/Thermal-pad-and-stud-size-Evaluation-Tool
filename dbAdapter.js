@@ -16,6 +16,10 @@ const dbAdapter = {
     return 'Firebase 雲端模式';
   },
 
+  async refresh() {
+    if (DB_MODE === 'local') return await fileDb.refresh();
+  },
+
   async getCollection(colName) {
     if (DB_MODE === 'local') return await fileDb.getCollection(colName);
     const snap = await db.collection(colName).get();

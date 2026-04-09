@@ -1437,8 +1437,12 @@ async function loadProjects() {
   showStatus('\u6b63\u5728\u8b80\u53d6\u5c08\u6848\u5217\u8868...', '');
 
   try {
+    // Re-read from disk to discard any unsaved in-memory changes
+    await dbAdapter.refresh();
+
     const projectList = await dbAdapter.getProjectsSorted();
     const select = document.getElementById('project-select');
+    const prevSelected = select.value;
     select.innerHTML = '<option value="">-- \u8acb\u9078\u64c7\u5c08\u6848 --</option>';
 
     if (projectList.length === 0) {
@@ -1455,7 +1459,13 @@ async function loadProjects() {
       select.appendChild(opt);
     });
 
-    showStatus(`\u6210\u529f\u8f09\u5165 ${projectList.length} \u500b\u5c08\u6848\u3002`, 'success');
+    // Restore previous selection and reload project data
+    if (prevSelected && select.querySelector(`option[value="${prevSelected}"]`)) {
+      select.value = prevSelected;
+      await onProjectChange();
+    }
+
+    showStatus(`\u6210\u529f\u8f09\u5165 ${projectList.length} \u500b\u5c08\u6848\uff0c\u8cc7\u6599\u5df2\u5f9e\u78c1\u789f\u91cd\u65b0\u8b80\u53d6\u3002`, 'success');
   } catch (e) {
     console.error('Load projects error:', e);
     showStatus('\u8f09\u5165\u5c08\u6848\u5931\u6557\uff1a' + e.message, 'error');
@@ -2459,8 +2469,12 @@ async function sgLoadProjects() {
   btn.innerHTML = '<span class="loading-spinner"></span>載入中...';
 
   try {
+    // Re-read from disk to discard any unsaved in-memory changes
+    await dbAdapter.refresh();
+
     const projectList = await dbAdapter.getProjectsSorted();
     const select = document.getElementById('sg-project-select');
+    const prevSelected = select.value;
     select.innerHTML = '<option value="">-- 請選擇專案 --</option>';
 
     projectList.forEach(item => {
@@ -2470,10 +2484,20 @@ async function sgLoadProjects() {
       select.appendChild(opt);
     });
 
+    // Restore previous selection and reload project data
+    if (prevSelected && select.querySelector(`option[value="${prevSelected}"]`)) {
+      select.value = prevSelected;
+      await sgOnProjectChange();
+    } else {
+      sgProjectId = null;
+      sgProjectData = null;
+      sgRenderProjectComponents();
+    }
+
     if (projectList.length === 0) {
       sgShowStatus('資料庫中尚無專案，請新增專案。', '');
     } else {
-      sgShowStatus('成功載入 ' + projectList.length + ' 個專案。', 'success');
+      sgShowStatus('成功載入 ' + projectList.length + ' 個專案，資料已從磁碟重新讀取。', 'success');
     }
 
   } catch (e) {
