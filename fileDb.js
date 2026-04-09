@@ -62,6 +62,12 @@ const fileDb = {
   isReady() { return fileHandle !== null; },
   getFilename() { return fileHandle ? fileHandle.name : null; },
 
+  /** Re-read file from disk to refresh in-memory cache */
+  async refresh() {
+    this._assertReady();
+    await this._readFile();
+  },
+
   async getCollection(colName) {
     this._assertReady();
     return dbCache[colName] ?? {};
