@@ -566,22 +566,6 @@
   .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
   .empty-state p { font-size: 0.95rem; }
 
-  .comp-summary {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .summary-chip {
-    background: #fff;
-    border: 1px solid #d6e4f0;
-    border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 0.85rem;
-    color: #1a3a6b;
-    font-weight: 600;
-  }
-  .summary-chip span { color: #c00000; font-size: 1.1rem; }
 
   .toolbar-row {
     display: flex;
@@ -1036,7 +1020,6 @@
 
     <!-- Legend & Summary -->
     <div id="comp-legend" class="toolbar-row" style="display:none;">
-      <div class="comp-summary" id="comp-summary"></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot readonly"></div> 資料庫既有（唯讀）</div>
         <div class="legend-item"><div class="legend-dot editable"></div> 本工具新增（可編輯）</div>
@@ -1502,24 +1485,13 @@ function getCustomComponents(catKey) {
 
 function renderAllCategories() {
   const container = document.getElementById('comp-container');
-  const summaryEl = document.getElementById('comp-summary');
   const exportToolbar = document.getElementById('export-toolbar');
 
-  let totalComponents = 0;
-  let totalQuantity = 0;
-  let totalPower = 0;
   let html = '';
 
   for (const [catKey, catInfo] of Object.entries(CATEGORIES)) {
     const items = currentProjectData[catInfo.field] || [];
     const customItems = getCustomComponents(catKey);
-    const allItems = items.concat(customItems);
-
-    totalComponents += allItems.length;
-    allItems.forEach(item => {
-      totalQuantity += parseInt(item.Qty) || 0;
-      totalPower += (parseFloat(item['Power(W)']) || 0) * (parseInt(item.Qty) || 1);
-    });
 
     html += renderCategoryTable(catKey, catInfo, items, customItems);
   }
@@ -1530,16 +1502,9 @@ function renderAllCategories() {
         <div class="icon">&#128237;</div>
         <p>\u6b64\u5c08\u6848\u5c1a\u7121\u5143\u4ef6\u8cc7\u6599\u3002</p>
       </div>`;
-    summaryEl.innerHTML = '';
     exportToolbar.style.display = 'none';
     return;
   }
-
-  summaryEl.innerHTML = `
-    <div class="summary-chip">\u5143\u4ef6\u7a2e\u985e\uff1a<span>${totalComponents}</span></div>
-    <div class="summary-chip">\u5143\u4ef6\u7e3d\u6578\uff1a<span>${totalQuantity}</span></div>
-    <div class="summary-chip">\u7e3d\u529f\u8017\uff1a<span>${fmt(totalPower)} W</span></div>
-  `;
   html += `<div style="margin-top:16px;padding:10px 16px;font-size:0.95rem;font-weight:700;color:#c0392b;">
     Note：以上凸台高度公差皆為 +/-0.1mm
   </div>`;
