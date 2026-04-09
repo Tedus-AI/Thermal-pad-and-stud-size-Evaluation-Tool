@@ -605,6 +605,40 @@
   .save-status.saved  { display: inline-block; background: #e8f5e9; color: #217346; }
   .save-status.err    { display: inline-block; background: #fce8e8; color: #c00000; }
 
+  .conflict-toast {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: #fff3e0;
+    border: 2px solid #e65100;
+    border-radius: 10px;
+    padding: 16px 24px;
+    max-width: 520px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 0.9rem;
+    color: #bf360c;
+    line-height: 1.6;
+  }
+  .conflict-toast.visible { display: block; }
+  .conflict-toast .conflict-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  .conflict-toast .conflict-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    color: #bf360c;
+    cursor: pointer;
+  }
+
   .tim-size-col { min-width: 100px; }
 
   /* Hide checkbox */
@@ -913,6 +947,11 @@
 </style>
 </head>
 <body>
+<div id="conflict-toast" class="conflict-toast">
+  <button class="conflict-close" onclick="this.parentElement.classList.remove('visible')">&times;</button>
+  <div class="conflict-title">&#9888;&#65039; 儲存失敗：版本衝突</div>
+  <div>資料已被他人更新。系統已載入最新版本，您填寫的內容仍保留在畫面上。<br>請確認欄位內容後，再次點擊「儲存」。</div>
+</div>
 <div class="container">
 
   <div class="header">
@@ -1993,10 +2032,15 @@ async function saveThermalSpecs() {
     showSaveStatus('\u5132\u5b58\u6210\u529f\uff01', 'saved');
   } catch (e) {
     console.error('Save error:', e);
-    showSaveStatus('\u5132\u5b58\u5931\u6557\uff1a' + e.message, 'err');
+    if (e instanceof ConflictError) {
+      showConflictWarning();
+      showSaveStatus('版本衝突，請重新儲存', 'err');
+    } else {
+      showSaveStatus('\u5132\u5b58\u5931\u6557\uff1a' + e.message, 'err');
+    }
   }
 
-  btn.disabled = false;
+  btn.disabled = isProtected;
   btn.textContent = '\u5132\u5b58\u71b1\u8a2d\u8a08\u8cc7\u6599';
 }
 
@@ -2676,11 +2720,17 @@ async function sgSaveProjectComponents() {
     status.className = 'save-status saved';
     setTimeout(() => { status.textContent = ''; status.className = 'save-status'; }, 3000);
   } catch (e) {
-    status.textContent = '儲存失敗：' + e.message;
-    status.className = 'save-status err';
+    if (e instanceof ConflictError) {
+      showConflictWarning();
+      status.textContent = '版本衝突，請重新儲存';
+      status.className = 'save-status err';
+    } else {
+      status.textContent = '儲存失敗：' + e.message;
+      status.className = 'save-status err';
+    }
   }
 
-  btn.disabled = false;
+  btn.disabled = isProtected;
   btn.textContent = '儲存元件變更';
 }
 
@@ -2727,7 +2777,12 @@ async function sgCreateProject() {
     document.getElementById('sg-project-select').value = id;
     await sgOnProjectChange();
   } catch (e) {
-    sgShowStatus('建立專案失敗：' + e.message, 'error');
+    if (e instanceof ConflictError) {
+      showConflictWarning();
+      sgShowStatus('版本衝突，請重新嘗試', 'error');
+    } else {
+      sgShowStatus('建立專案失敗：' + e.message, 'error');
+    }
   }
 }
 
@@ -2757,6 +2812,14 @@ function escapeAttr(str) {
 </script>
 
 <script>
+function showConflictWarning() {
+  const toast = document.getElementById('conflict-toast');
+  if (toast) {
+    toast.classList.add('visible');
+    setTimeout(() => { toast.classList.remove('visible'); }, 8000);
+  }
+}
+
 function updateDbStatusText(message, type) {
   const el = document.getElementById('db-status-text');
   if (el) {

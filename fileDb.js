@@ -1,5 +1,15 @@
+/* ---- ConflictError ---- */
+class ConflictError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ConflictError';
+  }
+}
+window.ConflictError = ConflictError;
+
 let fileHandle = null;
 let dbCache = {};
+let currentVersion = 0;
 
 const fileDb = {
   async openFile() {
@@ -38,8 +48,9 @@ const fileDb = {
         suggestedName: 'thermal_db.json',
         types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }]
       });
-      dbCache = { rf_library: {}, digital_library: {}, pwr_library: {}, projects: {} };
-      await this._writeFile();
+      dbCache = { version: Date.now(), rf_library: {}, digital_library: {}, pwr_library: {}, projects: {} };
+      currentVersion = dbCache.version;
+      await this._writeFileRaw();
       await this._saveHandle(fileHandle);
       return { success: true, filename: fileHandle.name, isNew: true };
     } catch(e) {
@@ -101,9 +112,40 @@ const fileDb = {
     const text = await file.text();
     try { dbCache = JSON.parse(text); }
     catch { dbCache = { rf_library: {}, digital_library: {}, pwr_library: {}, projects: {} }; }
+
+    // Migration: add version if missing
+    if (!dbCache.version) {
+      dbCache.version = Date.now();
+      await this._writeFileRaw();
+    }
+    currentVersion = dbCache.version;
   },
 
+  /** Write with optimistic locking: re-fetch and compare version before writing */
   async _writeFile() {
+    // Step 1: Re-fetch latest from disk
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    let latestDb;
+    try { latestDb = JSON.parse(text); }
+    catch { latestDb = {}; }
+
+    // Step 2: Compare version
+    const diskVersion = latestDb.version ?? 0;
+    if (diskVersion !== currentVersion) {
+      // Conflict detected — update currentVersion so next save can succeed
+      currentVersion = diskVersion;
+      throw new ConflictError('版本衝突：資料已被他人更新');
+    }
+
+    // Step 3: Write with new version
+    dbCache.version = Date.now();
+    currentVersion = dbCache.version;
+    await this._writeFileRaw();
+  },
+
+  /** Raw write without version check (used for migration and createFile) */
+  async _writeFileRaw() {
     const writable = await fileHandle.createWritable();
     await writable.write(JSON.stringify(dbCache, null, 2));
     await writable.close();
