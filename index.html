@@ -2051,6 +2051,7 @@ async function saveThermalSpecs() {
 
 /* ---- 隱藏元件切換 ---- */
 function onToggleHide(el) {
+  if (isProtected) { el.checked = !el.checked; alert('請先解鎖密碼保護'); return; }
   const compKey = el.dataset.comp;
   const row = el.closest('tr');
   if (el.checked) {
@@ -2590,6 +2591,7 @@ function sgRenderProjectComponents() {
 
 /* ---- Type dropdown change handler ---- */
 function sgOnTypeChange(sel) {
+  if (isProtected) return;
   const customInput = sel.parentElement.querySelector('.sg-type-custom');
   if (sel.value === '其他') {
     customInput.classList.add('visible');
@@ -2606,6 +2608,7 @@ function sgOnTypeChange(sel) {
 
 /* ---- TV field dropdown change handler ---- */
 function sgOnTvChange(sel) {
+  if (isProtected) return;
   const numInput = sel.parentElement.querySelector('.sg-tv-input');
   if (sel.value === 'N/A') {
     numInput.classList.add('hidden');
@@ -2626,6 +2629,7 @@ function sgOnTvChange(sel) {
 
 /* ---- Inline edit handler ---- */
 function sgOnCompEdit(el) {
+  if (isProtected) return;
   const cat = el.dataset.cat;
   const idx = parseInt(el.dataset.idx, 10);
   const field = el.dataset.field;
@@ -2641,6 +2645,7 @@ function sgOnCompEdit(el) {
 
 /* ---- Delete component from list ---- */
 function sgDeleteComp(cat, idx) {
+  if (isProtected) { alert('請先解鎖密碼保護'); return; }
   const fieldKey = SG_CAT_MAP[cat].field;
   if (!sgProjectData || !sgProjectData[fieldKey]) return;
 
@@ -2654,6 +2659,7 @@ function sgDeleteComp(cat, idx) {
 
 /* ---- Add new empty component row ---- */
 function sgAddCompRow(cat) {
+  if (isProtected) { alert('請先解鎖密碼保護'); return; }
   const fieldKey = SG_CAT_MAP[cat].field;
   if (!sgProjectData) return;
   if (!sgProjectData[fieldKey]) sgProjectData[fieldKey] = [];
