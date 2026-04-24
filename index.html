@@ -1020,6 +1020,68 @@
     text-align: center;
     box-sizing: border-box;
   }
+  /* === Tab 3: Validation Table === */
+  .vd-comp-category { margin-bottom: 18px; }
+  .vd-comp-category-header {
+    font-size: 0.95rem; font-weight: 700; padding: 8px 14px;
+    border-radius: 8px 8px 0 0; color: #fff;
+  }
+  .vd-comp-category-header.rf      { background: linear-gradient(135deg,#1a3a6b,#2e6bb5); }
+  .vd-comp-category-header.digital { background: linear-gradient(135deg,#217346,#2e9959); }
+  .vd-comp-category-header.pwr     { background: linear-gradient(135deg,#b8860b,#d4a017); }
+  .vd-table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    table-layout: auto;
+  }
+  .vd-table thead th {
+    background: #f0f4f8; color: #1a3a6b; font-weight: 700;
+    padding: 7px 6px; border: 1px solid #d6e4f0; text-align: center;
+    white-space: nowrap; font-size: 0.78rem;
+  }
+  .vd-table tbody td {
+    padding: 5px 6px; border: 1px solid #e8ecf0; text-align: center;
+    vertical-align: middle;
+  }
+  .vd-table tbody td.comp-name-cell {
+    text-align: left; font-weight: 600; color: #1a3a6b; white-space: nowrap;
+  }
+  .vd-table tbody td.note-cell { text-align: left; min-width: 120px; }
+  .vd-table input[type="number"],
+  .vd-table input[type="text"],
+  .vd-table textarea {
+    width: 100%; padding: 4px 5px; border: 1.5px solid #e0e0e0;
+    border-radius: 5px; font-size: 0.82rem; text-align: center;
+    outline: none; background: #fff; box-sizing: border-box;
+  }
+  .vd-table textarea { text-align: left; resize: vertical; min-height: 28px; font-size: 0.78rem; }
+  .vd-table input:focus, .vd-table textarea:focus {
+    border-color: #2e6bb5; box-shadow: 0 0 0 2px rgba(46,107,181,0.12);
+  }
+  .vd-table .readonly-cell {
+    background: #f8f9fb; color: #555; font-weight: 500;
+  }
+  .vd-err-green  { color: #217346; font-weight: 700; }
+  .vd-err-orange { color: #d4760a; font-weight: 700; }
+  .vd-err-red    { color: #c0392b; font-weight: 700; }
+  .vd-add-dropdown { position: relative; display: inline-block; }
+  .vd-add-dropdown-content {
+    display: none; position: absolute; left: 0; top: 100%;
+    background: #fff; border: 1px solid #d6e4f0; border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 100;
+    max-height: 220px; overflow-y: auto; min-width: 220px;
+  }
+  .vd-add-dropdown-content.open { display: block; }
+  .vd-add-dropdown-content div {
+    padding: 7px 14px; cursor: pointer; font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .vd-add-dropdown-content div:hover { background: #e8f0fe; }
+  .vd-del-btn {
+    padding: 3px 8px; border: none; border-radius: 4px;
+    font-size: 0.75rem; cursor: pointer; background: transparent; color: #c0392b;
+  }
+  .vd-del-btn:hover { background: #fde8e8; }
+
   .sg-comp-del-btn {
     padding: 3px 8px;
     border: none;
@@ -1117,10 +1179,49 @@
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('specgen')">EE/RF/PWR-專案元件清單</button>
     <button class="tab-btn" onclick="switchTab('complist')">TH/ME-專案元件清單</button>
+    <button class="tab-btn" onclick="switchTab('validation')">模擬與實測驗證</button>
     <button class="tab-btn" onclick="switchTab('calc')">凸台&amp;TIM尺寸速算</button>
   </div>
 
-  <!-- ==================== Tab 1: Original Calculator ==================== -->
+  <!-- ==================== Tab 3: 模擬與實測驗證 ==================== -->
+  <div id="tab-validation" class="tab-content">
+
+    <!-- Password Protection Bar (Tab 3) -->
+    <div id="vd-protect-bar" class="protect-bar">
+      <span class="protect-status" id="vd-protect-status">&#128274; 密碼保護：啟用中（僅可讀取，無法儲存）</span>
+      <input type="password" id="vd-protect-pwd" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')toggleProtection()">
+      <button class="protect-unlock-btn" id="vd-protect-btn" onclick="toggleProtection()">解鎖</button>
+      <div class="protect-hint">&#9888; 若僅載入資料閱讀，請勿解鎖資料庫，避免佔用需要編輯資料人員的作業</div>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-header blue">&#128202; 模擬與實測驗證</div>
+      <div class="card-body">
+        <div class="comp-toolbar">
+          <div class="field">
+            <label>選擇專案</label>
+            <select id="vd-project-select" onchange="vdOnProjectChange()">
+              <option value="">-- 請先載入專案列表 --</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="vd-load-btn" onclick="vdLoadProjects()">載入專案</button>
+          <button class="btn btn-save" id="vd-save-btn" onclick="vdSaveValidation()" disabled>儲存驗證資料</button>
+          <span id="vd-save-status" class="save-status"></span>
+        </div>
+        <div id="vd-status" class="comp-status" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div id="vd-container">
+      <div class="empty-state">
+        <div class="icon">&#128202;</div>
+        <p>請先載入專案列表並選擇專案，即可載入驗證元件清單。</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== Tab 4: Original Calculator ==================== -->
   <div id="tab-calc" class="tab-content">
     <div class="main-grid">
       <div class="card">
@@ -1374,10 +1475,10 @@ let isProtected = true;          // 預設啟用保護
 
 /* ---- Helpers: apply unlocked/locked UI state ---- */
 function _applyUnlockedUI() {
-  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar')].filter(Boolean);
-  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd')].filter(Boolean);
-  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status')].filter(Boolean);
-  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn')].filter(Boolean);
+  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar'), document.getElementById('vd-protect-bar')].filter(Boolean);
+  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd')].filter(Boolean);
+  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status'), document.getElementById('vd-protect-status')].filter(Boolean);
+  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn')].filter(Boolean);
 
   isProtected = false;
   bars.forEach(bar => bar.classList.add('unlocked'));
@@ -1390,13 +1491,15 @@ function _applyUnlockedUI() {
   if (sgSaveBtn) sgSaveBtn.disabled = false;
   const eeImportBtn = document.getElementById('ee-import-btn');
   if (eeImportBtn) { eeImportBtn.disabled = false; eeImportBtn.title = 'EE 匯入 Excel'; }
+  const vdSaveBtn = document.getElementById('vd-save-btn');
+  if (vdSaveBtn) vdSaveBtn.disabled = false;
 }
 
 function relock() {
-  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar')].filter(Boolean);
-  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd')].filter(Boolean);
-  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status')].filter(Boolean);
-  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn')].filter(Boolean);
+  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar'), document.getElementById('vd-protect-bar')].filter(Boolean);
+  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd')].filter(Boolean);
+  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status'), document.getElementById('vd-protect-status')].filter(Boolean);
+  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn')].filter(Boolean);
 
   isProtected = true;
   bars.forEach(bar => bar.classList.remove('unlocked'));
@@ -1409,11 +1512,13 @@ function relock() {
   if (sgSaveBtn) sgSaveBtn.disabled = true;
   const eeImportBtn = document.getElementById('ee-import-btn');
   if (eeImportBtn) { eeImportBtn.disabled = true; eeImportBtn.title = '需先解鎖密碼保護才能使用'; }
+  const vdSaveBtn = document.getElementById('vd-save-btn');
+  if (vdSaveBtn) vdSaveBtn.disabled = true;
 }
 
 async function toggleProtection() {
-  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd')].filter(Boolean);
-  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn')].filter(Boolean);
+  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd')].filter(Boolean);
+  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn')].filter(Boolean);
 
   // Find whichever password input has a value
   const typedPwd = pwdInputs.find(el => el.value) || pwdInputs[0];
@@ -1443,6 +1548,7 @@ async function toggleProtection() {
         try {
           if (typeof loadProjects === 'function') await loadProjects();
           if (typeof sgLoadProjects === 'function') await sgLoadProjects();
+      if (typeof vdLoadProjects === 'function') await vdLoadProjects();
         } catch (e) { console.warn('reload after acquireLock failed:', e); }
       } catch (e) {
         btns.forEach((btn, i) => { btn.disabled = false; btn.textContent = originalTexts[i] || '解鎖'; });
@@ -1519,6 +1625,7 @@ async function initDatabase() {
       }
       await loadProjects();
       if (typeof sgLoadProjects === 'function') await sgLoadProjects();
+      if (typeof vdLoadProjects === 'function') await vdLoadProjects();
       return;
     }
     // SharePoint：未登入 → 顯示登入按鈕
@@ -1571,6 +1678,7 @@ async function handleSpLogin() {
       _updateSpHeaderSignedIn();
       await loadProjects();
       if (typeof sgLoadProjects === 'function') await sgLoadProjects();
+      if (typeof vdLoadProjects === 'function') await vdLoadProjects();
     } else if (result && result.reason === 'cancelled') {
       // user cancelled, do nothing
     }
@@ -1609,7 +1717,7 @@ window.addEventListener('beforeunload', (event) => {
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  const tabMap = { specgen: 0, complist: 1, calc: 2 };
+  const tabMap = { specgen: 0, complist: 1, validation: 2, calc: 3 };
   const tabIndex = tabMap[tab] ?? 0;
   document.querySelectorAll('.tab-btn')[tabIndex].classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
@@ -3236,7 +3344,369 @@ async function handlePickDb() {
     updateDbStatusText(`✅ ${result.filename}`, 'success');
     await loadProjects();
     await sgLoadProjects();
+    await vdLoadProjects();
   }
+}
+
+/* ============================
+   Tab 3: 模擬與實測驗證
+   ============================ */
+let vdProjectId = null;
+let vdProjectData = null;
+let vdValidationData = {};   // { rf: [...], digital: [...], pwr: [...] }
+
+const VD_CAT_MAP = {
+  RF:      { field: 'rf_data',      label: 'RF 射頻元件',     css: 'rf',      icon: '&#128225;' },
+  Digital: { field: 'digital_data', label: 'Digital 數位元件', css: 'digital', icon: '&#128178;' },
+  PWR:     { field: 'pwr_data',     label: 'PWR 電源元件',    css: 'pwr',     icon: '&#9889;' }
+};
+
+function vdShowStatus(msg, type) {
+  const el = document.getElementById('vd-status');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.className = 'comp-status' + (type ? ' ' + type : '');
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+async function vdLoadProjects() {
+  if (!dbAdapter.isReady()) {
+    const msg = dbAdapter.isSharePointMode()
+      ? '資料庫尚未連線，請先登入 SharePoint。'
+      : '資料庫尚未開啟，請先點選「📂 資料庫目錄」。';
+    vdShowStatus(msg, 'error');
+    return;
+  }
+
+  const btn = document.getElementById('vd-load-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>載入中...';
+
+  try {
+    await dbAdapter.refresh();
+    const projectList = await dbAdapter.getProjectsSorted();
+    const select = document.getElementById('vd-project-select');
+    const prevSelected = select.value;
+    select.innerHTML = '<option value="">-- 請選擇專案 --</option>';
+
+    projectList.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.id;
+      opt.textContent = item.project_name || item.id;
+      select.appendChild(opt);
+    });
+
+    if (prevSelected && select.querySelector(`option[value="${prevSelected}"]`)) {
+      select.value = prevSelected;
+      await vdOnProjectChange();
+    } else {
+      vdProjectId = null;
+      vdProjectData = null;
+      vdValidationData = {};
+      vdRender();
+    }
+
+    if (projectList.length === 0) {
+      vdShowStatus('資料庫中尚無專案，請至 Tab 1 新增。', '');
+    } else {
+      vdShowStatus('成功載入 ' + projectList.length + ' 個專案。', 'success');
+    }
+  } catch (e) {
+    vdShowStatus('載入專案失敗：' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '載入專案';
+}
+
+async function vdOnProjectChange() {
+  const select = document.getElementById('vd-project-select');
+  vdProjectId = select.value || null;
+  vdProjectData = null;
+  vdValidationData = {};
+
+  if (!vdProjectId) { vdRender(); return; }
+
+  try {
+    vdProjectData = await dbAdapter.getDoc('projects', vdProjectId);
+    if (!vdProjectData) { vdShowStatus('專案不存在。', 'error'); return; }
+
+    // Build validation data from saved or fresh from Tab1/Tab2
+    const saved = vdProjectData.validation_data || {};
+    for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+      const catLower = catKey.toLowerCase();
+      const tab1Items = vdProjectData[catInfo.field] || [];
+      // Tab 2 custom components
+      const ts = vdProjectData.thermal_specs || {};
+      const customComps = (ts._custom_components && ts._custom_components[catLower]) || [];
+      const allItems = tab1Items.concat(customComps);
+
+      const savedCat = saved[catLower] || [];
+      const result = [];
+
+      allItems.forEach(comp => {
+        const name = comp.Component || '';
+        if (!name) return;
+        const existing = savedCat.find(s => s.component === name);
+        if (existing) {
+          existing.pd_est = parseFloat(comp['Power(W)']) || 0;
+          existing.qty = parseInt(comp.Qty) || 1;
+          result.push(existing);
+        } else {
+          result.push({
+            component: name,
+            qty: parseInt(comp.Qty) || 1,
+            pd_est: parseFloat(comp['Power(W)']) || 0,
+            pd_meas: '',
+            temp_sim: '',
+            temp_meas: '',
+            temp_sim_cal: '',
+            note: ''
+          });
+        }
+      });
+
+      // Keep any saved entries that were previously added but aren't in Tab1/Tab2 anymore
+      // (they were manually re-added via dropdown — preserve them)
+      savedCat.forEach(s => {
+        if (!result.find(r => r.component === s.component)) {
+          result.push(s);
+        }
+      });
+
+      vdValidationData[catLower] = result;
+    }
+
+    vdShowStatus('已載入專案：' + (vdProjectData.project_name || vdProjectId), 'success');
+    vdRender();
+  } catch (e) {
+    vdShowStatus('載入專案失敗：' + e.message, 'error');
+  }
+}
+
+function vdCalcRelError(est, meas) {
+  const e = parseFloat(est), m = parseFloat(meas);
+  if (isNaN(e) || isNaN(m) || m === 0) return null;
+  return ((e - m) / m * 100);
+}
+
+function vdCalcAbsDiff(simCal, meas) {
+  const s = parseFloat(simCal), m = parseFloat(meas);
+  if (isNaN(s) || isNaN(m)) return null;
+  return s - m;
+}
+
+function vdErrorClass(val) {
+  if (val === null) return '';
+  const abs = Math.abs(val);
+  if (abs <= 5) return 'vd-err-green';
+  if (abs < 10) return 'vd-err-orange';
+  return 'vd-err-red';
+}
+
+function vdFmtError(val) {
+  if (val === null) return '-';
+  return val.toFixed(1) + '%';
+}
+
+function vdTempDiffClass(val) {
+  if (val === null) return '';
+  const abs = Math.abs(val);
+  if (abs <= 3) return 'vd-err-green';
+  if (abs < 5) return 'vd-err-orange';
+  return 'vd-err-red';
+}
+
+function vdFmtDiff(val) {
+  if (val === null) return '-';
+  return val.toFixed(1) + '°C';
+}
+
+function vdRender() {
+  const container = document.getElementById('vd-container');
+
+  if (!vdProjectData || Object.keys(vdValidationData).length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">&#128202;</div><p>請先載入專案列表並選擇專案，即可載入驗證元件清單。</p></div>`;
+    return;
+  }
+
+  let html = '';
+
+  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+    const catLower = catKey.toLowerCase();
+    const items = vdValidationData[catLower] || [];
+
+    html += `<div class="vd-comp-category">
+      <div class="vd-comp-category-header ${catInfo.css}">
+        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
+      </div>
+      <table class="vd-table">
+        <thead><tr>
+          <th>元件名稱</th>
+          <th>Pd(估值)</th>
+          <th>Pd(實測值)</th>
+          <th>Pd-相對誤差%</th>
+          <th>溫度(模擬值)</th>
+          <th>溫度(實測)</th>
+          <th>溫度(模擬校正)</th>
+          <th>溫度-相對誤差%</th>
+          <th>溫度-絕對溫差</th>
+          <th>備註</th>
+          <th></th>
+        </tr></thead><tbody>`;
+
+    items.forEach((item, idx) => {
+      const pdErr = vdCalcRelError(item.pd_est, item.pd_meas);
+      const tempErr = vdCalcRelError(item.temp_sim_cal, item.temp_meas);
+      const tempDiff = vdCalcAbsDiff(item.temp_sim_cal, item.temp_meas);
+
+      html += `<tr>
+        <td class="comp-name-cell readonly-cell">${escapeHtml(item.component)}</td>
+        <td class="readonly-cell">${item.pd_est || '-'}</td>
+        <td><input type="number" step="any" value="${item.pd_meas !== '' && item.pd_meas !== undefined ? item.pd_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="pd_meas" onchange="vdOnEdit(this)"></td>
+        <td class="${vdErrorClass(pdErr)}">${vdFmtError(pdErr)}</td>
+        <td><input type="number" step="any" value="${item.temp_sim !== '' && item.temp_sim !== undefined ? item.temp_sim : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="temp_sim" onchange="vdOnEdit(this)"></td>
+        <td><input type="number" step="any" value="${item.temp_meas !== '' && item.temp_meas !== undefined ? item.temp_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="temp_meas" onchange="vdOnEdit(this)"></td>
+        <td><input type="number" step="any" value="${item.temp_sim_cal !== '' && item.temp_sim_cal !== undefined ? item.temp_sim_cal : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="temp_sim_cal" onchange="vdOnEdit(this)"></td>
+        <td class="${vdErrorClass(tempErr)}">${vdFmtError(tempErr)}</td>
+        <td class="${vdTempDiffClass(tempDiff)}">${vdFmtDiff(tempDiff)}</td>
+        <td class="note-cell"><textarea data-cat="${catLower}" data-idx="${idx}" data-field="note" onchange="vdOnEdit(this)">${escapeHtml(item.note || '')}</textarea></td>
+        <td><button class="vd-del-btn" onclick="vdDeleteItem('${catLower}',${idx})" title="移除">&#10060;</button></td>
+      </tr>`;
+    });
+
+    html += `</tbody></table>`;
+
+    // Add component dropdown
+    html += `<div class="vd-add-dropdown" style="margin-top:6px;">
+      <button class="sg-comp-add-btn" onclick="vdToggleAddDropdown('${catLower}',this)">&#10133; 新增驗證元件</button>
+      <div class="vd-add-dropdown-content" id="vd-add-dd-${catLower}"></div>
+    </div>`;
+
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function vdOnEdit(el) {
+  const cat = el.dataset.cat;
+  const idx = parseInt(el.dataset.idx, 10);
+  const field = el.dataset.field;
+  if (!vdValidationData[cat] || !vdValidationData[cat][idx]) return;
+
+  let val = el.value;
+  if (el.type === 'number' && val !== '') val = parseFloat(val);
+
+  vdValidationData[cat][idx][field] = val;
+  vdRender();
+}
+
+function vdDeleteItem(cat, idx) {
+  if (isProtected) { alert('請先解鎖密碼保護'); return; }
+  const item = vdValidationData[cat]?.[idx];
+  if (!item) return;
+  if (!confirm(`確定要從驗證清單移除「${item.component}」嗎？`)) return;
+  vdValidationData[cat].splice(idx, 1);
+  vdRender();
+}
+
+function vdToggleAddDropdown(catLower, btnEl) {
+  const dd = document.getElementById('vd-add-dd-' + catLower);
+  if (dd.classList.contains('open')) { dd.classList.remove('open'); return; }
+
+  // Close all other dropdowns first
+  document.querySelectorAll('.vd-add-dropdown-content.open').forEach(d => d.classList.remove('open'));
+
+  // Build options: components in Tab1/Tab2 that aren't already in the validation list
+  const catKey = catLower === 'rf' ? 'RF' : catLower === 'digital' ? 'Digital' : 'PWR';
+  const catInfo = VD_CAT_MAP[catKey];
+  const tab1Items = (vdProjectData[catInfo.field] || []);
+  const ts = vdProjectData.thermal_specs || {};
+  const customComps = (ts._custom_components && ts._custom_components[catLower]) || [];
+  const allSource = tab1Items.concat(customComps);
+
+  const currentNames = (vdValidationData[catLower] || []).map(i => i.component);
+  const available = allSource.filter(c => c.Component && !currentNames.includes(c.Component));
+
+  if (available.length === 0) {
+    dd.innerHTML = '<div style="color:#888;cursor:default;">沒有可新增的元件</div>';
+  } else {
+    dd.innerHTML = available.map(c => {
+      const name = escapeHtml(c.Component);
+      const power = parseFloat(c['Power(W)']) || 0;
+      const qty = parseInt(c.Qty) || 1;
+      return `<div onclick="vdAddItem('${catLower}','${escapeAttr(c.Component)}',${power},${qty})">${name} (${power}W)</div>`;
+    }).join('');
+  }
+
+  dd.classList.add('open');
+
+  const closeHandler = (e) => {
+    if (!dd.contains(e.target) && e.target !== btnEl) {
+      dd.classList.remove('open');
+      document.removeEventListener('click', closeHandler);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', closeHandler), 0);
+}
+
+function vdAddItem(catLower, compName, power, qty) {
+  if (isProtected) { alert('請先解鎖密碼保護'); return; }
+  if (!vdValidationData[catLower]) vdValidationData[catLower] = [];
+  vdValidationData[catLower].push({
+    component: compName,
+    qty: qty,
+    pd_est: power,
+    pd_meas: '',
+    temp_sim: '',
+    temp_meas: '',
+    temp_sim_cal: '',
+    note: ''
+  });
+  document.querySelectorAll('.vd-add-dropdown-content.open').forEach(d => d.classList.remove('open'));
+  vdRender();
+}
+
+async function vdSaveValidation() {
+  if (isProtected) { alert('請先解鎖密碼保護'); return; }
+  if (!vdProjectId || !dbAdapter.isReady()) { alert('尚未選擇專案'); return; }
+
+  const btn = document.getElementById('vd-save-btn');
+  const status = document.getElementById('vd-save-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>儲存中...';
+  status.textContent = '';
+  status.className = 'save-status';
+
+  try {
+    await dbAdapter.updateDoc('projects', vdProjectId, {
+      validation_data: vdValidationData
+    });
+
+    if (dbAdapter.isSharePointMode()) {
+      try { await dbAdapter.releaseLock(); } catch (e) { console.warn('releaseLock failed:', e); }
+      relock();
+    }
+
+    status.textContent = '已儲存';
+    status.className = 'save-status saved';
+    setTimeout(() => { status.textContent = ''; status.className = 'save-status'; }, 3000);
+  } catch (e) {
+    if (e instanceof ConflictError) {
+      showConflictWarning();
+      status.textContent = '版本衝突，已載入最新資料，請重新操作';
+      status.className = 'save-status err';
+      vdProjectData = await dbAdapter.getDoc('projects', vdProjectId);
+      await vdOnProjectChange();
+    } else {
+      status.textContent = '儲存失敗：' + e.message;
+      status.className = 'save-status err';
+    }
+  }
+
+  btn.disabled = isProtected;
+  btn.textContent = '儲存驗證資料';
 }
 </script>
 </body>
