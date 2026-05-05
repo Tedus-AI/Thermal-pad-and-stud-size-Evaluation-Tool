@@ -1399,6 +1399,13 @@
         </div>
         <div id="sg-project-status" class="comp-status" style="display:none;"></div>
 
+        <!-- Empty state shown before any project is loaded -->
+        <div id="sg-empty-state" class="empty-state" style="margin-top:16px;">
+          <div class="icon">&#128230;</div>
+          <p>請先載入專案列表並選擇專案，即可載入元件清單。</p>
+          <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
+        </div>
+
         <!-- Existing Project Components -->
         <div id="sg-project-components" style="display:none; margin-top:16px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
@@ -2960,13 +2967,17 @@ function sgRenderProjectComponents() {
   const body = document.getElementById('sg-project-components-body');
 
   const summaryEl = document.getElementById('sg-power-summary');
+  const emptyEl = document.getElementById('sg-empty-state');
 
   if (!sgProjectData) {
     container.style.display = 'none';
     body.innerHTML = '';
     if (summaryEl) summaryEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = '';
     return;
   }
+
+  if (emptyEl) emptyEl.style.display = 'none';
 
   let totalCount = 0;
   let html = '';
