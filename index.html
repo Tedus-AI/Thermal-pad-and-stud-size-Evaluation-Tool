@@ -1213,7 +1213,7 @@
     </div>
 
     <!-- 誤差判定規則圖例 -->
-    <div class="vd-legend" style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-bottom:16px; padding:10px 16px; background:#f8f9fb; border-radius:8px; border:1px solid #e0e6ed;">
+    <div id="vd-legend" class="vd-legend" style="display:none; flex-wrap:wrap; gap:18px; align-items:center; margin-bottom:16px; padding:10px 16px; background:#f8f9fb; border-radius:8px; border:1px solid #e0e6ed;">
       <span style="font-weight:700; font-size:0.85rem; color:#333;">誤差判定規則：</span>
       <span style="font-size:0.82rem; color:#555; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
         <span style="font-weight:600;">相對誤差%</span>
@@ -1399,13 +1399,6 @@
         </div>
         <div id="sg-project-status" class="comp-status" style="display:none;"></div>
 
-        <!-- Empty state shown before any project is loaded -->
-        <div id="sg-empty-state" class="empty-state" style="margin-top:16px;">
-          <div class="icon">&#128230;</div>
-          <p>請先載入專案列表並選擇專案，即可載入元件清單。</p>
-          <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
-        </div>
-
         <!-- Existing Project Components -->
         <div id="sg-project-components" style="display:none; margin-top:16px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
@@ -1423,6 +1416,12 @@
       </div>
     </div>
 
+    <!-- Empty state shown before any project is loaded -->
+    <div id="sg-empty-state" class="empty-state">
+      <div class="icon">&#128230;</div>
+      <p>請先載入專案列表並選擇專案，即可載入元件清單。</p>
+      <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
+    </div>
 
   </div>
 
@@ -3548,12 +3547,15 @@ function vdFmtDiff(val) {
 
 function vdRender() {
   const container = document.getElementById('vd-container');
+  const legendEl = document.getElementById('vd-legend');
 
   if (!vdProjectData || Object.keys(vdValidationData).length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="icon">&#128202;</div><p>請先載入專案列表並選擇專案，即可載入驗證元件清單。</p></div>`;
+    if (legendEl) legendEl.style.display = 'none';
     return;
   }
 
+  if (legendEl) legendEl.style.display = 'flex';
   let html = '';
 
   for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
