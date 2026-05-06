@@ -1119,10 +1119,14 @@
   }
   .sg-power-chip {
     border-radius: 8px;
-    padding: 10px 16px;
+    padding: 0 16px;
+    height: 38px;
     font-size: 0.85rem;
     font-weight: 600;
     color: #fff;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
   }
   .sg-power-chip.rf      { background: #c0392b; }
   .sg-power-chip.digital { background: #2e6bb5; }
@@ -1144,9 +1148,10 @@
     margin-bottom: 8px;
   }
   .sg-param-chip {
-    border-radius: 8px; padding: 10px 16px; font-size: 0.85rem;
-    font-weight: 600; color: #fff; background: #34495e;
+    border-radius: 8px; padding: 0 16px; height: 38px;
+    font-size: 0.85rem; font-weight: 600; color: #fff; background: #34495e;
     display: inline-flex; align-items: center; gap: 5px;
+    box-sizing: border-box;
   }
   .sg-param-chip select, .sg-param-chip input {
     background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);
@@ -3118,7 +3123,7 @@ function sgRenderProjectComponents() {
 
     // High-temp row: params + cards in one line
     document.getElementById('sg-power-row-hot').innerHTML =
-      `<div class="sg-param-chip">溫度(°C) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
+      `<div class="sg-param-chip">環溫(°C) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
         `<option value="45"${pTemp === '45' ? ' selected' : ''}>45°C</option>` +
         `<option value="55"${pTemp === '55' ? ' selected' : ''}>55°C</option>` +
         `<option value="custom"${pTemp === 'custom' ? ' selected' : ''}>自訂</option>` +
@@ -3135,7 +3140,7 @@ function sgRenderProjectComponents() {
 
     // Room-temp row: params + cards in one line
     document.getElementById('sg-power-row-rt').innerHTML =
-      `<div class="sg-param-chip">溫度(°C) <select disabled><option>25°C</option></select></div>` +
+      `<div class="sg-param-chip">環溫(°C) <select disabled><option>25°C</option></select></div>` +
       `<div class="sg-param-chip">Backoff 0 dB</div>` +
       `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
         `<option value="TDD 75%"${pDuplexRT === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
