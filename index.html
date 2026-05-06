@@ -1138,9 +1138,15 @@
   .sg-power-chip.rt-total   { background: #2c5a9a; opacity: 0.75; }
   .sg-power-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .sg-power-row + .sg-power-row { margin-top: 8px; }
-  .sg-power-row-label {
-    font-size: 0.8rem; font-weight: 700; color: #ccc;
-    min-width: 60px; text-align: right; margin-right: 4px;
+  .sg-power-group {
+    border: 2px dashed rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .sg-power-group-label {
+    font-size: 0.75rem; font-weight: 700; color: #aaa;
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
   }
   .sg-param-chip {
     border-radius: 8px; padding: 7px 12px; font-size: 0.82rem;
@@ -1437,8 +1443,16 @@
             </div>
           </div>
           <div id="sg-power-summary-container" style="display:none; margin-bottom:14px;">
-            <div id="sg-power-row-hot" class="sg-power-row"></div>
-            <div id="sg-power-row-rt" class="sg-power-row"></div>
+            <div class="sg-power-group">
+              <div class="sg-power-group-label">高溫條件</div>
+              <div id="sg-power-params-hot" class="sg-power-row"></div>
+              <div id="sg-power-cards-hot" class="sg-power-row"></div>
+            </div>
+            <div class="sg-power-group">
+              <div class="sg-power-group-label">常溫條件 (25°C)</div>
+              <div id="sg-power-params-rt" class="sg-power-row"></div>
+              <div id="sg-power-cards-rt" class="sg-power-row"></div>
+            </div>
           </div>
           <div id="sg-project-components-body"></div>
         </div>
@@ -3008,6 +3022,11 @@ function sgOnParamChange() {
   if (backoff) sgProjectData.param_backoff = backoff.value;
   if (duplex) sgProjectData.param_duplex = duplex.value;
 
+  const backoffRT = document.getElementById('sg-param-backoff-rt');
+  const duplexRT = document.getElementById('sg-sel-duplex-rt');
+  if (backoffRT) sgProjectData.param_backoff_rt = backoffRT.value;
+  if (duplexRT) sgProjectData.param_duplex_rt = duplexRT.value;
+
   sgRenderProjectComponents();
 }
 
@@ -3091,7 +3110,7 @@ function sgRenderProjectComponents() {
   body.innerHTML = html;
   container.style.display = 'block';
 
-  // Render power summary (high-temp + room-temp rows)
+  // Render power summary (high-temp + room-temp groups)
   if (summaryContainer) {
     const fmt = v => Number.isInteger(v) ? v : v.toFixed(2);
     const totalPwr = (catPower.RF || 0) + (catPower.Digital || 0) + (catPower.PWR || 0);
@@ -3101,9 +3120,11 @@ function sgRenderProjectComponents() {
     const pTempCustom = sgProjectData.param_temp_custom || '';
     const pBackoff = sgProjectData.param_backoff ?? '';
     const pDuplex = sgProjectData.param_duplex || 'TDD 75%';
+    const pBackoffRT = sgProjectData.param_backoff_rt ?? '';
+    const pDuplexRT = sgProjectData.param_duplex_rt || 'TDD 75%';
 
-    const hotRow = document.getElementById('sg-power-row-hot');
-    hotRow.innerHTML =
+    // High-temp params
+    document.getElementById('sg-power-params-hot').innerHTML =
       `<div class="sg-param-chip">溫度(℃) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
         `<option value="45"${pTemp === '45' ? ' selected' : ''}>45℃</option>` +
         `<option value="55"${pTemp === '55' ? ' selected' : ''}>55℃</option>` +
@@ -3113,23 +3134,36 @@ function sgRenderProjectComponents() {
       `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex" onchange="sgOnParamChange()">` +
         `<option value="TDD 75%"${pDuplex === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
         `<option value="FDD 100%"${pDuplex === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
-      `</select></div>` +
-      `<div class="sg-power-chip rf">RF 熱耗@${tempLabel}°C：<span>${fmt(catPower.RF || 0)} W</span></div>` +
-      `<div class="sg-power-chip digital">Digital 熱耗@${tempLabel}°C：<span>${fmt(catPower.Digital || 0)} W</span></div>` +
-      `<div class="sg-power-chip pwr">PWR 熱耗@${tempLabel}°C：<span>${fmt(catPower.PWR || 0)} W</span></div>` +
-      `<div class="sg-power-chip total">總熱耗@${tempLabel}°C：<span>${fmt(totalPwr)} W</span></div>`;
+      `</select></div>`;
 
-    const rtRow = document.getElementById('sg-power-row-rt');
-    rtRow.innerHTML =
-      `<div class="sg-power-row-label">25°C</div>` +
-      `<div class="sg-power-chip rt-rf">RF 熱耗@25°C：<span>${fmt(catPowerRT.RF || 0)} W</span></div>` +
-      `<div class="sg-power-chip rt-digital">Digital 熱耗@25°C：<span>${fmt(catPowerRT.Digital || 0)} W</span></div>` +
-      `<div class="sg-power-chip rt-pwr">PWR 熱耗@25°C：<span>${fmt(catPowerRT.PWR || 0)} W</span></div>` +
-      `<div class="sg-power-chip rt-total">總熱耗@25°C：<span>${fmt(totalPwrRT)} W</span></div>`;
+    // High-temp cards (short text)
+    document.getElementById('sg-power-cards-hot').innerHTML =
+      `<div class="sg-power-chip rf">RF 熱耗：<span>${fmt(catPower.RF || 0)} W</span></div>` +
+      `<div class="sg-power-chip digital">Digital 熱耗：<span>${fmt(catPower.Digital || 0)} W</span></div>` +
+      `<div class="sg-power-chip pwr">PWR 熱耗：<span>${fmt(catPower.PWR || 0)} W</span></div>` +
+      `<div class="sg-power-chip total">總熱耗：<span>${fmt(totalPwr)} W</span></div>`;
 
-    // Attach backoff input handler after DOM is ready
+    // Room-temp params (temperature fixed)
+    document.getElementById('sg-power-params-rt').innerHTML =
+      `<div class="sg-param-chip">溫度(℃) <select disabled><option>25℃</option></select></div>` +
+      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff-rt" value="${pBackoffRT}" placeholder="0"> dB</div>` +
+      `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
+        `<option value="TDD 75%"${pDuplexRT === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
+        `<option value="FDD 100%"${pDuplexRT === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
+      `</select></div>`;
+
+    // Room-temp cards (short text)
+    document.getElementById('sg-power-cards-rt').innerHTML =
+      `<div class="sg-power-chip rt-rf">RF 熱耗：<span>${fmt(catPowerRT.RF || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-digital">Digital 熱耗：<span>${fmt(catPowerRT.Digital || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-pwr">PWR 熱耗：<span>${fmt(catPowerRT.PWR || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-total">總熱耗：<span>${fmt(totalPwrRT)} W</span></div>`;
+
+    // Attach input handlers after DOM is ready
     const boInput = document.getElementById('sg-param-backoff');
     if (boInput) boInput.addEventListener('change', sgOnParamChange);
+    const boInputRT = document.getElementById('sg-param-backoff-rt');
+    if (boInputRT) boInputRT.addEventListener('change', sgOnParamChange);
 
     summaryContainer.style.display = 'block';
   }
@@ -3285,7 +3319,9 @@ async function sgSaveProjectComponents() {
       param_temp: sgProjectData.param_temp || '55',
       param_temp_custom: sgProjectData.param_temp_custom || '',
       param_backoff: sgProjectData.param_backoff || '',
-      param_duplex: sgProjectData.param_duplex || 'TDD 75%'
+      param_duplex: sgProjectData.param_duplex || 'TDD 75%',
+      param_backoff_rt: sgProjectData.param_backoff_rt || '',
+      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%'
     });
 
     // Update library entries for each component
