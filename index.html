@@ -1132,6 +1132,29 @@
   .sg-power-chip.digital { background: #2e6bb5; }
   .sg-power-chip.pwr     { background: #e67e22; }
   .sg-power-chip.total   { background: #1a3a6b; }
+  .sg-power-chip.rt-rf      { background: #e74c3c; opacity: 0.75; }
+  .sg-power-chip.rt-digital { background: #5b9bd5; opacity: 0.75; }
+  .sg-power-chip.rt-pwr     { background: #f0a04b; opacity: 0.75; }
+  .sg-power-chip.rt-total   { background: #2c5a9a; opacity: 0.75; }
+  .sg-power-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .sg-power-row + .sg-power-row { margin-top: 8px; }
+  .sg-power-row-label {
+    font-size: 0.8rem; font-weight: 700; color: #ccc;
+    min-width: 60px; text-align: right; margin-right: 4px;
+  }
+  .sg-param-chip {
+    border-radius: 8px; padding: 7px 12px; font-size: 0.82rem;
+    font-weight: 600; color: #fff; background: #34495e;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .sg-param-chip select, .sg-param-chip input {
+    background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 4px; padding: 2px 6px; font-size: 0.82rem; font-weight: 600;
+  }
+  .sg-param-chip select option { color: #222; background: #fff; }
+  .sg-param-chip input { width: 50px; }
+  .sg-param-chip input.sg-temp-custom { width: 55px; display: none; }
+  .sg-param-chip input.sg-temp-custom.visible { display: inline-block; }
 </style>
 </head>
 <body>
@@ -1413,7 +1436,10 @@
               <span id="sg-comp-save-status" class="save-status"></span>
             </div>
           </div>
-          <div id="sg-power-summary" style="display:none; margin-bottom:14px; gap:10px; flex-wrap:wrap;"></div>
+          <div id="sg-power-summary-container" style="display:none; margin-bottom:14px;">
+            <div id="sg-power-row-hot" class="sg-power-row"></div>
+            <div id="sg-power-row-rt" class="sg-power-row"></div>
+          </div>
           <div id="sg-project-components-body"></div>
         </div>
       </div>
@@ -2964,17 +2990,38 @@ const SG_CAT_MAP = {
 };
 
 
+function sgOnParamChange() {
+  if (!sgProjectData) return;
+  const selTemp = document.getElementById('sg-sel-temp');
+  const customTemp = document.getElementById('sg-temp-custom');
+  const backoff = document.getElementById('sg-param-backoff');
+  const duplex = document.getElementById('sg-sel-duplex');
+
+  if (selTemp) {
+    sgProjectData.param_temp = selTemp.value;
+    if (customTemp) {
+      if (selTemp.value === 'custom') { customTemp.classList.add('visible'); }
+      else { customTemp.classList.remove('visible'); }
+      sgProjectData.param_temp_custom = customTemp.value;
+    }
+  }
+  if (backoff) sgProjectData.param_backoff = backoff.value;
+  if (duplex) sgProjectData.param_duplex = duplex.value;
+
+  sgRenderProjectComponents();
+}
+
 function sgRenderProjectComponents() {
   const container = document.getElementById('sg-project-components');
   const body = document.getElementById('sg-project-components-body');
 
-  const summaryEl = document.getElementById('sg-power-summary');
+  const summaryContainer = document.getElementById('sg-power-summary-container');
   const emptyEl = document.getElementById('sg-empty-state');
 
   if (!sgProjectData) {
     container.style.display = 'none';
     body.innerHTML = '';
-    if (summaryEl) summaryEl.style.display = 'none';
+    if (summaryContainer) summaryContainer.style.display = 'none';
     if (emptyEl) emptyEl.style.display = '';
     return;
   }
@@ -2984,11 +3031,15 @@ function sgRenderProjectComponents() {
   let totalCount = 0;
   let html = '';
   const catPower = {};
+  const catPowerRT = {};
+  const selTemp = sgProjectData.param_temp || '55';
+  const tempLabel = selTemp === 'custom' ? (sgProjectData.param_temp_custom || '??') : selTemp;
 
   for (const [catKey, catInfo] of Object.entries(SG_CAT_MAP)) {
     const items = sgProjectData[catInfo.field] || [];
     totalCount += items.length;
     catPower[catKey] = items.reduce((sum, c) => sum + (parseFloat(c['Power(W)']) || 0) * (parseInt(c.Qty) || 1), 0);
+    catPowerRT[catKey] = items.reduce((sum, c) => sum + (parseFloat(c['Power_RT(W)']) || 0) * (parseInt(c.Qty) || 1), 0);
 
     html += `<div class="sg-comp-category">
       <div class="sg-comp-category-header ${catInfo.css}">
@@ -2996,7 +3047,7 @@ function sgRenderProjectComponents() {
       </div>
       <table class="sg-comp-list-table">
         <thead><tr>
-          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@55°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th></th>
+          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th></th>
         </tr></thead><tbody>`;
 
     items.forEach((comp, idx) => {
@@ -3040,16 +3091,47 @@ function sgRenderProjectComponents() {
   body.innerHTML = html;
   container.style.display = 'block';
 
-  // Render power summary
-  if (summaryEl) {
+  // Render power summary (high-temp + room-temp rows)
+  if (summaryContainer) {
     const fmt = v => Number.isInteger(v) ? v : v.toFixed(2);
     const totalPwr = (catPower.RF || 0) + (catPower.Digital || 0) + (catPower.PWR || 0);
-    summaryEl.innerHTML =
-      `<div class="sg-power-chip rf">RF 熱耗：<span>${fmt(catPower.RF || 0)} W</span></div>` +
-      `<div class="sg-power-chip digital">Digital 熱耗：<span>${fmt(catPower.Digital || 0)} W</span></div>` +
-      `<div class="sg-power-chip pwr">PWR 熱耗：<span>${fmt(catPower.PWR || 0)} W</span></div>` +
-      `<div class="sg-power-chip total">總熱耗：<span>${fmt(totalPwr)} W</span></div>`;
-    summaryEl.style.display = 'flex';
+    const totalPwrRT = (catPowerRT.RF || 0) + (catPowerRT.Digital || 0) + (catPowerRT.PWR || 0);
+
+    const pTemp = sgProjectData.param_temp || '55';
+    const pTempCustom = sgProjectData.param_temp_custom || '';
+    const pBackoff = sgProjectData.param_backoff ?? '';
+    const pDuplex = sgProjectData.param_duplex || 'TDD 75%';
+
+    const hotRow = document.getElementById('sg-power-row-hot');
+    hotRow.innerHTML =
+      `<div class="sg-param-chip">溫度(℃) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
+        `<option value="45"${pTemp === '45' ? ' selected' : ''}>45℃</option>` +
+        `<option value="55"${pTemp === '55' ? ' selected' : ''}>55℃</option>` +
+        `<option value="custom"${pTemp === 'custom' ? ' selected' : ''}>自訂</option>` +
+      `</select><input type="number" class="sg-temp-custom${pTemp === 'custom' ? ' visible' : ''}" id="sg-temp-custom" value="${pTempCustom}" placeholder="℃" onchange="sgOnParamChange()"></div>` +
+      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff" value="${pBackoff}" placeholder="0"> dB</div>` +
+      `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex" onchange="sgOnParamChange()">` +
+        `<option value="TDD 75%"${pDuplex === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
+        `<option value="FDD 100%"${pDuplex === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
+      `</select></div>` +
+      `<div class="sg-power-chip rf">RF 熱耗@${tempLabel}°C：<span>${fmt(catPower.RF || 0)} W</span></div>` +
+      `<div class="sg-power-chip digital">Digital 熱耗@${tempLabel}°C：<span>${fmt(catPower.Digital || 0)} W</span></div>` +
+      `<div class="sg-power-chip pwr">PWR 熱耗@${tempLabel}°C：<span>${fmt(catPower.PWR || 0)} W</span></div>` +
+      `<div class="sg-power-chip total">總熱耗@${tempLabel}°C：<span>${fmt(totalPwr)} W</span></div>`;
+
+    const rtRow = document.getElementById('sg-power-row-rt');
+    rtRow.innerHTML =
+      `<div class="sg-power-row-label">25°C</div>` +
+      `<div class="sg-power-chip rt-rf">RF 熱耗@25°C：<span>${fmt(catPowerRT.RF || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-digital">Digital 熱耗@25°C：<span>${fmt(catPowerRT.Digital || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-pwr">PWR 熱耗@25°C：<span>${fmt(catPowerRT.PWR || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-total">總熱耗@25°C：<span>${fmt(totalPwrRT)} W</span></div>`;
+
+    // Attach backoff input handler after DOM is ready
+    const boInput = document.getElementById('sg-param-backoff');
+    if (boInput) boInput.addEventListener('change', sgOnParamChange);
+
+    summaryContainer.style.display = 'block';
   }
 }
 
@@ -3199,7 +3281,11 @@ async function sgSaveProjectComponents() {
     await dbAdapter.updateDoc('projects', sgProjectId, {
       rf_data: sgProjectData.rf_data || [],
       digital_data: sgProjectData.digital_data || [],
-      pwr_data: sgProjectData.pwr_data || []
+      pwr_data: sgProjectData.pwr_data || [],
+      param_temp: sgProjectData.param_temp || '55',
+      param_temp_custom: sgProjectData.param_temp_custom || '',
+      param_backoff: sgProjectData.param_backoff || '',
+      param_duplex: sgProjectData.param_duplex || 'TDD 75%'
     });
 
     // Update library entries for each component
