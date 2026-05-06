@@ -1137,7 +1137,6 @@
   .sg-power-chip.rt-pwr     { background: #f0a04b; opacity: 0.75; }
   .sg-power-chip.rt-total   { background: #2c5a9a; opacity: 0.75; }
   .sg-power-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .sg-power-row + .sg-power-row { margin-top: 8px; }
   .sg-power-group {
     border: 2px dashed rgba(255,255,255,0.25);
     border-radius: 10px;
@@ -1444,14 +1443,12 @@
           </div>
           <div id="sg-power-summary-container" style="display:none; margin-bottom:14px;">
             <div class="sg-power-group">
-              <div class="sg-power-group-label">高溫條件</div>
-              <div id="sg-power-params-hot" class="sg-power-row"></div>
-              <div id="sg-power-cards-hot" class="sg-power-row"></div>
+              <div class="sg-power-group-label">高溫條件&Total Pd(W)</div>
+              <div id="sg-power-row-hot" class="sg-power-row"></div>
             </div>
             <div class="sg-power-group">
-              <div class="sg-power-group-label">常溫條件 (25°C)</div>
-              <div id="sg-power-params-rt" class="sg-power-row"></div>
-              <div id="sg-power-cards-rt" class="sg-power-row"></div>
+              <div class="sg-power-group-label">常溫條件&Total Pd(W)</div>
+              <div id="sg-power-row-rt" class="sg-power-row"></div>
             </div>
           </div>
           <div id="sg-project-components-body"></div>
@@ -3123,41 +3120,35 @@ function sgRenderProjectComponents() {
     const pBackoffRT = sgProjectData.param_backoff_rt ?? '';
     const pDuplexRT = sgProjectData.param_duplex_rt || 'TDD 75%';
 
-    // High-temp params
-    document.getElementById('sg-power-params-hot').innerHTML =
-      `<div class="sg-param-chip">溫度(℃) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
-        `<option value="45"${pTemp === '45' ? ' selected' : ''}>45℃</option>` +
-        `<option value="55"${pTemp === '55' ? ' selected' : ''}>55℃</option>` +
+    // High-temp row: params + cards in one line
+    document.getElementById('sg-power-row-hot').innerHTML =
+      `<div class="sg-param-chip">溫度(°C) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
+        `<option value="45"${pTemp === '45' ? ' selected' : ''}>45°C</option>` +
+        `<option value="55"${pTemp === '55' ? ' selected' : ''}>55°C</option>` +
         `<option value="custom"${pTemp === 'custom' ? ' selected' : ''}>自訂</option>` +
       `</select><input type="number" class="sg-temp-custom${pTemp === 'custom' ? ' visible' : ''}" id="sg-temp-custom" value="${pTempCustom}" placeholder="℃" onchange="sgOnParamChange()"></div>` +
       `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff" value="${pBackoff}" placeholder="0"> dB</div>` +
       `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex" onchange="sgOnParamChange()">` +
         `<option value="TDD 75%"${pDuplex === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
         `<option value="FDD 100%"${pDuplex === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
-      `</select></div>`;
+      `</select></div>` +
+      `<div class="sg-power-chip rf">RF : <span>${fmt(catPower.RF || 0)} W</span></div>` +
+      `<div class="sg-power-chip digital">Digital : <span>${fmt(catPower.Digital || 0)} W</span></div>` +
+      `<div class="sg-power-chip pwr">PWR : <span>${fmt(catPower.PWR || 0)} W</span></div>` +
+      `<div class="sg-power-chip total">Total : <span>${fmt(totalPwr)} W</span></div>`;
 
-    // High-temp cards (short text)
-    document.getElementById('sg-power-cards-hot').innerHTML =
-      `<div class="sg-power-chip rf">RF 熱耗：<span>${fmt(catPower.RF || 0)} W</span></div>` +
-      `<div class="sg-power-chip digital">Digital 熱耗：<span>${fmt(catPower.Digital || 0)} W</span></div>` +
-      `<div class="sg-power-chip pwr">PWR 熱耗：<span>${fmt(catPower.PWR || 0)} W</span></div>` +
-      `<div class="sg-power-chip total">總熱耗：<span>${fmt(totalPwr)} W</span></div>`;
-
-    // Room-temp params (temperature fixed)
-    document.getElementById('sg-power-params-rt').innerHTML =
-      `<div class="sg-param-chip">溫度(℃) <select disabled><option>25℃</option></select></div>` +
+    // Room-temp row: params + cards in one line
+    document.getElementById('sg-power-row-rt').innerHTML =
+      `<div class="sg-param-chip">溫度(°C) <select disabled><option>25°C</option></select></div>` +
       `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff-rt" value="${pBackoffRT}" placeholder="0"> dB</div>` +
       `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
         `<option value="TDD 75%"${pDuplexRT === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
         `<option value="FDD 100%"${pDuplexRT === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
-      `</select></div>`;
-
-    // Room-temp cards (short text)
-    document.getElementById('sg-power-cards-rt').innerHTML =
-      `<div class="sg-power-chip rt-rf">RF 熱耗：<span>${fmt(catPowerRT.RF || 0)} W</span></div>` +
-      `<div class="sg-power-chip rt-digital">Digital 熱耗：<span>${fmt(catPowerRT.Digital || 0)} W</span></div>` +
-      `<div class="sg-power-chip rt-pwr">PWR 熱耗：<span>${fmt(catPowerRT.PWR || 0)} W</span></div>` +
-      `<div class="sg-power-chip rt-total">總熱耗：<span>${fmt(totalPwrRT)} W</span></div>`;
+      `</select></div>` +
+      `<div class="sg-power-chip rt-rf">RF : <span>${fmt(catPowerRT.RF || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-digital">Digital : <span>${fmt(catPowerRT.Digital || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-pwr">PWR : <span>${fmt(catPowerRT.PWR || 0)} W</span></div>` +
+      `<div class="sg-power-chip rt-total">Total : <span>${fmt(totalPwrRT)} W</span></div>`;
 
     // Attach input handlers after DOM is ready
     const boInput = document.getElementById('sg-param-backoff');
