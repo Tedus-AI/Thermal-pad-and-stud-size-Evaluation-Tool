@@ -1066,6 +1066,10 @@
   .vd-err-green  { color: #217346; font-weight: 700; }
   .vd-err-orange { color: #d4760a; font-weight: 700; }
   .vd-err-red    { color: #e00000; font-weight: 700; }
+  .vd-pd-sel {
+    border: 1px solid #ccc; border-radius: 4px; padding: 2px 4px;
+    font-size: 0.78rem; background: #fff; color: #333; cursor: pointer;
+  }
   .vd-add-dropdown { position: relative; display: inline-block; }
   .vd-add-dropdown-content {
     display: none; position: absolute; left: 0; top: 100%;
@@ -3596,6 +3600,7 @@ async function vdOnProjectChange() {
         const existing = savedCat.find(s => s.component === name);
         if (existing) {
           existing.pd_est = parseFloat(comp['Power(W)']) || 0;
+          existing.pd_est_rt = parseFloat(comp['Power_RT(W)']) || 0;
           existing.qty = parseInt(comp.Qty) || 1;
           result.push(existing);
         } else {
@@ -3603,6 +3608,8 @@ async function vdOnProjectChange() {
             component: name,
             qty: parseInt(comp.Qty) || 1,
             pd_est: parseFloat(comp['Power(W)']) || 0,
+            pd_est_rt: parseFloat(comp['Power_RT(W)']) || 0,
+            pd_source: 'hot',
             pd_meas: '',
             temp_sim: '',
             temp_meas: '',
@@ -3667,6 +3674,14 @@ function vdFmtDiff(val) {
   return val.toFixed(1) + '°C';
 }
 
+function vdOnPdSourceChange(sel) {
+  const cat = sel.dataset.cat;
+  const idx = parseInt(sel.dataset.idx, 10);
+  if (!vdValidationData[cat] || !vdValidationData[cat][idx]) return;
+  vdValidationData[cat][idx].pd_source = sel.value;
+  vdRender();
+}
+
 function vdRender() {
   const container = document.getElementById('vd-container');
   const legendEl = document.getElementById('vd-legend');
@@ -3704,20 +3719,27 @@ function vdRender() {
         </tr></thead><tbody>`;
 
     items.forEach((item, idx) => {
-      const pdErr = vdCalcRelError(item.pd_est, item.pd_meas);
+      const pdVal = item.pd_source === 'rt' ? item.pd_est_rt : item.pd_est;
+      const pdErr = vdCalcRelError(pdVal, item.pd_meas);
       const tempErr = vdCalcRelError(item.temp_sim_cal, item.temp_meas);
       const tempDiff = vdCalcAbsDiff(item.temp_sim_cal, item.temp_meas);
+      const pdSrc = item.pd_source || 'hot';
+      const pdCell = item.pd_est_rt
+        ? `<select class="vd-pd-sel" data-cat="${catLower}" data-idx="${idx}" onchange="vdOnPdSourceChange(this)">` +
+          `<option value="hot"${pdSrc === 'hot' ? ' selected' : ''}>${item.pd_est} (高溫)</option>` +
+          `<option value="rt"${pdSrc === 'rt' ? ' selected' : ''}>${item.pd_est_rt} (常溫)</option></select>`
+        : (item.pd_est || '-');
 
       html += `<tr>
         <td class="comp-name-cell readonly-cell">${escapeHtml(item.component)}</td>
-        <td class="readonly-cell">${item.pd_est || '-'}</td>
+        <td class="readonly-cell">${pdCell}</td>
         <td><input type="number" step="any" value="${item.pd_meas !== '' && item.pd_meas !== undefined ? item.pd_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="pd_meas" onchange="vdOnEdit(this)"></td>
         <td class="${vdErrorClass(pdErr)}">${vdFmtError(pdErr)}</td>
         <td><input type="number" step="any" value="${item.temp_sim !== '' && item.temp_sim !== undefined ? item.temp_sim : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="temp_sim" onchange="vdOnEdit(this)"></td>
         <td><input type="number" step="any" value="${item.temp_meas !== '' && item.temp_meas !== undefined ? item.temp_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="temp_meas" onchange="vdOnEdit(this)"></td>
         <td><input type="number" step="any" value="${item.temp_sim_cal !== '' && item.temp_sim_cal !== undefined ? item.temp_sim_cal : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="temp_sim_cal" onchange="vdOnEdit(this)"></td>
         <td class="${vdErrorClass(tempErr)}">${vdFmtError(tempErr)}</td>
-        <td>${vdFmtDiff(tempDiff)}</td>
+        <td class="${vdTempDiffClass(tempDiff)}">${vdFmtDiff(tempDiff)}</td>
         <td class="note-cell"><textarea data-cat="${catLower}" data-idx="${idx}" data-field="note" onchange="vdOnEdit(this)">${escapeHtml(item.note || '')}</textarea></td>
         <td><button class="vd-del-btn" onclick="vdDeleteItem('${catLower}',${idx})" title="移除">&#10060;</button></td>
       </tr>`;
