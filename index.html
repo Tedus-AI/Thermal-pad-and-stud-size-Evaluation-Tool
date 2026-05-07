@@ -458,6 +458,9 @@
   .comp-table .heat-dir-col { min-width: 100px; }
   .comp-table .ic-hsk-col { min-width: 90px; }
   .comp-table .note-col { min-width: 150px; }
+  .comp-table .power-col { display: none; }
+  .comp-table th.readonly-col.name-col { min-width: 220px; }
+  .comp-table td.name-cell { min-width: 220px; }
 
   .comp-table td {
     padding: 8px 6px;
@@ -2028,9 +2031,9 @@ function renderCategoryTable(catKey, catInfo, items, customItems) {
         <thead><tr>
           <th class="readonly-col hide-col">隱藏</th>
           <th class="readonly-col">#</th>
-          <th class="readonly-col">元件名稱</th>
+          <th class="readonly-col name-col">元件名稱</th>
           <th class="readonly-col">數量</th>
-          <th class="readonly-col">發熱瓦數<br>(W)</th>
+          <th class="readonly-col power-col">發熱瓦數<br>(W)</th>
           <th class="editable-col heat-source-col">元件大小<br>(mm)</th>
           <th class="editable-col heat-source-height-col">元件高度(max)<br>(mm)</th>
           <th class="editable-col boss-size-col">凸台大小<br>(mm)</th>
@@ -2111,7 +2114,7 @@ function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
                 onchange="onCompNameChange(this)" onblur="onCompNameChange(this)">${customBadge}
             </td>
             <td class="readonly-cell">${qty}</td>
-            <td class="readonly-cell">${power}</td>
+            <td class="readonly-cell power-col">${power}</td>
             <td class="editable-cell heat-source-col">
               <input class="cell-input" type="text"
                 data-comp="${escapeAttr(specKey)}" data-field="heatSourceSize"
