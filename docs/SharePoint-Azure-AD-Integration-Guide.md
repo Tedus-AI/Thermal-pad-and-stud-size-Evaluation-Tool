@@ -88,7 +88,7 @@ const SHAREPOINT_CONFIG = {
   siteHostname: '<tenant>.sharepoint.com',     // 見下方說明
   sitePath:     '/sites/<site-name>',
   filePath:     '/<library>/<filename>.json',
-  lockTimeoutMinutes: 10
+  lockTimeoutMinutes: 60
 };
 ```
 

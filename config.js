@@ -10,7 +10,7 @@ const SHAREPOINT_CONFIG = {
   siteHostname: 'deltao365.sharepoint.com',
   sitePath: '/sites/Thermal-Spec-DB',
   filePath: '/ToolDatabase/thermal_db.json',
-  lockTimeoutMinutes: 10
+  lockTimeoutMinutes: 60
 };
 
 window.DB_MODE = DB_MODE;

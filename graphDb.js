@@ -19,6 +19,7 @@ let dbCache = {};
 let driveItemId = null;
 let _siteId = null;
 let currentLock = null;
+let currentVersion = null;
 
 const graphDb = {
   /* ─── MSAL Initialization ─────────────────────────────── */
@@ -179,10 +180,32 @@ const graphDb = {
     } catch {
       dbCache = { rf_library: {}, digital_library: {}, pwr_library: {}, projects: {} };
     }
+    if (!dbCache.version) dbCache.version = Date.now();
+    currentVersion = dbCache.version;
   },
 
-  async _writeFile() {
+  async _writeFile(skipVersionCheck) {
     await this._resolveDriveItemId();
+
+    if (!skipVersionCheck) {
+      // Re-fetch latest file and compare version (optimistic locking)
+      const chkResp = await this._graphGet(
+        `https://graph.microsoft.com/v1.0/sites/${_siteId}/drive/items/${driveItemId}/content`,
+        false
+      );
+      const chkText = await chkResp.text();
+      let latest;
+      try { latest = JSON.parse(chkText); } catch { latest = {}; }
+      const diskVersion = latest.version ?? 0;
+      if (diskVersion !== currentVersion) {
+        dbCache = latest;
+        currentVersion = diskVersion;
+        throw new ConflictError('版本衝突：資料已被他人更新');
+      }
+    }
+
+    dbCache.version = Date.now();
+    currentVersion = dbCache.version;
     const body = JSON.stringify(dbCache, null, 2);
     await this._graphPut(
       `https://graph.microsoft.com/v1.0/sites/${_siteId}/drive/items/${driveItemId}/content`,
@@ -218,7 +241,7 @@ const graphDb = {
       lockedAt: now.toISOString(),
       expiresAt: expiresAt.toISOString()
     };
-    await this._writeFile();
+    await this._writeFile(true);
     currentLock = dbCache.lock;
     return currentLock;
   },
@@ -234,7 +257,7 @@ const graphDb = {
       // that still contains the lock, causing it to persist.
       if (dbCache.lock && dbCache.lock.lockedByEmail === msalAccount.username) {
         delete dbCache.lock;
-        await this._writeFile();
+        await this._writeFile(true);
       }
     } catch (e) {
       console.warn('[graphDb] releaseLock failed:', e);
