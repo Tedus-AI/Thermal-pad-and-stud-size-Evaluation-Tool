@@ -3141,7 +3141,7 @@ function sgRenderProjectComponents() {
     // Room-temp row: params + cards in one line
     document.getElementById('sg-power-row-rt').innerHTML =
       `<div class="sg-param-chip">環溫(°C) <select disabled><option>25°C</option></select></div>` +
-      `<div class="sg-param-chip">Backoff 0 dB</div>` +
+      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff-rt" value="${pBackoffRT || '0'}" placeholder="0"> dB</div>` +
       `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
         `<option value="TDD 75%"${pDuplexRT === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
         `<option value="FDD 100%"${pDuplexRT === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
@@ -3154,6 +3154,8 @@ function sgRenderProjectComponents() {
     // Attach backoff input handler after DOM is ready
     const boInput = document.getElementById('sg-param-backoff');
     if (boInput) boInput.addEventListener('change', sgOnParamChange);
+    const boInputRT = document.getElementById('sg-param-backoff-rt');
+    if (boInputRT) boInputRT.addEventListener('change', sgOnParamChange);
 
     summaryContainer.style.display = 'block';
   }
