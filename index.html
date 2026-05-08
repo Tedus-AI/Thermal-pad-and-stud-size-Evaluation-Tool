@@ -746,6 +746,85 @@
     min-width: 40px;
   }
 
+  /* Hidden component collapsible zone (Tab 2 & Tab 3) */
+  .hidden-comp-zone {
+    margin-top: 8px;
+    border: 1px solid #e0c080;
+    border-radius: 6px;
+    background: #fffbf0;
+    overflow: hidden;
+  }
+  .hidden-comp-zone > summary {
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #8a6d00;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hidden-comp-zone > summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform 0.18s;
+  }
+  .hidden-comp-zone[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  .hidden-comp-zone > summary:hover {
+    background: #fff3cd;
+  }
+  .hidden-comp-zone[open] > summary {
+    border-bottom: 1px solid #e0c080;
+    border-radius: 6px 6px 0 0;
+  }
+  .hidden-comp-zone .comp-table-wrap {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+  .sg-hidden-comp-zone {
+    margin-top: 6px;
+    border: 1px solid #e0c080;
+    border-radius: 6px;
+    background: #fffbf0;
+    overflow: hidden;
+  }
+  .sg-hidden-comp-zone > summary {
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #8a6d00;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sg-hidden-comp-zone > summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform 0.18s;
+  }
+  .sg-hidden-comp-zone[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  .sg-hidden-comp-zone > summary:hover {
+    background: #fff3cd;
+  }
+  .sg-hidden-comp-zone[open] > summary {
+    border-bottom: 1px solid #e0c080;
+    border-radius: 6px 6px 0 0;
+  }
+  .sg-hidden-comp-zone table {
+    margin: 0;
+    border-radius: 0;
+  }
+
   /* Export buttons */
   .export-toolbar {
     display: flex;
@@ -1101,6 +1180,10 @@
     transition: background 0.2s;
   }
   .sg-comp-del-btn:hover { background: #fdd; }
+  .sg-row-hidden td {
+    opacity: 0.4;
+    text-decoration: line-through;
+  }
   .sg-comp-add-btn {
     display: inline-flex;
     align-items: center;
@@ -2660,12 +2743,8 @@ function renderAllCategories() {
 function renderCategoryTable(catKey, catInfo, items, customItems) {
   customItems = customItems || [];
   const totalCount = items.length + customItems.length;
-  let html = `
-    <div class="category-section">
-      <div class="category-title ${catInfo.css}">${catInfo.icon} ${catInfo.label}\uff08${totalCount} \u9805\uff09</div>
-      <div class="comp-table-wrap">
-      <table class="comp-table">
-        <thead><tr>
+
+  const theadHtml = `<thead><tr>
           <th class="readonly-col hide-col">隱藏</th>
           <th class="readonly-col">#</th>
           <th class="readonly-col name-col">元件名稱</th>
@@ -2681,24 +2760,51 @@ function renderCategoryTable(catKey, catInfo, items, customItems) {
           <th class="editable-col heat-dir-col">散熱方向</th>
           <th class="editable-col ic-hsk-col">IC 距離<br>HSK</th>
           <th class="editable-col note-col">備註</th>
-        </tr></thead>
-        <tbody>`;
+        </tr></thead>`;
 
-  /* 渲染共用資料庫的元件 */
+  /* Split items into visible and hidden */
+  const visibleRows = [];
+  const hiddenRows = [];
+
   items.forEach((comp, idx) => {
-    html += renderComponentRow(comp, idx, false, catKey);
+    const specKey = (comp.Component || '').replace(/ /g, '_').replace(/\//g, '-');
+    const row = renderComponentRow(comp, idx, false, catKey);
+    if (hiddenComponents[specKey]) hiddenRows.push(row);
+    else visibleRows.push(row);
   });
 
-  /* 渲染自訂元件 */
   customItems.forEach((comp, idx) => {
-    html += renderComponentRow(comp, items.length + idx, true, catKey, idx);
+    const specKey = (comp.Component || '').replace(/ /g, '_').replace(/\//g, '-');
+    const row = renderComponentRow(comp, items.length + idx, true, catKey, idx);
+    if (hiddenComponents[specKey]) hiddenRows.push(row);
+    else visibleRows.push(row);
   });
 
-  html += `</tbody></table></div>
-      <button class="add-comp-btn" onclick="openAddModal('${catKey}')">+ \u65b0\u589e\u5143\u4ef6</button>
-    </div>`;
+  let html = `
+    <div class="category-section">
+      <div class="category-title ${catInfo.css}">${catInfo.icon} ${catInfo.label}（${totalCount} 項）</div>
+      <div class="comp-table-wrap">
+      <table class="comp-table">
+        ${theadHtml}
+        <tbody>${visibleRows.join('')}</tbody>
+      </table></div>`;
+
+  if (hiddenRows.length > 0) {
+    html += `
+      <details class="hidden-comp-zone">
+        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
+        <div class="comp-table-wrap">
+        <table class="comp-table">
+          ${theadHtml}
+          <tbody>${hiddenRows.join('')}</tbody>
+        </table></div>
+      </details>`;
+  }
+
+  html += `</div>`;
   return html;
 }
+
 
 /* ---- 渲染單一元件列 ---- */
 function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
@@ -3163,14 +3269,12 @@ async function saveThermalSpecs() {
 /* ---- 隱藏元件切換 ---- */
 function onToggleHide(el) {
   const compKey = el.dataset.comp;
-  const row = el.closest('tr');
   if (el.checked) {
     hiddenComponents[compKey] = true;
-    row.classList.add('row-hidden');
   } else {
     delete hiddenComponents[compKey];
-    row.classList.remove('row-hidden');
   }
+  renderAllCategories();
 }
 
 /* ---- 收集匯出資料（按分類，排除隱藏元件） ---- */
@@ -3545,6 +3649,7 @@ async function exportPDF() {
 /* ---- State ---- */
 let sgProjectId = null;
 let sgProjectData = null;
+let sgHiddenComps = {};
 
 /* ---- Default values by component type ---- */
 const SG_DEFAULTS = {
@@ -3617,6 +3722,7 @@ async function sgOnProjectChange() {
   const select = document.getElementById('sg-project-select');
   sgProjectId = select.value || null;
   sgProjectData = null;
+  sgHiddenComps = {};
 
   if (!sgProjectId) {
     sgRenderProjectComponents();
@@ -3625,6 +3731,7 @@ async function sgOnProjectChange() {
 
   try {
     sgProjectData = await dbAdapter.getDoc('projects', sgProjectId);
+    sgHiddenComps = sgProjectData.sg_hidden_components || {};
     sgShowStatus('已選擇專案：' + (sgProjectData?.project_name || sgProjectId), 'success');
     sgRenderProjectComponents();
   } catch (e) {
@@ -3698,24 +3805,25 @@ function sgRenderProjectComponents() {
     catPower[catKey] = items.reduce((sum, c) => sum + (parseFloat(c['Power(W)']) || 0) * (parseInt(c.Qty) || 1), 0);
     catPowerRT[catKey] = items.reduce((sum, c) => sum + (parseFloat(c['Power_RT(W)']) || 0) * (parseInt(c.Qty) || 1), 0);
 
-    html += `<div class="sg-comp-category">
-      <div class="sg-comp-category-header ${catInfo.css}">
-        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
-      </div>
-      <table class="sg-comp-list-table">
-        <thead><tr>
-          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th></th>
-        </tr></thead><tbody>`;
+    const theadHtml = `<thead><tr>
+          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th style="width:46px">隱藏</th>
+        </tr></thead>`;
+
+    const visibleRows = [];
+    const hiddenRows = [];
 
     items.forEach((comp, idx) => {
       const c = catKey, i = idx;
+      const compName = comp.Component || '';
+      const hideKey = `${catKey}|${compName}`;
+      const isHidden = !!sgHiddenComps[hideKey];
       const typeVal = comp.Type || '';
       const isPredefined = SG_TYPE_OPTIONS.includes(typeVal);
       const selectVal = isPredefined ? typeVal : (typeVal ? '其他' : '');
       const customVal = (!isPredefined && typeVal) ? typeVal : '';
       const customVisible = selectVal === '其他' ? ' visible' : '';
-      html += `<tr>
-        <td class="sg-edit-cell"><input class="sg-cell-input comp-name" type="text" value="${escapeHtml(comp.Component || '')}" data-cat="${c}" data-idx="${i}" data-field="Component" onchange="sgOnCompEdit(this)"></td>
+      const rowHtml = `<tr${isHidden ? ' class="sg-row-hidden"' : ''}>
+        <td class="sg-edit-cell"><input class="sg-cell-input comp-name" type="text" value="${escapeHtml(compName)}" data-cat="${c}" data-idx="${i}" data-field="Component" onchange="sgOnCompEdit(this)"></td>
         <td class="sg-edit-cell"><div class="sg-type-cell"><select data-cat="${c}" data-idx="${i}" data-field="Type" onchange="sgOnTypeChange(this)"><option value="">--</option>${SG_TYPE_OPTIONS.map(o => `<option value="${o}"${selectVal === o ? ' selected' : ''}>${o}</option>`).join('')}</select><input type="text" class="sg-type-custom${customVisible}" value="${escapeHtml(customVal)}" placeholder="自訂類型" data-cat="${c}" data-idx="${i}" data-field="Type" onchange="sgOnCompEdit(this)"></div></td>
         <td class="sg-edit-cell"><input class="sg-cell-input" type="number" min="0" value="${comp.Qty ?? 1}" data-cat="${c}" data-idx="${i}" data-field="Qty" onchange="sgOnCompEdit(this)"></td>
         <td class="sg-edit-cell"><input class="sg-cell-input" type="number" step="any" value="${comp['Power(W)'] ?? ''}" data-cat="${c}" data-idx="${i}" data-field="Power(W)" onchange="sgOnCompEdit(this)"></td>
@@ -3732,11 +3840,37 @@ function sgRenderProjectComponents() {
             <label>Remote<input type="number" min="0" value="${comp.Remote_Qty ?? ''}" placeholder="0" data-cat="${c}" data-idx="${i}" data-field="Remote_Qty" onchange="sgOnCompEdit(this)"></label>
           </div>
         </div></td>
-        <td class="sg-edit-cell" style="text-align:center;"><button class="sg-comp-del-btn" onclick="sgDeleteComp('${c}',${i})" title="刪除此元件">&#10060;</button></td>
+        <td class="sg-edit-cell" style="text-align:center;">
+          <input type="checkbox" class="hide-checkbox" data-cat="${c}" data-comp="${escapeHtml(compName)}"
+            ${isHidden ? 'checked' : ''} onchange="sgOnHideToggle(this)"
+            title="勾選以隱藏此元件（匯出時不包含）">
+        </td>
       </tr>`;
+      if (isHidden) hiddenRows.push(rowHtml);
+      else visibleRows.push(rowHtml);
     });
 
-    html += `</tbody></table>
+    html += `<div class="sg-comp-category">
+      <div class="sg-comp-category-header ${catInfo.css}">
+        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
+      </div>
+      <table class="sg-comp-list-table">
+        ${theadHtml}
+        <tbody>${visibleRows.join('')}</tbody>
+      </table>`;
+
+    if (hiddenRows.length > 0) {
+      html += `
+      <details class="sg-hidden-comp-zone">
+        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
+        <table class="sg-comp-list-table">
+          ${theadHtml}
+          <tbody>${hiddenRows.join('')}</tbody>
+        </table>
+      </details>`;
+    }
+
+    html += `
       <button class="sg-comp-add-btn" onclick="sgAddCompRow('${catKey}')">&#10133; 新增 ${catInfo.label}</button>
     </div>`;
   }
@@ -3747,7 +3881,6 @@ function sgRenderProjectComponents() {
 
   body.innerHTML = html;
   container.style.display = 'block';
-
   // Render power summary (high-temp + room-temp groups)
   if (summaryContainer) {
     const fmt = v => Number.isInteger(v) ? v : v.toFixed(2);
@@ -3874,6 +4007,19 @@ function sgOnCompEdit(el) {
 }
 
 /* ---- Delete component from list ---- */
+/* ---- Hide component toggle (Tab 3) ---- */
+function sgOnHideToggle(el) {
+  const cat = el.dataset.cat;
+  const compName = el.dataset.comp;
+  const key = `${cat}|${compName}`;
+  if (el.checked) {
+    sgHiddenComps[key] = true;
+  } else {
+    delete sgHiddenComps[key];
+  }
+  sgRenderProjectComponents();
+}
+
 function sgDeleteComp(cat, idx) {
   if (isProtected) { alert('請先解鎖密碼保護'); return; }
   const fieldKey = SG_CAT_MAP[cat].field;
@@ -3953,7 +4099,8 @@ async function sgSaveProjectComponents() {
       param_backoff: sgProjectData.param_backoff || '',
       param_duplex: sgProjectData.param_duplex || 'TDD 75%',
       param_backoff_rt: sgProjectData.param_backoff_rt || '',
-      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%'
+      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%',
+      sg_hidden_components: sgHiddenComps
     });
 
     // Update library entries for each component
@@ -3985,6 +4132,7 @@ async function sgSaveProjectComponents() {
       status.className = 'save-status err';
       // Reload project data from refreshed dbCache and re-render
       sgProjectData = await dbAdapter.getDoc('projects', sgProjectId);
+      sgHiddenComps = sgProjectData.sg_hidden_components || {};
       sgRenderProjectComponents();
     } else {
       status.textContent = '儲存失敗：' + e.message;
