@@ -1462,6 +1462,8 @@
     transition: background 0.15s;
   }
   .fb-action-btn:hover { background: #eef2f7; }
+  .fb-teams-btn { background: #ede8f6; }
+  .fb-teams-btn:hover { background: #6264A7; color: white; }
 
   /* --- Image attachment zone --- */
   .fb-img-zone {
@@ -1558,6 +1560,50 @@
     border: none; background: #c62828; color: #fff; cursor: pointer;
   }
   .fb-del-btn:hover { background: #b71c1c; }
+  .fb-img-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+  }
+  .fb-img-lightbox.open { display: flex; }
+  .fb-img-lightbox-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .fb-img-lightbox-inner img {
+    display: block;
+    max-width: 85vw;
+    max-height: 85vh;
+    border-radius: 6px;
+    object-fit: contain;
+  }
+  .fb-img-lightbox-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #333;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3001;
+  }
+  .fb-img-lightbox-close:hover { background: #c0392b; }
 </style>
 </head>
 <body>
@@ -1589,6 +1635,13 @@
       <button class="fb-cancel-btn2" onclick="fbCancelDelete()">取消</button>
       <button class="fb-del-btn" onclick="fbConfirmDelete()">確認刪除</button>
     </div>
+  </div>
+</div>
+
+<div id="fb-img-lightbox" class="fb-img-lightbox" onclick="fbCloseLightbox()">
+  <div class="fb-img-lightbox-inner" onclick="event.stopPropagation()">
+    <button class="fb-img-lightbox-close" onclick="fbCloseLightbox()">&#10005;</button>
+    <img id="fb-img-lightbox-img" src="" alt="截圖">
   </div>
 </div>
 
@@ -1657,6 +1710,8 @@
             </select>
           </div>
           <button class="btn btn-primary" id="vd-load-btn" onclick="vdLoadProjects()">載入專案</button>
+          <button class="btn-export excel" onclick="vdExportExcel()" id="vd-export-excel-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128202; 匯出 Excel</button>
+          <button class="btn-export pdf" onclick="vdExportPdf()" id="vd-export-pdf-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128196; 匯出 PDF</button>
           <button class="btn btn-save" id="vd-save-btn" onclick="vdSaveValidation()" disabled>儲存驗證資料</button>
           <span id="vd-save-status" class="save-status"></span>
         </div>
@@ -1860,7 +1915,9 @@
             <div style="font-size:0.9rem; font-weight:700; color:#1a3a6b;">
               目前專案元件清單
             </div>
-            <div class="sg-comp-save-bar" style="margin:0; padding:0;">
+            <div class="sg-comp-save-bar" style="margin:0; padding:0; gap:8px; display:flex; align-items:center; flex-wrap:wrap;">
+              <button class="btn-export excel" onclick="sgExportExcel()" id="sg-export-excel-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128202; 匯出 Excel</button>
+              <button class="btn-export pdf" onclick="sgExportPdf()" id="sg-export-pdf-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128196; 匯出 PDF</button>
               <button class="btn btn-save" onclick="sgSaveProjectComponents()" id="sg-comp-save-btn" style="padding:7px 18px; font-size:0.85rem;" disabled>儲存元件變更</button>
               <span id="sg-comp-save-status" class="save-status"></span>
             </div>
@@ -2119,7 +2176,6 @@
                   <option>全部</option>
                   <option>待處理</option>
                   <option>評估中</option>
-                  <option>已排入</option>
                   <option>修正中</option>
                   <option>已完成</option>
                   <option>不採用</option>
@@ -3783,6 +3839,7 @@ function sgRenderProjectComponents() {
     body.innerHTML = '';
     if (summaryContainer) summaryContainer.style.display = 'none';
     if (emptyEl) emptyEl.style.display = '';
+    ['sg-export-excel-btn','sg-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
     return;
   }
 
@@ -3807,7 +3864,7 @@ function sgRenderProjectComponents() {
       </div>
       <table class="sg-comp-list-table">
         <thead><tr>
-          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th></th>
+          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th>備註</th><th></th>
         </tr></thead><tbody>`;
 
     items.forEach((comp, idx) => {
@@ -3835,6 +3892,7 @@ function sgRenderProjectComponents() {
             <label>Remote<input type="number" min="0" value="${comp.Remote_Qty ?? ''}" placeholder="0" data-cat="${c}" data-idx="${i}" data-field="Remote_Qty" onchange="sgOnCompEdit(this)"></label>
           </div>
         </div></td>
+        <td class="sg-edit-cell"><input class="sg-cell-input" type="text" value="${escapeHtml(comp.note || '')}" data-cat="${c}" data-idx="${i}" data-field="note" placeholder="—" onchange="sgOnCompEdit(this)"></td>
         <td class="sg-edit-cell" style="text-align:center;"><button class="sg-comp-del-btn" onclick="sgDeleteComp('${c}',${i})" title="刪除此元件">&#10060;</button></td>
       </tr>`;
     });
@@ -3849,6 +3907,7 @@ function sgRenderProjectComponents() {
   }
 
   body.innerHTML = html;
+  ['sg-export-excel-btn','sg-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
   container.style.display = 'block';
 }
 
@@ -4045,6 +4104,44 @@ async function sgSaveProjectComponents() {
 
   btn.disabled = isProtected;
   btn.textContent = '儲存元件變更';
+}
+
+/* ---- Tab 1 export ---- */
+function sgExportExcel() {
+  if (!sgProjectData) return;
+  const wb = XLSX.utils.book_new();
+  const selTemp = sgProjectData.param_temp || '55';
+  const tempLabel = selTemp === 'custom' ? (sgProjectData.param_temp_custom || '??') : selTemp;
+  for (const [catKey, catInfo] of Object.entries(SG_CAT_MAP)) {
+    const items = sgProjectData[catInfo.field] || [];
+    const headers = ['Component','Type','Qty',`Pd@${tempLabel}°C(W)`,'Pd@25°C(W)','Thermal Via 內徑(mil)','Thermal Via Qty','Temp Sensor','備註'];
+    const rows = items.map(c => [
+      c.Component||'', c.Type||'', c.Qty??'', c['Power(W)']??'', c['Power_RT(W)']??'',
+      c.TV_ID_mil||'', c.TV_Qty||'', c.Temp_Sensor||'', c.note||''
+    ]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, catKey);
+  }
+  const name = (sgProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  XLSX.writeFile(wb, `${name}_元件清單_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function sgExportPdf() {
+  if (!sgProjectData) return;
+  const body = document.getElementById('sg-project-components-body');
+  if (!body) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const canvas = await html2canvas(body, { scale: 1.5, useCORS: true, backgroundColor: '#fff' });
+  const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const ratio = canvas.width / canvas.height;
+  let w = pageW - 20, h = w / ratio;
+  if (h > pageH - 20) { h = pageH - 20; w = h * ratio; }
+  pdf.addImage(imgData, 'JPEG', 10, 10, w, h);
+  const name = (sgProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  pdf.save(`${name}_元件清單_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
 /* ---- Toggle new project form ---- */
@@ -4377,6 +4474,7 @@ function vdRender() {
   if (!vdProjectData || Object.keys(vdValidationData).length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="icon">&#128202;</div><p>請先載入專案列表並選擇專案，即可載入驗證元件清單。</p></div>`;
     if (legendEl) legendEl.style.display = 'none';
+    ['vd-export-excel-btn','vd-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
     return;
   }
 
@@ -4469,6 +4567,7 @@ function vdRender() {
     html += `</div>`;
   }
 
+  ['vd-export-excel-btn','vd-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
   container.innerHTML = html;
 }
 
@@ -4606,6 +4705,42 @@ async function vdSaveValidation() {
   btn.textContent = '儲存驗證資料';
 }
 
+/* ---- Tab 3 export ---- */
+function vdExportExcel() {
+  if (!vdProjectData) return;
+  const wb = XLSX.utils.book_new();
+  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+    const catLower = catKey.toLowerCase();
+    const items = vdValidationData[catLower] || [];
+    const headers = ['元件名稱','Pd估值(W)','Pd實測(W)','Pd相對誤差%','溫度初始模擬','溫度實測','溫度模擬校正','溫度相對誤差%','絕對溫差','備註'];
+    const rows = items.map(i => [
+      i.component||'', i.pd_est??'', i.pd_meas??'', '', i.temp_sim??'', i.temp_meas??'', i.temp_sim_cal??'', '', '', i.note||''
+    ]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, catKey);
+  }
+  const name = (vdProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  XLSX.writeFile(wb, `${name}_驗證資料_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function vdExportPdf() {
+  if (!vdProjectData) return;
+  const container = document.getElementById('vd-container');
+  if (!container) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const canvas = await html2canvas(container, { scale: 1.5, useCORS: true, backgroundColor: '#fff' });
+  const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const ratio = canvas.width / canvas.height;
+  let w = pageW - 20, h = w / ratio;
+  if (h > pageH - 20) { h = pageH - 20; w = h * ratio; }
+  pdf.addImage(imgData, 'JPEG', 10, 10, w, h);
+  const name = (vdProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  pdf.save(`${name}_驗證資料_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
 /* ============================
    Feedback Tab (使用者建議與改善)
    ============================ */
@@ -4698,7 +4833,7 @@ function fbGenId() {
 }
 
 function fbGetStatusClass(status) {
-  const map = { '待處理': 'sp', '評估中': 'se', '已排入': 'ss', '修正中': 'sf', '已完成': 'sd', '不採用': 'sr' };
+  const map = { '待處理': 'sp', '評估中': 'se', '修正中': 'sf', '已完成': 'sd', '不採用': 'sr' };
   return map[status] || 'sp';
 }
 
@@ -4890,7 +5025,7 @@ function fbRenderTable() {
   tbody.innerHTML = filtered.map(([id, item]) => {
     const statusCell = canEdit
       ? `<select class="fb-status-sel" onchange="fbUpdateStatus('${id}',this.value)">${
-          ['待處理','評估中','已排入','修正中','已完成','不採用'].map(s =>
+          ['待處理','評估中','修正中','已完成','不採用'].map(s =>
             `<option${item.status===s?' selected':''}>${s}</option>`).join('')
         }</select>`
       : `<span class="fb-badge ${fbGetStatusClass(item.status)}">${item.status}</span>`;
@@ -4912,6 +5047,7 @@ function fbRenderTable() {
           <button class="fb-action-btn" title="閱讀" onclick="fbShowDetail('${id}')">&#128065;</button>
           <button class="fb-action-btn" title="修改" onclick="fbEditItem('${id}')">&#9999;&#65039;</button>
           <button class="fb-action-btn" title="刪除" onclick="fbDeleteItem('${id}')">&#128465;</button>
+          <button class="fb-action-btn fb-teams-btn" title="Teams 聯絡提出人" onclick="fbOpenTeams('${id}')"><svg width="16" height="16" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="28" height="28" rx="6" fill="#6264A7"/><text x="14" y="20" text-anchor="middle" font-size="16" font-weight="bold" fill="white" font-family="Arial">T</text></svg></button>
         </div>
       </td>
     </tr>`;
@@ -4923,7 +5059,8 @@ async function fbUpdateStatus(id, newStatus) {
   const now = new Date().toISOString();
   fbItems[id].status = newStatus;
   fbItems[id].updated_at = now;
-  if (newStatus === '已完成' && !fbItems[id].closed_at) fbItems[id].closed_at = now;
+  if (newStatus === '已完成') { if (!fbItems[id].closed_at) fbItems[id].closed_at = now; }
+  else { fbItems[id].closed_at = ''; }
   try {
     await fbSaveItem(id, fbItems[id]);
     fbRenderSummary();
@@ -4937,6 +5074,16 @@ async function fbUpdateAdminNote(id, note) {
   fbItems[id].updated_at = new Date().toISOString();
   try { await fbSaveItem(id, fbItems[id]); }
   catch (e) { fbShowToast('儲存失敗：' + e.message, 'err'); }
+}
+
+function fbOpenTeams(id) {
+  const item = fbItems[id];
+  if (!item) return;
+  const email = (item.contact || '').trim();
+  if (!email) { fbShowToast('此回饋無聯絡方式（Email），無法開啟 Teams'); return; }
+  const msg = (item.admin_note || '').trim();
+  const url = 'https://teams.microsoft.com/l/chat/0/0?users=' + encodeURIComponent(email) + (msg ? '&message=' + encodeURIComponent(msg) : '');
+  window.open(url, '_blank');
 }
 
 function fbExportCsv() {
@@ -5022,8 +5169,15 @@ function fbRenderAttachments() {
 }
 
 function fbOpenImage(src) {
-  const w = window.open('', '_blank');
-  w.document.write(`<html><body style="margin:0;background:#000"><img src="${src}" style="max-width:100%;display:block;margin:auto"></body></html>`);
+  const lb = document.getElementById('fb-img-lightbox');
+  if (!lb) return;
+  document.getElementById('fb-img-lightbox-img').src = src;
+  lb.classList.add('open');
+}
+
+function fbCloseLightbox() {
+  document.getElementById('fb-img-lightbox')?.classList.remove('open');
+  document.getElementById('fb-img-lightbox-img').src = '';
 }
 
 function fbInitPasteListener() {
@@ -5039,6 +5193,9 @@ function fbInitPasteListener() {
         break;
       }
     }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fbCloseLightbox();
   });
 }
 
