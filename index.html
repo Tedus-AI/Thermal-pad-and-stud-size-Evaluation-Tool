@@ -1167,6 +1167,10 @@
     font-size: 0.75rem; cursor: pointer; background: transparent; color: #c0392b;
   }
   .vd-del-btn:hover { background: #fde8e8; }
+  .vd-row-hidden td, .vd-row-hidden th {
+    opacity: 0.4;
+    text-decoration: line-through;
+  }
 
   .sg-comp-del-btn {
     padding: 3px 8px;
@@ -4188,6 +4192,7 @@ async function handlePickDb() {
 let vdProjectId = null;
 let vdProjectData = null;
 let vdValidationData = {};   // { rf: [...], digital: [...], pwr: [...] }
+let vdHiddenComps = {};
 
 const VD_CAT_MAP = {
   RF:      { field: 'rf_data',      label: 'RF 射頻元件',     css: 'rf',      icon: '&#128225;' },
@@ -4237,6 +4242,7 @@ async function vdLoadProjects() {
       vdProjectId = null;
       vdProjectData = null;
       vdValidationData = {};
+      vdHiddenComps = {};
       vdRender();
     }
 
@@ -4258,6 +4264,7 @@ async function vdOnProjectChange() {
   vdProjectId = select.value || null;
   vdProjectData = null;
   vdValidationData = {};
+  vdHiddenComps = {};
 
   if (!vdProjectId) { vdRender(); return; }
 
@@ -4309,6 +4316,7 @@ async function vdOnProjectChange() {
       vdValidationData[catLower] = result;
     }
 
+    vdHiddenComps = vdProjectData.vd_hidden_components || {};
     vdShowStatus('已載入專案：' + (vdProjectData.project_name || vdProjectId), 'success');
     vdRender();
   } catch (e) {
@@ -4375,16 +4383,7 @@ function vdRender() {
   if (legendEl) legendEl.style.display = 'block';
   let html = '';
 
-  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
-    const catLower = catKey.toLowerCase();
-    const items = vdValidationData[catLower] || [];
-
-    html += `<div class="vd-comp-category">
-      <div class="vd-comp-category-header ${catInfo.css}">
-        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
-      </div>
-      <table class="vd-table">
-        <thead><tr>
+  const theadHtml = `<thead><tr>
           <th>元件名稱</th>
           <th>Pd(估值)</th>
           <th>Pd(實測值)</th>
@@ -4395,10 +4394,19 @@ function vdRender() {
           <th>溫度-相對誤差%<br>(模擬校正-實測)</th>
           <th>絕對溫差<br>(模擬校正-實測)</th>
           <th>備註</th>
-          <th></th>
-        </tr></thead><tbody>`;
+          <th style="width:46px">隱藏</th>
+        </tr></thead>`;
+
+  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+    const catLower = catKey.toLowerCase();
+    const items = vdValidationData[catLower] || [];
+
+    const visibleRows = [];
+    const hiddenRows = [];
 
     items.forEach((item, idx) => {
+      const hideKey = `${catLower}|${item.component}`;
+      const isHidden = !!vdHiddenComps[hideKey];
       const pdVal = item.pd_source === 'rt' ? item.pd_est_rt : item.pd_est;
       const pdErr = vdCalcRelError(pdVal, item.pd_meas);
       const tempErr = vdCalcRelError(item.temp_sim_cal, item.temp_meas);
@@ -4410,7 +4418,7 @@ function vdRender() {
           `<option value="rt"${pdSrc === 'rt' ? ' selected' : ''}>${item.pd_est_rt} (常溫)</option></select>`
         : (item.pd_est || '-');
 
-      html += `<tr>
+      const rowHtml = `<tr${isHidden ? ' class="vd-row-hidden"' : ''}>
         <td class="comp-name-cell readonly-cell">${escapeHtml(item.component)}</td>
         <td class="readonly-cell">${pdCell}</td>
         <td><input type="number" step="any" value="${item.pd_meas !== '' && item.pd_meas !== undefined ? item.pd_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="pd_meas" onchange="vdOnEdit(this)"></td>
@@ -4421,11 +4429,36 @@ function vdRender() {
         <td class="${vdErrorClass(tempErr)}">${vdFmtError(tempErr)}</td>
         <td class="${vdTempDiffClass(tempDiff)}">${vdFmtDiff(tempDiff)}</td>
         <td class="note-cell"><textarea data-cat="${catLower}" data-idx="${idx}" data-field="note" onchange="vdOnEdit(this)">${escapeHtml(item.note || '')}</textarea></td>
-        <td><button class="vd-del-btn" onclick="vdDeleteItem('${catLower}',${idx})" title="移除">&#10060;</button></td>
+        <td style="text-align:center;">
+          <input type="checkbox" class="hide-checkbox" data-cat="${catLower}" data-comp="${escapeAttr(item.component)}"
+            ${isHidden ? 'checked' : ''} onchange="vdOnHideToggle(this)"
+            title="勾選以隱藏此元件">
+        </td>
       </tr>`;
+
+      if (isHidden) hiddenRows.push(rowHtml);
+      else visibleRows.push(rowHtml);
     });
 
-    html += `</tbody></table>`;
+    html += `<div class="vd-comp-category">
+      <div class="vd-comp-category-header ${catInfo.css}">
+        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
+      </div>
+      <table class="vd-table">
+        ${theadHtml}
+        <tbody>${visibleRows.join('')}</tbody>
+      </table>`;
+
+    if (hiddenRows.length > 0) {
+      html += `
+      <details class="sg-hidden-comp-zone">
+        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
+        <table class="vd-table">
+          ${theadHtml}
+          <tbody>${hiddenRows.join('')}</tbody>
+        </table>
+      </details>`;
+    }
 
     // Add component dropdown
     html += `<div class="vd-add-dropdown" style="margin-top:6px;">
@@ -4437,6 +4470,19 @@ function vdRender() {
   }
 
   container.innerHTML = html;
+}
+
+/* ---- Hide toggle (Tab 3 validation) ---- */
+function vdOnHideToggle(el) {
+  const cat = el.dataset.cat;
+  const compName = el.dataset.comp;
+  const key = `${cat}|${compName}`;
+  if (el.checked) {
+    vdHiddenComps[key] = true;
+  } else {
+    delete vdHiddenComps[key];
+  }
+  vdRender();
 }
 
 function vdOnEdit(el) {
@@ -4531,7 +4577,8 @@ async function vdSaveValidation() {
 
   try {
     await dbAdapter.updateDoc('projects', vdProjectId, {
-      validation_data: vdValidationData
+      validation_data: vdValidationData,
+      vd_hidden_components: vdHiddenComps
     });
 
     if (dbAdapter.isSharePointMode()) {
