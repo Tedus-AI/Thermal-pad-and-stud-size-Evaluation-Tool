@@ -4748,68 +4748,6 @@ async function vdExportPdf() {
    Feedback Tab (使用者建議與改善)
    ============================ */
 
-const FB_SAMPLE_DATA = [
-  {
-    type: 'Bug', tab: '模擬與實測驗證',
-    title: '上傳 S2P 檔案後分析結果未更新',
-    priority: '高', reporter: '張工程師（RF部）',
-    contact: 'chang.engineer@company.com',
-    description: '上傳 S2P 檔案後，分析結果沒有重新計算，需要重新整理頁面才會更新。',
-    current_behavior: '檔案已上傳，但結果仍顯示舊資料。',
-    expected_behavior: '上傳後應自動重新分析並更新結果。',
-    attachment_link: '', note: '',
-    status: '待處理', closed_at: '', admin_note: '已回報問題，待評估',
-    created_at: '2024-05-22T10:15:00+08:00', updated_at: '2024-05-22T10:15:00+08:00'
-  },
-  {
-    type: '改善建議', tab: 'EE/RF/PWR-專案元件清單',
-    title: '希望可批次匯出 BOM 為 Excel',
-    priority: '中', reporter: '陳工程師（EE部）',
-    contact: '',
-    description: '希望可以批次選擇多個專案並一次匯出 BOM 為 Excel 格式，以方便跨專案比對。',
-    current_behavior: '目前只能單一專案匯出。',
-    expected_behavior: '可以選取多個專案批次匯出。',
-    attachment_link: '', note: '',
-    status: '評估中', closed_at: '', admin_note: '評估需求與影響範圍',
-    created_at: '2024-05-21T16:40:00+08:00', updated_at: '2024-05-21T16:40:00+08:00'
-  },
-  {
-    type: '新功能需求', tab: '凸台&TIM尺寸速算',
-    title: '希望增加壓力分佈可視化圖表',
-    priority: '中', reporter: '林工程師（TH部）',
-    contact: '',
-    description: '希望在凸台尺寸計算結果中增加壓力分佈可視化圖表，讓設計人員直覺了解壓力分佈狀況。',
-    current_behavior: '目前只顯示數字結果。',
-    expected_behavior: '增加圓餅圖或熱力圖顯示壓力分佈。',
-    attachment_link: '', note: '',
-    status: '修正中', closed_at: '', admin_note: '開發中，預計下週測試',
-    created_at: '2024-05-20T09:12:00+08:00', updated_at: '2024-05-20T09:12:00+08:00'
-  },
-  {
-    type: '資料欄位問題', tab: 'TH/ME-專案元件清單',
-    title: '材料熱導率單位欄位顯示不一致',
-    priority: '低', reporter: '周工程師（ME部）',
-    contact: '',
-    description: '材料熱導率單位在不同畫面顯示不一致，有的是 W/mK，有的是 W/m·K。',
-    current_behavior: '單位顯示不統一，造成混淆。',
-    expected_behavior: '統一使用 W/m·K 標示。',
-    attachment_link: '', note: '',
-    status: '已完成', closed_at: '2024-05-19T00:00:00+08:00', admin_note: '已統一為 W/m·K',
-    created_at: '2024-05-16T14:25:00+08:00', updated_at: '2024-05-19T00:00:00+08:00'
-  },
-  {
-    type: '權限/登入/儲存問題', tab: 'SharePoint登入/儲存',
-    title: '離線狀態下儲存草稿會失敗',
-    priority: '高', reporter: '吳工程師（PWR部）',
-    contact: '',
-    description: '在離線狀態下嘗試儲存資料時，系統沒有提示錯誤，但資料實際上沒有被儲存。',
-    current_behavior: '離線儲存靜默失敗，無任何提示。',
-    expected_behavior: '應提示使用者目前為離線狀態並提供草稿暫存機制。',
-    attachment_link: '', note: '',
-    status: '已完成', closed_at: '2024-05-17T00:00:00+08:00', admin_note: '已修正並上線',
-    created_at: '2024-05-15T11:08:00+08:00', updated_at: '2024-05-17T00:00:00+08:00'
-  }
-];
 
 let fbItems = {};
 let fbFilters = { type: '全部', status: '全部', tab: '全部', priority: '全部', keyword: '' };
@@ -4854,30 +4792,14 @@ async function fbLoadItems() {
   try {
     if (!dbAdapter.isReady()) {
       fbItems = {};
-      FB_SAMPLE_DATA.forEach(item => { fbItems[fbGenId()] = { ...item }; });
       fbLoaded = true;
       return;
     }
     const col = await dbAdapter.getCollection('feedback_items');
-    if (!col || Object.keys(col).length === 0) {
-      fbItems = {};
-      const toSeed = {};
-      for (const item of FB_SAMPLE_DATA) {
-        await new Promise(r => setTimeout(r, 1));
-        const id = fbGenId();
-        toSeed[id] = { ...item };
-      }
-      for (const [id, item] of Object.entries(toSeed)) {
-        await dbAdapter.setDoc('feedback_items', id, item);
-      }
-      fbItems = toSeed;
-    } else {
-      fbItems = col;
-    }
+    fbItems = (col && Object.keys(col).length > 0) ? col : {};
   } catch (e) {
     console.error('[fbLoadItems]', e);
     fbItems = {};
-    FB_SAMPLE_DATA.forEach(item => { fbItems[fbGenId()] = { ...item }; });
   }
   fbLoaded = true;
 }
