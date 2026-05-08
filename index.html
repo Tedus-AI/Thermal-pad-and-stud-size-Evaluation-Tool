@@ -4758,7 +4758,6 @@ async function fbSubmitFeedback() {
 
 function fbApplyFilters(items) {
   return Object.entries(items).filter(([, item]) => {
-    if (item._deleted) return false;
     if (fbFilters.type !== '全部' && item.type !== fbFilters.type) return false;
     if (fbFilters.status !== '全部' && item.status !== fbFilters.status) return false;
     if (fbFilters.tab !== '全部' && item.tab !== fbFilters.tab) return false;
@@ -4773,7 +4772,7 @@ function fbApplyFilters(items) {
 }
 
 function fbRenderSummary() {
-  const vals = Object.values(fbItems).filter(i => !i._deleted);
+  const vals = Object.values(fbItems);
   const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
   set('fb-stat-pending', vals.filter(i => i.status === '待處理').length);
   set('fb-stat-eval',    vals.filter(i => i.status === '評估中').length);
@@ -5026,14 +5025,15 @@ async function fbConfirmDelete() {
   fbDeleteTargetId = null;
   document.getElementById('fb-delete-modal').classList.remove('open');
   if (!id || !fbItems[id]) return;
+  const backup = fbItems[id];
   try {
-    fbItems[id]._deleted = true;
-    await fbSaveItem(id, fbItems[id]);
+    delete fbItems[id];
+    if (dbAdapter.isReady()) await dbAdapter.deleteDoc('feedback_items', id);
     fbRenderSummary();
     fbRenderTable();
     fbShowToast('回饋已刪除');
   } catch (e) {
-    fbItems[id]._deleted = false;
+    fbItems[id] = backup;
     fbShowToast('刪除失敗：' + e.message, 'err');
   }
 }

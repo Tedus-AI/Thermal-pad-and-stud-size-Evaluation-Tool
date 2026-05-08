@@ -59,6 +59,10 @@ const dbAdapter = {
     return await this._backend().updateDoc(colName, docId, fields);
   },
 
+  async deleteDoc(colName, docId) {
+    return await this._backend().deleteDoc(colName, docId);
+  },
+
   async getProjectsSorted() {
     return await this._backend().getProjectsSorted();
   },
