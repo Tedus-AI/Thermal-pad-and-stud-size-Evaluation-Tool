@@ -1167,6 +1167,10 @@
     font-size: 0.75rem; cursor: pointer; background: transparent; color: #c0392b;
   }
   .vd-del-btn:hover { background: #fde8e8; }
+  .vd-row-hidden td, .vd-row-hidden th {
+    opacity: 0.4;
+    text-decoration: line-through;
+  }
 
   .sg-comp-del-btn {
     padding: 3px 8px;
@@ -1180,10 +1184,6 @@
     transition: background 0.2s;
   }
   .sg-comp-del-btn:hover { background: #fdd; }
-  .sg-row-hidden td {
-    opacity: 0.4;
-    text-decoration: line-through;
-  }
   .sg-comp-add-btn {
     display: inline-flex;
     align-items: center;
@@ -3649,7 +3649,6 @@ async function exportPDF() {
 /* ---- State ---- */
 let sgProjectId = null;
 let sgProjectData = null;
-let sgHiddenComps = {};
 
 /* ---- Default values by component type ---- */
 const SG_DEFAULTS = {
@@ -3722,8 +3721,6 @@ async function sgOnProjectChange() {
   const select = document.getElementById('sg-project-select');
   sgProjectId = select.value || null;
   sgProjectData = null;
-  sgHiddenComps = {};
-
   if (!sgProjectId) {
     sgRenderProjectComponents();
     return;
@@ -3731,7 +3728,6 @@ async function sgOnProjectChange() {
 
   try {
     sgProjectData = await dbAdapter.getDoc('projects', sgProjectId);
-    sgHiddenComps = sgProjectData.sg_hidden_components || {};
     sgShowStatus('已選擇專案：' + (sgProjectData?.project_name || sgProjectId), 'success');
     sgRenderProjectComponents();
   } catch (e) {
@@ -3805,25 +3801,24 @@ function sgRenderProjectComponents() {
     catPower[catKey] = items.reduce((sum, c) => sum + (parseFloat(c['Power(W)']) || 0) * (parseInt(c.Qty) || 1), 0);
     catPowerRT[catKey] = items.reduce((sum, c) => sum + (parseFloat(c['Power_RT(W)']) || 0) * (parseInt(c.Qty) || 1), 0);
 
-    const theadHtml = `<thead><tr>
-          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th style="width:46px">隱藏</th>
-        </tr></thead>`;
-
-    const visibleRows = [];
-    const hiddenRows = [];
+    html += `<div class="sg-comp-category">
+      <div class="sg-comp-category-header ${catInfo.css}">
+        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
+      </div>
+      <table class="sg-comp-list-table">
+        <thead><tr>
+          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th></th>
+        </tr></thead><tbody>`;
 
     items.forEach((comp, idx) => {
       const c = catKey, i = idx;
-      const compName = comp.Component || '';
-      const hideKey = `${catKey}|${compName}`;
-      const isHidden = !!sgHiddenComps[hideKey];
       const typeVal = comp.Type || '';
       const isPredefined = SG_TYPE_OPTIONS.includes(typeVal);
       const selectVal = isPredefined ? typeVal : (typeVal ? '其他' : '');
       const customVal = (!isPredefined && typeVal) ? typeVal : '';
       const customVisible = selectVal === '其他' ? ' visible' : '';
-      const rowHtml = `<tr${isHidden ? ' class="sg-row-hidden"' : ''}>
-        <td class="sg-edit-cell"><input class="sg-cell-input comp-name" type="text" value="${escapeHtml(compName)}" data-cat="${c}" data-idx="${i}" data-field="Component" onchange="sgOnCompEdit(this)"></td>
+      html += `<tr>
+        <td class="sg-edit-cell"><input class="sg-cell-input comp-name" type="text" value="${escapeHtml(comp.Component || '')}" data-cat="${c}" data-idx="${i}" data-field="Component" onchange="sgOnCompEdit(this)"></td>
         <td class="sg-edit-cell"><div class="sg-type-cell"><select data-cat="${c}" data-idx="${i}" data-field="Type" onchange="sgOnTypeChange(this)"><option value="">--</option>${SG_TYPE_OPTIONS.map(o => `<option value="${o}"${selectVal === o ? ' selected' : ''}>${o}</option>`).join('')}</select><input type="text" class="sg-type-custom${customVisible}" value="${escapeHtml(customVal)}" placeholder="自訂類型" data-cat="${c}" data-idx="${i}" data-field="Type" onchange="sgOnCompEdit(this)"></div></td>
         <td class="sg-edit-cell"><input class="sg-cell-input" type="number" min="0" value="${comp.Qty ?? 1}" data-cat="${c}" data-idx="${i}" data-field="Qty" onchange="sgOnCompEdit(this)"></td>
         <td class="sg-edit-cell"><input class="sg-cell-input" type="number" step="any" value="${comp['Power(W)'] ?? ''}" data-cat="${c}" data-idx="${i}" data-field="Power(W)" onchange="sgOnCompEdit(this)"></td>
@@ -3840,37 +3835,11 @@ function sgRenderProjectComponents() {
             <label>Remote<input type="number" min="0" value="${comp.Remote_Qty ?? ''}" placeholder="0" data-cat="${c}" data-idx="${i}" data-field="Remote_Qty" onchange="sgOnCompEdit(this)"></label>
           </div>
         </div></td>
-        <td class="sg-edit-cell" style="text-align:center;">
-          <input type="checkbox" class="hide-checkbox" data-cat="${c}" data-comp="${escapeHtml(compName)}"
-            ${isHidden ? 'checked' : ''} onchange="sgOnHideToggle(this)"
-            title="勾選以隱藏此元件（匯出時不包含）">
-        </td>
+        <td class="sg-edit-cell" style="text-align:center;"><button class="sg-comp-del-btn" onclick="sgDeleteComp('${c}',${i})" title="刪除此元件">&#10060;</button></td>
       </tr>`;
-      if (isHidden) hiddenRows.push(rowHtml);
-      else visibleRows.push(rowHtml);
     });
 
-    html += `<div class="sg-comp-category">
-      <div class="sg-comp-category-header ${catInfo.css}">
-        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
-      </div>
-      <table class="sg-comp-list-table">
-        ${theadHtml}
-        <tbody>${visibleRows.join('')}</tbody>
-      </table>`;
-
-    if (hiddenRows.length > 0) {
-      html += `
-      <details class="sg-hidden-comp-zone">
-        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
-        <table class="sg-comp-list-table">
-          ${theadHtml}
-          <tbody>${hiddenRows.join('')}</tbody>
-        </table>
-      </details>`;
-    }
-
-    html += `
+    html += `</tbody></table>
       <button class="sg-comp-add-btn" onclick="sgAddCompRow('${catKey}')">&#10133; 新增 ${catInfo.label}</button>
     </div>`;
   }
@@ -3881,58 +3850,7 @@ function sgRenderProjectComponents() {
 
   body.innerHTML = html;
   container.style.display = 'block';
-  // Render power summary (high-temp + room-temp groups)
-  if (summaryContainer) {
-    const fmt = v => Number.isInteger(v) ? v : v.toFixed(2);
-    const totalPwr = (catPower.RF || 0) + (catPower.Digital || 0) + (catPower.PWR || 0);
-    const totalPwrRT = (catPowerRT.RF || 0) + (catPowerRT.Digital || 0) + (catPowerRT.PWR || 0);
 
-    const pTemp = sgProjectData.param_temp || '55';
-    const pTempCustom = sgProjectData.param_temp_custom || '';
-    const pBackoff = sgProjectData.param_backoff ?? '';
-    const pDuplex = sgProjectData.param_duplex || 'TDD 75%';
-    const pBackoffRT = sgProjectData.param_backoff_rt ?? '';
-    const pDuplexRT = sgProjectData.param_duplex_rt || 'TDD 75%';
-
-    // High-temp row: params + cards in one line
-    document.getElementById('sg-power-row-hot').innerHTML =
-      `<div class="sg-param-chip">環溫(°C) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
-        `<option value="45"${pTemp === '45' ? ' selected' : ''}>45°C</option>` +
-        `<option value="55"${pTemp === '55' ? ' selected' : ''}>55°C</option>` +
-        `<option value="custom"${pTemp === 'custom' ? ' selected' : ''}>自訂</option>` +
-      `</select><input type="number" class="sg-temp-custom${pTemp === 'custom' ? ' visible' : ''}" id="sg-temp-custom" value="${pTempCustom}" placeholder="℃" onchange="sgOnParamChange()"></div>` +
-      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff" value="${pBackoff}" placeholder="0"> dB</div>` +
-      `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex" onchange="sgOnParamChange()">` +
-        `<option value="TDD 75%"${pDuplex === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
-        `<option value="FDD 100%"${pDuplex === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
-      `</select></div>` +
-      `<div class="sg-power-chip rf">RF : ${fmt(catPower.RF || 0)} W</div>` +
-      `<div class="sg-power-chip digital">Digital : ${fmt(catPower.Digital || 0)} W</div>` +
-      `<div class="sg-power-chip pwr">PWR : ${fmt(catPower.PWR || 0)} W</div>` +
-      `<div class="sg-power-chip total">Total : ${fmt(totalPwr)} W</div>`;
-
-    // Room-temp row: params + cards in one line
-    document.getElementById('sg-power-row-rt').innerHTML =
-      `<div class="sg-param-chip">環溫(°C) <select disabled><option>25°C</option></select></div>` +
-      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff-rt" value="${pBackoffRT || '0'}" placeholder="0"> dB</div>` +
-      `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
-        `<option value="TDD 75%"${pDuplexRT === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
-        `<option value="FDD 100%"${pDuplexRT === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
-      `</select></div>` +
-      `<div class="sg-power-chip rt-rf">RF : ${fmt(catPowerRT.RF || 0)} W</div>` +
-      `<div class="sg-power-chip rt-digital">Digital : ${fmt(catPowerRT.Digital || 0)} W</div>` +
-      `<div class="sg-power-chip rt-pwr">PWR : ${fmt(catPowerRT.PWR || 0)} W</div>` +
-      `<div class="sg-power-chip rt-total">Total : ${fmt(totalPwrRT)} W</div>`;
-
-    // Attach backoff input handler after DOM is ready
-    const boInput = document.getElementById('sg-param-backoff');
-    if (boInput) boInput.addEventListener('change', sgOnParamChange);
-    const boInputRT = document.getElementById('sg-param-backoff-rt');
-    if (boInputRT) boInputRT.addEventListener('change', sgOnParamChange);
-
-    summaryContainer.style.display = 'block';
-  }
-}
 
 /* ---- Type dropdown change handler ---- */
 function sgOnTypeChange(sel) {
@@ -4007,19 +3925,6 @@ function sgOnCompEdit(el) {
 }
 
 /* ---- Delete component from list ---- */
-/* ---- Hide component toggle (Tab 3) ---- */
-function sgOnHideToggle(el) {
-  const cat = el.dataset.cat;
-  const compName = el.dataset.comp;
-  const key = `${cat}|${compName}`;
-  if (el.checked) {
-    sgHiddenComps[key] = true;
-  } else {
-    delete sgHiddenComps[key];
-  }
-  sgRenderProjectComponents();
-}
-
 function sgDeleteComp(cat, idx) {
   if (isProtected) { alert('請先解鎖密碼保護'); return; }
   const fieldKey = SG_CAT_MAP[cat].field;
@@ -4099,8 +4004,7 @@ async function sgSaveProjectComponents() {
       param_backoff: sgProjectData.param_backoff || '',
       param_duplex: sgProjectData.param_duplex || 'TDD 75%',
       param_backoff_rt: sgProjectData.param_backoff_rt || '',
-      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%',
-      sg_hidden_components: sgHiddenComps
+      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%'
     });
 
     // Update library entries for each component
@@ -4132,7 +4036,6 @@ async function sgSaveProjectComponents() {
       status.className = 'save-status err';
       // Reload project data from refreshed dbCache and re-render
       sgProjectData = await dbAdapter.getDoc('projects', sgProjectId);
-      sgHiddenComps = sgProjectData.sg_hidden_components || {};
       sgRenderProjectComponents();
     } else {
       status.textContent = '儲存失敗：' + e.message;
@@ -4289,6 +4192,7 @@ async function handlePickDb() {
 let vdProjectId = null;
 let vdProjectData = null;
 let vdValidationData = {};   // { rf: [...], digital: [...], pwr: [...] }
+let vdHiddenComps = {};
 
 const VD_CAT_MAP = {
   RF:      { field: 'rf_data',      label: 'RF 射頻元件',     css: 'rf',      icon: '&#128225;' },
@@ -4338,6 +4242,7 @@ async function vdLoadProjects() {
       vdProjectId = null;
       vdProjectData = null;
       vdValidationData = {};
+      vdHiddenComps = {};
       vdRender();
     }
 
@@ -4359,6 +4264,7 @@ async function vdOnProjectChange() {
   vdProjectId = select.value || null;
   vdProjectData = null;
   vdValidationData = {};
+  vdHiddenComps = {};
 
   if (!vdProjectId) { vdRender(); return; }
 
@@ -4410,6 +4316,7 @@ async function vdOnProjectChange() {
       vdValidationData[catLower] = result;
     }
 
+    vdHiddenComps = vdProjectData.vd_hidden_components || {};
     vdShowStatus('已載入專案：' + (vdProjectData.project_name || vdProjectId), 'success');
     vdRender();
   } catch (e) {
@@ -4476,16 +4383,7 @@ function vdRender() {
   if (legendEl) legendEl.style.display = 'block';
   let html = '';
 
-  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
-    const catLower = catKey.toLowerCase();
-    const items = vdValidationData[catLower] || [];
-
-    html += `<div class="vd-comp-category">
-      <div class="vd-comp-category-header ${catInfo.css}">
-        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
-      </div>
-      <table class="vd-table">
-        <thead><tr>
+  const theadHtml = `<thead><tr>
           <th>元件名稱</th>
           <th>Pd(估值)</th>
           <th>Pd(實測值)</th>
@@ -4496,10 +4394,19 @@ function vdRender() {
           <th>溫度-相對誤差%<br>(模擬校正-實測)</th>
           <th>絕對溫差<br>(模擬校正-實測)</th>
           <th>備註</th>
-          <th></th>
-        </tr></thead><tbody>`;
+          <th style="width:46px">隱藏</th>
+        </tr></thead>`;
+
+  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+    const catLower = catKey.toLowerCase();
+    const items = vdValidationData[catLower] || [];
+
+    const visibleRows = [];
+    const hiddenRows = [];
 
     items.forEach((item, idx) => {
+      const hideKey = `${catLower}|${item.component}`;
+      const isHidden = !!vdHiddenComps[hideKey];
       const pdVal = item.pd_source === 'rt' ? item.pd_est_rt : item.pd_est;
       const pdErr = vdCalcRelError(pdVal, item.pd_meas);
       const tempErr = vdCalcRelError(item.temp_sim_cal, item.temp_meas);
@@ -4511,7 +4418,7 @@ function vdRender() {
           `<option value="rt"${pdSrc === 'rt' ? ' selected' : ''}>${item.pd_est_rt} (常溫)</option></select>`
         : (item.pd_est || '-');
 
-      html += `<tr>
+      const rowHtml = `<tr${isHidden ? ' class="vd-row-hidden"' : ''}>
         <td class="comp-name-cell readonly-cell">${escapeHtml(item.component)}</td>
         <td class="readonly-cell">${pdCell}</td>
         <td><input type="number" step="any" value="${item.pd_meas !== '' && item.pd_meas !== undefined ? item.pd_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="pd_meas" onchange="vdOnEdit(this)"></td>
@@ -4522,11 +4429,36 @@ function vdRender() {
         <td class="${vdErrorClass(tempErr)}">${vdFmtError(tempErr)}</td>
         <td class="${vdTempDiffClass(tempDiff)}">${vdFmtDiff(tempDiff)}</td>
         <td class="note-cell"><textarea data-cat="${catLower}" data-idx="${idx}" data-field="note" onchange="vdOnEdit(this)">${escapeHtml(item.note || '')}</textarea></td>
-        <td><button class="vd-del-btn" onclick="vdDeleteItem('${catLower}',${idx})" title="移除">&#10060;</button></td>
+        <td style="text-align:center;">
+          <input type="checkbox" class="hide-checkbox" data-cat="${catLower}" data-comp="${escapeAttr(item.component)}"
+            ${isHidden ? 'checked' : ''} onchange="vdOnHideToggle(this)"
+            title="勾選以隱藏此元件">
+        </td>
       </tr>`;
+
+      if (isHidden) hiddenRows.push(rowHtml);
+      else visibleRows.push(rowHtml);
     });
 
-    html += `</tbody></table>`;
+    html += `<div class="vd-comp-category">
+      <div class="vd-comp-category-header ${catInfo.css}">
+        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
+      </div>
+      <table class="vd-table">
+        ${theadHtml}
+        <tbody>${visibleRows.join('')}</tbody>
+      </table>`;
+
+    if (hiddenRows.length > 0) {
+      html += `
+      <details class="sg-hidden-comp-zone">
+        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
+        <table class="vd-table">
+          ${theadHtml}
+          <tbody>${hiddenRows.join('')}</tbody>
+        </table>
+      </details>`;
+    }
 
     // Add component dropdown
     html += `<div class="vd-add-dropdown" style="margin-top:6px;">
@@ -4538,6 +4470,19 @@ function vdRender() {
   }
 
   container.innerHTML = html;
+}
+
+/* ---- Hide toggle (Tab 3 validation) ---- */
+function vdOnHideToggle(el) {
+  const cat = el.dataset.cat;
+  const compName = el.dataset.comp;
+  const key = `${cat}|${compName}`;
+  if (el.checked) {
+    vdHiddenComps[key] = true;
+  } else {
+    delete vdHiddenComps[key];
+  }
+  vdRender();
 }
 
 function vdOnEdit(el) {
@@ -4632,7 +4577,8 @@ async function vdSaveValidation() {
 
   try {
     await dbAdapter.updateDoc('projects', vdProjectId, {
-      validation_data: vdValidationData
+      validation_data: vdValidationData,
+      vd_hidden_components: vdHiddenComps
     });
 
     if (dbAdapter.isSharePointMode()) {
