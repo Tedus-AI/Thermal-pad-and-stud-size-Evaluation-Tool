@@ -4711,7 +4711,7 @@ function vdExportExcel() {
   const wb = XLSX.utils.book_new();
   for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
     const catLower = catKey.toLowerCase();
-    const items = vdValidationData[catLower] || [];
+    const items = (vdValidationData[catLower] || []).filter(i => !vdHiddenComps[`${catLower}|${i.component}`]);
     const headers = ['元件名稱','Pd估值(W)','Pd實測(W)','Pd相對誤差%','溫度初始模擬','溫度實測','溫度模擬校正','溫度相對誤差%','絕對溫差','備註'];
     const rows = items.map(i => [
       i.component||'', i.pd_est??'', i.pd_meas??'', '', i.temp_sim??'', i.temp_meas??'', i.temp_sim_cal??'', '', '', i.note||''
@@ -4729,7 +4729,10 @@ async function vdExportPdf() {
   if (!container) return;
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const hiddenZones = container.querySelectorAll('.sg-hidden-comp-zone');
+  hiddenZones.forEach(el => { el.style.display = 'none'; });
   const canvas = await html2canvas(container, { scale: 1.5, useCORS: true, backgroundColor: '#fff' });
+  hiddenZones.forEach(el => { el.style.display = ''; });
   const imgData = canvas.toDataURL('image/jpeg', 0.92);
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
