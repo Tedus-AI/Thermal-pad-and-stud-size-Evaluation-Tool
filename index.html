@@ -1370,6 +1370,111 @@
   }
   .fb-toast.show { opacity: 1; }
   .fb-toast.err  { background: #c62828; }
+
+  /* --- Action icon buttons --- */
+  .fb-action-btns { display: flex; gap: 4px; justify-content: center; }
+  .fb-action-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 4px 6px; border-radius: 5px; font-size: 1rem; line-height: 1;
+    transition: background 0.15s;
+  }
+  .fb-action-btn:hover { background: #eef2f7; }
+
+  /* --- Image attachment zone --- */
+  .fb-img-zone {
+    border: 2px dashed #c5d9ee; border-radius: 8px;
+    padding: 12px; text-align: center; cursor: pointer;
+    background: #fafcff; transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+  }
+  .fb-img-zone:hover, .fb-img-zone.drag-over {
+    border-color: #2e6bb5; background: #f0f7ff;
+  }
+  .fb-img-zone-hint { font-size: 0.78rem; color: #999; line-height: 1.6; pointer-events: none; }
+  .fb-img-zone-hint strong { color: #2e6bb5; }
+  .fb-att-previews { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .fb-att-thumb {
+    position: relative; width: 68px; height: 68px;
+    border-radius: 6px; overflow: hidden; border: 1px solid #d0d8e0; cursor: pointer;
+  }
+  .fb-att-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fb-att-remove {
+    position: absolute; top: 2px; right: 2px; width: 17px; height: 17px;
+    background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%;
+    font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .fb-att-remove:hover { background: rgba(180,0,0,0.85); }
+
+  /* --- Edit mode banner --- */
+  .fb-edit-banner {
+    display: none; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 9px 14px; margin-bottom: 14px;
+    background: #fff8e1; border: 1.5px solid #ffd54f; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 600; color: #e65100;
+  }
+  .fb-edit-banner.show { display: flex; }
+  .fb-edit-cancel-btn {
+    background: none; border: none; font-size: 0.82rem; font-weight: 600;
+    color: #e65100; cursor: pointer; text-decoration: underline;
+  }
+
+  /* --- Detail / Delete modals --- */
+  .fb-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 1100; display: none; justify-content: center; align-items: center;
+  }
+  .fb-overlay.open { display: flex; }
+  .fb-modal-box {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    width: 680px; max-width: 94vw;
+    max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .fb-modal-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 22px; border-bottom: 1px solid #eef2f7; flex-shrink: 0;
+  }
+  .fb-modal-hd h3 { font-size: 1rem; font-weight: 700; color: #1a3a6b; }
+  .fb-modal-x {
+    background: none; border: none; font-size: 1.5rem; color: #aaa; cursor: pointer; line-height: 1;
+  }
+  .fb-modal-x:hover { color: #333; }
+  .fb-modal-bd { overflow-y: auto; padding: 18px 22px; }
+  table.fb-dtl-tbl { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  .fb-dtl-tbl th {
+    width: 100px; text-align: right; padding: 7px 14px 7px 0;
+    font-weight: 600; color: #666; vertical-align: top; white-space: nowrap;
+  }
+  .fb-dtl-tbl td {
+    padding: 7px 0; color: #333; vertical-align: top;
+    border-bottom: 1px solid #f0f4f8; line-height: 1.6; word-break: break-word;
+  }
+  .fb-dtl-tbl tr:last-child td { border-bottom: none; }
+  .fb-dtl-att-lbl { font-size: 0.82rem; font-weight: 600; color: #666; margin: 14px 0 8px; }
+  .fb-dtl-att-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .fb-dtl-att-img {
+    width: 130px; height: 98px; object-fit: cover; border-radius: 7px;
+    border: 1px solid #d0d8e0; cursor: pointer; transition: transform 0.15s;
+  }
+  .fb-dtl-att-img:hover { transform: scale(1.05); }
+  .fb-confirm-box {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    padding: 28px 30px; width: 360px; max-width: 90vw;
+  }
+  .fb-confirm-box h3 { font-size: 1rem; font-weight: 700; color: #c62828; margin-bottom: 10px; }
+  .fb-confirm-box p { font-size: 0.87rem; color: #555; line-height: 1.6; }
+  .fb-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+  .fb-cancel-btn2 {
+    padding: 8px 18px; border-radius: 7px; font-size: 0.87rem; font-weight: 600;
+    border: 1.5px solid #d0d8e0; background: #fff; color: #555; cursor: pointer;
+  }
+  .fb-cancel-btn2:hover { background: #f5f5f5; }
+  .fb-del-btn {
+    padding: 8px 18px; border-radius: 7px; font-size: 0.87rem; font-weight: 600;
+    border: none; background: #c62828; color: #fff; cursor: pointer;
+  }
+  .fb-del-btn:hover { background: #b71c1c; }
 </style>
 </head>
 <body>
@@ -1380,6 +1485,29 @@
 </div>
 
 <div id="fb-toast" class="fb-toast"></div>
+
+<!-- Feedback Detail Modal -->
+<div id="fb-detail-modal" class="fb-overlay" onclick="if(event.target===this)fbCloseDetail()">
+  <div class="fb-modal-box">
+    <div class="fb-modal-hd">
+      <h3>&#128203; 回饋詳細內容</h3>
+      <button class="fb-modal-x" onclick="fbCloseDetail()">&times;</button>
+    </div>
+    <div class="fb-modal-bd" id="fb-detail-body"></div>
+  </div>
+</div>
+
+<!-- Feedback Delete Confirm Modal -->
+<div id="fb-delete-modal" class="fb-overlay" onclick="if(event.target===this)fbCancelDelete()">
+  <div class="fb-confirm-box">
+    <h3>&#128465; 確認刪除</h3>
+    <p>確定要刪除此筆回饋嗎？<br>此操作無法復原。</p>
+    <div class="fb-confirm-actions">
+      <button class="fb-cancel-btn2" onclick="fbCancelDelete()">取消</button>
+      <button class="fb-del-btn" onclick="fbConfirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
 
 <!-- Lock Warning Modal (SharePoint pessimistic locking) -->
 <div id="lock-warning-modal" class="lock-modal-overlay" style="display:none" onclick="if(event.target===this)closeLockWarning()">
@@ -1700,7 +1828,6 @@
 
     <!-- Section 1: Quick Actions -->
     <div class="fb-section">
-      <div class="fb-section-num">1</div>
       <div class="fb-section-body">
         <div class="fb-quick-grid">
           <div class="fb-quick-card" onclick="fbSetType('Bug')">
@@ -1734,10 +1861,13 @@
 
     <!-- Section 2: Add Feedback Form -->
     <div class="fb-section" id="fb-form-section">
-      <div class="fb-section-num">2</div>
       <div class="fb-section-body">
         <div class="fb-form-card">
-          <h3>新增回饋</h3>
+          <div class="fb-edit-banner" id="fb-edit-banner">
+            &#9999; 編輯模式：正在修改此回饋
+            <button class="fb-edit-cancel-btn" onclick="fbCancelEdit()">取消編輯</button>
+          </div>
+          <h3 id="fb-form-title">新增回饋</h3>
           <div class="fb-form-cols">
 
             <!-- Left: meta fields -->
@@ -1815,12 +1945,19 @@
             <!-- Right: attachment + note + buttons -->
             <div class="fb-form-col-right">
               <div class="fb-f">
-                <label>截圖或附件連結</label>
-                <div class="fb-attach-wrap">
-                  <input type="text" id="fb-attachment-link"
-                    placeholder="請提供檔案連結（可多筆，以逗號分隔）">
-                  <span class="fb-attach-icon">&#128206;</span>
+                <label>截圖或附件</label>
+                <div class="fb-img-zone" id="fb-img-zone"
+                  onclick="document.getElementById('fb-file-input').click()"
+                  ondragover="event.preventDefault();this.classList.add('drag-over')"
+                  ondragleave="this.classList.remove('drag-over')"
+                  ondrop="event.preventDefault();this.classList.remove('drag-over');fbHandleDropFiles(event.dataTransfer.files)">
+                  <div class="fb-img-zone-hint">
+                    &#128247; 點擊選擇 &nbsp;·&nbsp; 拖曳 &nbsp;·&nbsp; 或 <strong>Ctrl+V</strong> 貼上截圖
+                  </div>
                 </div>
+                <input type="file" id="fb-file-input" accept="image/*" multiple
+                  style="display:none" onchange="fbHandleFileInput(this.files)">
+                <div class="fb-att-previews" id="fb-att-previews"></div>
               </div>
               <div class="fb-f" style="flex:1">
                 <label>備註（選填）</label>
@@ -1840,7 +1977,6 @@
 
     <!-- Section 3: Summary -->
     <div class="fb-section">
-      <div class="fb-section-num">3</div>
       <div class="fb-section-body">
         <div class="fb-summary-grid">
           <div class="fb-stat-card">
@@ -1877,7 +2013,6 @@
 
     <!-- Section 4: Feedback List -->
     <div class="fb-section">
-      <div class="fb-section-num">4</div>
       <div class="fb-section-body">
         <div class="fb-list-card">
           <div class="fb-list-toolbar">
@@ -1952,10 +2087,11 @@
                   <th>狀態</th>
                   <th>完成日期</th>
                   <th>處理備註</th>
+                  <th style="text-align:center">操作</th>
                 </tr>
               </thead>
               <tbody id="fb-table-body">
-                <tr class="fb-empty-row"><td colspan="9">
+                <tr class="fb-empty-row"><td colspan="10">
                   <div class="fb-empty-icon">&#128203;</div>
                   <div class="fb-empty-text">載入中...</div>
                 </td></tr>
@@ -4446,6 +4582,9 @@ const FB_SAMPLE_DATA = [
 let fbItems = {};
 let fbFilters = { type: '全部', status: '全部', tab: '全部', priority: '全部', keyword: '' };
 let fbLoaded = false;
+let fbAttachments = [];
+let fbEditingId = null;
+let fbDeleteTargetId = null;
 
 function fbFormatDate(dateStr) {
   if (!dateStr) return '—';
@@ -4528,10 +4667,33 @@ function fbClearForm() {
     if (el) { el.value = ''; el.classList.remove('fb-invalid'); }
   });
   ['fb-title', 'fb-reporter', 'fb-contact', 'fb-description',
-   'fb-current-behavior', 'fb-expected-behavior', 'fb-attachment-link', 'fb-note'].forEach(id => {
+   'fb-current-behavior', 'fb-expected-behavior', 'fb-note'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('fb-invalid'); }
   });
+  fbAttachments = [];
+  fbRenderAttachments();
+  const fi = document.getElementById('fb-file-input');
+  if (fi) fi.value = '';
+  // Auto-fill reporter/contact again after clear
+  const acct = dbAdapter.getAccountInfo();
+  if (acct) {
+    const rep = document.getElementById('fb-reporter');
+    const con = document.getElementById('fb-contact');
+    if (rep) rep.value = acct.name || '';
+    if (con) con.value = acct.email || '';
+  }
+}
+
+function fbCancelEdit() {
+  fbEditingId = null;
+  const banner = document.getElementById('fb-edit-banner');
+  if (banner) banner.classList.remove('show');
+  const title = document.getElementById('fb-form-title');
+  if (title) title.textContent = '新增回饋';
+  const btn = document.getElementById('fb-submit-btn');
+  if (btn) btn.textContent = '送出回饋';
+  fbClearForm();
 }
 
 async function fbSubmitFeedback() {
@@ -4547,9 +4709,7 @@ async function fbSubmitFeedback() {
   });
   if (!valid) { fbShowToast('請填寫所有必填欄位（標記 * 的欄位）', 'err'); return; }
 
-  const now = new Date().toISOString();
-  const id = fbGenId();
-  const item = {
+  const fields = {
     type:              document.getElementById('fb-type').value,
     tab:               document.getElementById('fb-tab-sel').value,
     title:             document.getElementById('fb-title').value.trim(),
@@ -4559,29 +4719,46 @@ async function fbSubmitFeedback() {
     description:       document.getElementById('fb-description').value.trim(),
     current_behavior:  document.getElementById('fb-current-behavior').value.trim(),
     expected_behavior: document.getElementById('fb-expected-behavior').value.trim(),
-    attachment_link:   document.getElementById('fb-attachment-link').value.trim(),
+    attachments:       fbAttachments.slice(),
     note:              document.getElementById('fb-note').value.trim(),
-    status: '待處理', closed_at: '', admin_note: '',
-    created_at: now, updated_at: now
+    updated_at:        new Date().toISOString()
   };
 
   const btn = document.getElementById('fb-submit-btn');
-  btn.disabled = true; btn.textContent = '送出中...';
+  btn.disabled = true;
+
   try {
-    await fbSaveItem(id, item);
-    fbItems[id] = item;
+    if (fbEditingId && fbItems[fbEditingId]) {
+      btn.textContent = '更新中...';
+      Object.assign(fbItems[fbEditingId], fields);
+      await fbSaveItem(fbEditingId, fbItems[fbEditingId]);
+      fbEditingId = null;
+      document.getElementById('fb-edit-banner')?.classList.remove('show');
+      const t = document.getElementById('fb-form-title');
+      if (t) t.textContent = '新增回饋';
+      fbShowToast('回饋已更新！');
+    } else {
+      btn.textContent = '送出中...';
+      const now = new Date().toISOString();
+      const id = fbGenId();
+      const item = { ...fields, status: '待處理', closed_at: '', admin_note: '', created_at: now };
+      await fbSaveItem(id, item);
+      fbItems[id] = item;
+      fbShowToast('回饋已成功送出！感謝您的回報。');
+    }
     fbClearForm();
     fbRenderSummary();
     fbRenderTable();
-    fbShowToast('回饋已成功送出！感謝您的回報。');
   } catch (e) {
-    fbShowToast('送出失敗：' + e.message, 'err');
+    fbShowToast('儲存失敗：' + e.message, 'err');
   }
-  btn.disabled = false; btn.textContent = '送出回饋';
+  btn.disabled = false;
+  btn.textContent = fbEditingId ? '更新回饋' : '送出回饋';
 }
 
 function fbApplyFilters(items) {
   return Object.entries(items).filter(([, item]) => {
+    if (item._deleted) return false;
     if (fbFilters.type !== '全部' && item.type !== fbFilters.type) return false;
     if (fbFilters.status !== '全部' && item.status !== fbFilters.status) return false;
     if (fbFilters.tab !== '全部' && item.tab !== fbFilters.tab) return false;
@@ -4596,7 +4773,7 @@ function fbApplyFilters(items) {
 }
 
 function fbRenderSummary() {
-  const vals = Object.values(fbItems);
+  const vals = Object.values(fbItems).filter(i => !i._deleted);
   const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
   set('fb-stat-pending', vals.filter(i => i.status === '待處理').length);
   set('fb-stat-eval',    vals.filter(i => i.status === '評估中').length);
@@ -4609,7 +4786,7 @@ function fbRenderTable() {
   if (!tbody) return;
   const filtered = fbApplyFilters(fbItems);
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr class="fb-empty-row"><td colspan="9">
+    tbody.innerHTML = `<tr class="fb-empty-row"><td colspan="10">
       <div class="fb-empty-icon">&#128203;</div>
       <div class="fb-empty-text">目前尚無回饋紀錄。<br>當使用者提交 Bug、改善建議或功能需求後，將顯示在此處。</div>
     </td></tr>`;
@@ -4636,7 +4813,14 @@ function fbRenderTable() {
       <td><span class="fb-badge ${fbGetPriorityClass(item.priority)}">${item.priority||'—'}</span></td>
       <td>${statusCell}</td>
       <td style="white-space:nowrap;font-size:0.8rem;color:#666;">${item.closed_at?fbFormatDate(item.closed_at):'—'}</td>
-      <td style="min-width:150px;">${noteCell}</td>
+      <td style="min-width:140px;">${noteCell}</td>
+      <td>
+        <div class="fb-action-btns">
+          <button class="fb-action-btn" title="閱讀" onclick="fbShowDetail('${id}')">&#128065;</button>
+          <button class="fb-action-btn" title="修改" onclick="fbEditItem('${id}')">&#9999;&#65039;</button>
+          <button class="fb-action-btn" title="刪除" onclick="fbDeleteItem('${id}')">&#128465;</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -4689,9 +4873,184 @@ function fbShowToast(msg, type) {
   t._fbTimer = setTimeout(() => { t.className = 'fb-toast'; }, 3500);
 }
 
+/* ---- Image attachment helpers ---- */
+function fbCompressImage(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1200, MAX_H = 900;
+        let w = img.width, h = img.height;
+        if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+        if (h > MAX_H) { w = Math.round(w * MAX_H / h); h = MAX_H; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve({ name: file.name || 'screenshot.jpg', data: canvas.toDataURL('image/jpeg', 0.72) });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function fbHandleImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const att = await fbCompressImage(file);
+  fbAttachments.push(att);
+  fbRenderAttachments();
+}
+
+function fbHandleFileInput(files) {
+  Array.from(files).forEach(fbHandleImageFile);
+  const fi = document.getElementById('fb-file-input');
+  if (fi) fi.value = '';
+}
+
+function fbHandleDropFiles(files) {
+  Array.from(files).forEach(fbHandleImageFile);
+}
+
+function fbRemoveAttachment(idx) {
+  fbAttachments.splice(idx, 1);
+  fbRenderAttachments();
+}
+
+function fbRenderAttachments() {
+  const el = document.getElementById('fb-att-previews');
+  if (!el) return;
+  el.innerHTML = fbAttachments.map((att, i) => `
+    <div class="fb-att-thumb" onclick="fbOpenImage('${att.data}')">
+      <img src="${att.data}" alt="${att.name}">
+      <button class="fb-att-remove" type="button"
+        onclick="event.stopPropagation();fbRemoveAttachment(${i})">&#215;</button>
+    </div>`).join('');
+}
+
+function fbOpenImage(src) {
+  const w = window.open('', '_blank');
+  w.document.write(`<html><body style="margin:0;background:#000"><img src="${src}" style="max-width:100%;display:block;margin:auto"></body></html>`);
+}
+
+function fbInitPasteListener() {
+  document.addEventListener('paste', e => {
+    const fbTab = document.getElementById('tab-feedback');
+    if (!fbTab || !fbTab.classList.contains('active')) return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) { fbHandleImageFile(file); e.preventDefault(); }
+        break;
+      }
+    }
+  });
+}
+
+/* ---- Detail / Edit / Delete ---- */
+function fbShowDetail(id) {
+  const item = fbItems[id];
+  if (!item) return;
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const row = (label, val) => val
+    ? `<tr><th>${label}</th><td>${val}</td></tr>` : '';
+  document.getElementById('fb-detail-body').innerHTML = `
+    <table class="fb-dtl-tbl">
+      ${row('類型',  `<span class="fb-badge ${fbGetTypeClass(item.type)}">${esc(item.type)}</span>`)}
+      ${row('發生分頁', esc(item.tab))}
+      ${row('標題',  `<strong>${esc(item.title)}</strong>`)}
+      ${row('優先度', `<span class="fb-badge ${fbGetPriorityClass(item.priority)}">${esc(item.priority)}</span>`)}
+      ${row('狀態',  `<span class="fb-badge ${fbGetStatusClass(item.status)}">${esc(item.status)}</span>`)}
+      ${row('提出人', esc(item.reporter))}
+      ${row('聯絡方式', esc(item.contact))}
+      ${row('提出日期', fbFormatDate(item.created_at))}
+      ${item.closed_at ? row('完成日期', fbFormatDate(item.closed_at)) : ''}
+      ${row('詳細說明', `<span style="white-space:pre-wrap">${esc(item.description)}</span>`)}
+      ${item.current_behavior ? row('目前狀況', `<span style="white-space:pre-wrap">${esc(item.current_behavior)}</span>`) : ''}
+      ${item.expected_behavior ? row('期望結果', `<span style="white-space:pre-wrap">${esc(item.expected_behavior)}</span>`) : ''}
+      ${item.note ? row('備註', `<span style="white-space:pre-wrap">${esc(item.note)}</span>`) : ''}
+      ${item.admin_note ? row('處理備註', `<span style="white-space:pre-wrap">${esc(item.admin_note)}</span>`) : ''}
+    </table>
+    ${(item.attachments && item.attachments.length) ? `
+      <div class="fb-dtl-att-lbl">截圖/附件（${item.attachments.length} 張）</div>
+      <div class="fb-dtl-att-grid">
+        ${item.attachments.map(a => `<img src="${a.data}" alt="${esc(a.name)}" class="fb-dtl-att-img" onclick="fbOpenImage('${a.data}')">`).join('')}
+      </div>` : ''}`;
+  document.getElementById('fb-detail-modal').classList.add('open');
+}
+
+function fbCloseDetail() {
+  document.getElementById('fb-detail-modal').classList.remove('open');
+}
+
+function fbEditItem(id) {
+  const item = fbItems[id];
+  if (!item) return;
+  fbEditingId = id;
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val || ''; };
+  set('fb-type',             item.type);
+  set('fb-tab-sel',          item.tab);
+  set('fb-title',            item.title);
+  set('fb-priority',         item.priority);
+  set('fb-reporter',         item.reporter);
+  set('fb-contact',          item.contact);
+  set('fb-description',      item.description);
+  set('fb-current-behavior', item.current_behavior);
+  set('fb-expected-behavior',item.expected_behavior);
+  set('fb-note',             item.note);
+  fbAttachments = (item.attachments || []).slice();
+  fbRenderAttachments();
+  const banner = document.getElementById('fb-edit-banner');
+  if (banner) banner.classList.add('show');
+  const title = document.getElementById('fb-form-title');
+  if (title) title.textContent = '修改回饋';
+  const btn = document.getElementById('fb-submit-btn');
+  if (btn) btn.textContent = '更新回饋';
+  document.getElementById('fb-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fbDeleteItem(id) {
+  fbDeleteTargetId = id;
+  document.getElementById('fb-delete-modal').classList.add('open');
+}
+
+function fbCancelDelete() {
+  fbDeleteTargetId = null;
+  document.getElementById('fb-delete-modal').classList.remove('open');
+}
+
+async function fbConfirmDelete() {
+  const id = fbDeleteTargetId;
+  fbDeleteTargetId = null;
+  document.getElementById('fb-delete-modal').classList.remove('open');
+  if (!id || !fbItems[id]) return;
+  try {
+    fbItems[id]._deleted = true;
+    await fbSaveItem(id, fbItems[id]);
+    fbRenderSummary();
+    fbRenderTable();
+    fbShowToast('回饋已刪除');
+  } catch (e) {
+    fbItems[id]._deleted = false;
+    fbShowToast('刪除失敗：' + e.message, 'err');
+  }
+}
+
+/* ---- Tab activation ---- */
 async function fbOnTabActivate() {
   if (!fbLoaded) {
     await fbLoadItems();
+    fbInitPasteListener();
+  }
+  // Auto-fill reporter/contact from logged-in account
+  const acct = dbAdapter.getAccountInfo();
+  if (acct) {
+    const rep = document.getElementById('fb-reporter');
+    const con = document.getElementById('fb-contact');
+    if (rep && !rep.value) rep.value = acct.name || '';
+    if (con && !con.value) con.value = acct.email || '';
   }
   fbRenderSummary();
   fbRenderTable();
