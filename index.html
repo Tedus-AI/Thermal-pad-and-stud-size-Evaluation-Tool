@@ -1560,6 +1560,50 @@
     border: none; background: #c62828; color: #fff; cursor: pointer;
   }
   .fb-del-btn:hover { background: #b71c1c; }
+  .fb-img-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+  }
+  .fb-img-lightbox.open { display: flex; }
+  .fb-img-lightbox-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .fb-img-lightbox-inner img {
+    display: block;
+    max-width: 85vw;
+    max-height: 85vh;
+    border-radius: 6px;
+    object-fit: contain;
+  }
+  .fb-img-lightbox-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #333;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3001;
+  }
+  .fb-img-lightbox-close:hover { background: #c0392b; }
 </style>
 </head>
 <body>
@@ -1591,6 +1635,13 @@
       <button class="fb-cancel-btn2" onclick="fbCancelDelete()">取消</button>
       <button class="fb-del-btn" onclick="fbConfirmDelete()">確認刪除</button>
     </div>
+  </div>
+</div>
+
+<div id="fb-img-lightbox" class="fb-img-lightbox" onclick="fbCloseLightbox()">
+  <div class="fb-img-lightbox-inner" onclick="event.stopPropagation()">
+    <button class="fb-img-lightbox-close" onclick="fbCloseLightbox()">&#10005;</button>
+    <img id="fb-img-lightbox-img" src="" alt="截圖">
   </div>
 </div>
 
@@ -5118,8 +5169,15 @@ function fbRenderAttachments() {
 }
 
 function fbOpenImage(src) {
-  const w = window.open('', '_blank');
-  w.document.write(`<html><body style="margin:0;background:#000"><img src="${src}" style="max-width:100%;display:block;margin:auto"></body></html>`);
+  const lb = document.getElementById('fb-img-lightbox');
+  if (!lb) return;
+  document.getElementById('fb-img-lightbox-img').src = src;
+  lb.classList.add('open');
+}
+
+function fbCloseLightbox() {
+  document.getElementById('fb-img-lightbox')?.classList.remove('open');
+  document.getElementById('fb-img-lightbox-img').src = '';
 }
 
 function fbInitPasteListener() {
@@ -5135,6 +5193,9 @@ function fbInitPasteListener() {
         break;
       }
     }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fbCloseLightbox();
   });
 }
 
