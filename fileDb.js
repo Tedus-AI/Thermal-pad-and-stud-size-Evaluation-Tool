@@ -92,6 +92,14 @@ const fileDb = {
     await this._writeFile();
   },
 
+  async deleteDoc(colName, docId) {
+    this._assertReady();
+    if (dbCache[colName]) {
+      delete dbCache[colName][docId];
+      await this._writeFile();
+    }
+  },
+
   async getProjectsSorted() {
     this._assertReady();
     const projects = dbCache['projects'] ?? {};

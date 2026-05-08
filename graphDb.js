@@ -289,6 +289,13 @@ const graphDb = {
     await this._writeFile();
   },
 
+  async deleteDoc(colName, docId) {
+    if (dbCache[colName]) {
+      delete dbCache[colName][docId];
+      await this._writeFile();
+    }
+  },
+
   async getProjectsSorted() {
     const projects = dbCache['projects'] ?? {};
     return Object.entries(projects)
