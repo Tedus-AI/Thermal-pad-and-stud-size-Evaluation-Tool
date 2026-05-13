@@ -3117,6 +3117,8 @@ function sgRenderProjectComponents() {
 
   // Render power summary (high-temp + room-temp groups)
   if (summaryContainer) {
+    summaryContainer.style.display = 'block';
+    try {
     const fmt = v => Number.isInteger(v) ? v : v.toFixed(2);
     const totalPwr = (catPower.RF || 0) + (catPower.Digital || 0) + (catPower.PWR || 0);
     const totalPwrRT = (catPowerRT.RF || 0) + (catPowerRT.Digital || 0) + (catPowerRT.PWR || 0);
@@ -3128,8 +3130,10 @@ function sgRenderProjectComponents() {
     const pBackoffRT = sgProjectData.param_backoff_rt ?? '';
     const pDuplexRT = sgProjectData.param_duplex_rt || 'TDD 75%';
 
-    // High-temp row: params + cards in one line
-    document.getElementById('sg-power-row-hot').innerHTML =
+    const hotRow = document.getElementById('sg-power-row-hot');
+    const rtRow = document.getElementById('sg-power-row-rt');
+
+    if (hotRow) hotRow.innerHTML =
       `<div class="sg-param-chip">環溫(°C) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
         `<option value="45"${pTemp === '45' ? ' selected' : ''}>45°C</option>` +
         `<option value="55"${pTemp === '55' ? ' selected' : ''}>55°C</option>` +
@@ -3145,8 +3149,7 @@ function sgRenderProjectComponents() {
       `<div class="sg-power-chip pwr">PWR : ${fmt(catPower.PWR || 0)} W</div>` +
       `<div class="sg-power-chip total">Total : ${fmt(totalPwr)} W</div>`;
 
-    // Room-temp row: params + cards in one line
-    document.getElementById('sg-power-row-rt').innerHTML =
+    if (rtRow) rtRow.innerHTML =
       `<div class="sg-param-chip">環溫(°C) <select disabled><option>25°C</option></select></div>` +
       `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff-rt" value="${pBackoffRT || '0'}" placeholder="0"> dB</div>` +
       `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
@@ -3158,13 +3161,11 @@ function sgRenderProjectComponents() {
       `<div class="sg-power-chip rt-pwr">PWR : ${fmt(catPowerRT.PWR || 0)} W</div>` +
       `<div class="sg-power-chip rt-total">Total : ${fmt(totalPwrRT)} W</div>`;
 
-    // Attach backoff input handler after DOM is ready
     const boInput = document.getElementById('sg-param-backoff');
     if (boInput) boInput.addEventListener('change', sgOnParamChange);
     const boInputRT = document.getElementById('sg-param-backoff-rt');
     if (boInputRT) boInputRT.addEventListener('change', sgOnParamChange);
-
-    summaryContainer.style.display = 'block';
+    } catch (err) { console.warn('[sgRender] power summary error:', err); }
   }
 }
 
