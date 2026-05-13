@@ -746,6 +746,85 @@
     min-width: 40px;
   }
 
+  /* Hidden component collapsible zone (Tab 2 & Tab 3) */
+  .hidden-comp-zone {
+    margin-top: 8px;
+    border: 1px solid #e0c080;
+    border-radius: 6px;
+    background: #fffbf0;
+    overflow: hidden;
+  }
+  .hidden-comp-zone > summary {
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #8a6d00;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hidden-comp-zone > summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform 0.18s;
+  }
+  .hidden-comp-zone[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  .hidden-comp-zone > summary:hover {
+    background: #fff3cd;
+  }
+  .hidden-comp-zone[open] > summary {
+    border-bottom: 1px solid #e0c080;
+    border-radius: 6px 6px 0 0;
+  }
+  .hidden-comp-zone .comp-table-wrap {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+  .sg-hidden-comp-zone {
+    margin-top: 6px;
+    border: 1px solid #e0c080;
+    border-radius: 6px;
+    background: #fffbf0;
+    overflow: hidden;
+  }
+  .sg-hidden-comp-zone > summary {
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #8a6d00;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sg-hidden-comp-zone > summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform 0.18s;
+  }
+  .sg-hidden-comp-zone[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  .sg-hidden-comp-zone > summary:hover {
+    background: #fff3cd;
+  }
+  .sg-hidden-comp-zone[open] > summary {
+    border-bottom: 1px solid #e0c080;
+    border-radius: 6px 6px 0 0;
+  }
+  .sg-hidden-comp-zone table {
+    margin: 0;
+    border-radius: 0;
+  }
+
   /* Export buttons */
   .export-toolbar {
     display: flex;
@@ -1088,6 +1167,10 @@
     font-size: 0.75rem; cursor: pointer; background: transparent; color: #c0392b;
   }
   .vd-del-btn:hover { background: #fde8e8; }
+  .vd-row-hidden td, .vd-row-hidden th {
+    opacity: 0.4;
+    text-decoration: line-through;
+  }
 
   .sg-comp-del-btn {
     padding: 3px 8px;
@@ -1168,6 +1251,359 @@
   .sg-param-chip input { width: 50px; }
   .sg-param-chip input.sg-temp-custom { width: 55px; display: none; }
   .sg-param-chip input.sg-temp-custom.visible { display: inline-block; }
+
+  /* ===== Feedback Tab ===== */
+  .fb-page-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+  }
+  .fb-page-icon {
+    width: 48px; height: 48px; border-radius: 50%; background: #2e6bb5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; color: #fff; flex-shrink: 0;
+  }
+  .fb-page-header h2 { font-size: 1.4rem; font-weight: 700; color: #1a3a6b; margin-bottom: 3px; }
+  .fb-page-header p  { font-size: 0.88rem; color: #777; }
+
+  .fb-section {
+    display: flex; align-items: flex-start; gap: 16px; margin-bottom: 22px;
+  }
+  .fb-section-num {
+    width: 30px; height: 30px; border-radius: 50%; background: #2e6bb5;
+    color: #fff; font-weight: 700; font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 4px;
+  }
+  .fb-section-body { flex: 1; min-width: 0; }
+
+  .fb-quick-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  }
+  @media (max-width: 1000px) { .fb-quick-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 640px)  { .fb-quick-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .fb-quick-card {
+    background: #fff; border: 1.5px solid #d6e4f0; border-radius: 10px;
+    padding: 14px; display: flex; align-items: center; gap: 10px;
+    cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  }
+  .fb-quick-card:hover {
+    border-color: #2e6bb5; background: #f0f7ff;
+    box-shadow: 0 3px 10px rgba(46,107,181,0.15);
+  }
+  .fb-qc-icon { font-size: 1.25rem; flex-shrink: 0; }
+  .fb-qc-text { flex: 1; font-size: 0.86rem; font-weight: 600; color: #1a3a6b; line-height: 1.3; }
+  .fb-qc-arrow { color: #aaa; font-size: 1rem; }
+
+  .fb-form-card {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 22px 24px;
+  }
+  .fb-form-card > h3 { font-size: 0.95rem; font-weight: 700; color: #1a3a6b; margin-bottom: 16px; }
+  .fb-form-cols { display: flex; gap: 20px; }
+  @media (max-width: 900px) { .fb-form-cols { flex-direction: column; } }
+  .fb-form-col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .fb-form-col-right { width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+  @media (max-width: 900px) { .fb-form-col-right { width: 100%; } }
+
+  .fb-f label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+  .fb-f label .req { color: #e53935; }
+  .fb-f input, .fb-f select, .fb-f textarea {
+    width: 100%; padding: 8px 11px;
+    border: 1.5px solid #d0d8e0; border-radius: 7px;
+    font-size: 0.88rem; color: #333; background: #fff; outline: none; font-family: inherit;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .fb-f input:focus, .fb-f select:focus, .fb-f textarea:focus {
+    border-color: #2e6bb5; box-shadow: 0 0 0 3px rgba(46,107,181,0.1);
+  }
+  .fb-f input.fb-invalid, .fb-f select.fb-invalid, .fb-f textarea.fb-invalid {
+    border-color: #e53935; background: #fff8f8;
+  }
+  .fb-f textarea { resize: vertical; }
+  .fb-attach-wrap { position: relative; }
+  .fb-attach-wrap input { padding-right: 32px; }
+  .fb-attach-icon {
+    position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+    color: #aaa; font-size: 0.9rem; pointer-events: none;
+  }
+  .fb-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+  .fb-btn-clear {
+    padding: 8px 20px; border-radius: 7px; font-size: 0.88rem; font-weight: 600;
+    border: 1.5px solid #d0d8e0; background: #fff; color: #555; cursor: pointer;
+    transition: background 0.18s;
+  }
+  .fb-btn-clear:hover { background: #f0f0f0; }
+  .fb-btn-submit {
+    padding: 8px 20px; border-radius: 7px; font-size: 0.88rem; font-weight: 600;
+    border: none; background: #2e6bb5; color: #fff; cursor: pointer;
+    transition: background 0.18s;
+  }
+  .fb-btn-submit:hover { background: #245a9a; }
+  .fb-btn-submit:disabled { background: #a0b8d8; cursor: not-allowed; }
+
+  .fb-summary-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  @media (max-width: 680px) { .fb-summary-grid { grid-template-columns: repeat(2, 1fr); } }
+  .fb-stat-card {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    padding: 18px 20px; display: flex; align-items: center; gap: 14px;
+  }
+  .fb-stat-icon { font-size: 1.7rem; }
+  .fb-stat-label { font-size: 0.8rem; font-weight: 600; color: #888; margin-bottom: 2px; }
+  .fb-stat-count { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+  .fb-stat-count.clr-blue   { color: #2e6bb5; }
+  .fb-stat-count.clr-orange { color: #e65100; }
+  .fb-stat-count.clr-green  { color: #217346; }
+  .fb-stat-count.clr-purple { color: #7b1fa2; }
+
+  .fb-list-card {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden;
+  }
+  .fb-list-toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    padding: 14px 20px; border-bottom: 1px solid #eef2f7;
+  }
+  .fb-list-toolbar h3 { font-size: 0.95rem; font-weight: 700; color: #1a3a6b; }
+  .fb-filter-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1; justify-content: flex-end; }
+  .fb-filter-item { display: flex; align-items: center; gap: 4px; }
+  .fb-filter-item > span { font-size: 0.8rem; font-weight: 600; color: #666; white-space: nowrap; }
+  .fb-filter-item select {
+    padding: 5px 9px; border: 1.5px solid #d0d8e0; border-radius: 6px;
+    font-size: 0.82rem; color: #444; background: #fff; outline: none; cursor: pointer;
+  }
+  .fb-filter-item select:focus { border-color: #2e6bb5; }
+  .fb-search-box {
+    display: flex; align-items: center;
+    border: 1.5px solid #d0d8e0; border-radius: 6px; background: #fff;
+  }
+  .fb-search-box input {
+    padding: 5px 9px; border: none; outline: none;
+    font-size: 0.82rem; width: 160px; color: #333; font-family: inherit;
+  }
+  .fb-search-icon { padding: 0 7px; color: #aaa; }
+  .fb-export-btn {
+    padding: 5px 13px; border: 1.5px solid #d0d8e0; border-radius: 6px;
+    background: #fff; font-size: 0.82rem; font-weight: 600; color: #555;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    white-space: nowrap; transition: background 0.15s;
+  }
+  .fb-export-btn:hover { background: #f0f4f8; }
+  .fb-table-wrap { overflow-x: auto; }
+  table.fb-tbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  .fb-tbl th {
+    padding: 9px 14px; background: #f5f8fb;
+    font-weight: 700; font-size: 0.78rem; color: #666;
+    border-bottom: 2px solid #e2eaf3; text-align: left; white-space: nowrap;
+  }
+  .fb-tbl td {
+    padding: 9px 14px; border-bottom: 1px solid #eef2f7;
+    vertical-align: middle; color: #333;
+  }
+  .fb-tbl tr:last-child td { border-bottom: none; }
+  .fb-tbl tr:hover td { background: #f8fafd; }
+
+  .fb-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.74rem; font-weight: 700; white-space: nowrap;
+  }
+  .fb-badge.tb { background: #fde8e8; color: #c00000; }
+  .fb-badge.ti { background: #fff3e0; color: #e65100; }
+  .fb-badge.tf { background: #e8f5e9; color: #217346; }
+  .fb-badge.td { background: #e8eaf6; color: #3949ab; }
+  .fb-badge.ta { background: #f3e5f5; color: #7b1fa2; }
+  .fb-badge.to { background: #f5f5f5; color: #666; }
+  .fb-badge.sp { background: #e3f0fb; color: #1565c0; }
+  .fb-badge.se { background: #fff3e0; color: #e65100; }
+  .fb-badge.ss { background: #e8eaf6; color: #3949ab; }
+  .fb-badge.sf { background: #e8f5e9; color: #2e7d32; }
+  .fb-badge.sd { background: #f3e5f5; color: #7b1fa2; }
+  .fb-badge.sr { background: #f5f5f5; color: #757575; }
+  .fb-badge.pl { background: #e3f2fd; color: #1976d2; }
+  .fb-badge.pm { background: #fff3e0; color: #e65100; }
+  .fb-badge.ph { background: #fde8e8; color: #c62828; }
+  .fb-badge.pu { background: #b71c1c; color: #fff; }
+
+  .fb-empty-row td { padding: 48px 20px; text-align: center; }
+  .fb-empty-icon { font-size: 2rem; margin-bottom: 8px; }
+  .fb-empty-text { font-size: 0.9rem; color: #aaa; line-height: 1.7; }
+
+  .fb-admin-note-inp {
+    width: 100%; font-size: 0.8rem; padding: 3px 7px;
+    border: 1px solid #d0d8e0; border-radius: 4px;
+    outline: none; font-family: inherit;
+  }
+  .fb-admin-note-inp:focus { border-color: #2e6bb5; }
+  .fb-status-sel {
+    font-size: 0.8rem; padding: 3px 7px;
+    border: 1px solid #d0d8e0; border-radius: 4px;
+    background: #fff; outline: none; cursor: pointer;
+  }
+
+  .fb-toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: #2e6bb5; color: #fff;
+    padding: 11px 20px; border-radius: 8px;
+    font-size: 0.88rem; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  .fb-toast.show { opacity: 1; }
+  .fb-toast.err  { background: #c62828; }
+
+  /* --- Action icon buttons --- */
+  .fb-action-btns { display: flex; gap: 4px; justify-content: center; }
+  .fb-action-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 4px 6px; border-radius: 5px; font-size: 1rem; line-height: 1;
+    transition: background 0.15s;
+  }
+  .fb-action-btn:hover { background: #eef2f7; }
+  .fb-teams-btn { background: #ede8f6; }
+  .fb-teams-btn:hover { background: #6264A7; color: white; }
+
+  /* --- Image attachment zone --- */
+  .fb-img-zone {
+    border: 2px dashed #c5d9ee; border-radius: 8px;
+    padding: 12px; text-align: center; cursor: pointer;
+    background: #fafcff; transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+  }
+  .fb-img-zone:hover, .fb-img-zone.drag-over {
+    border-color: #2e6bb5; background: #f0f7ff;
+  }
+  .fb-img-zone-hint { font-size: 0.78rem; color: #999; line-height: 1.6; pointer-events: none; }
+  .fb-img-zone-hint strong { color: #2e6bb5; }
+  .fb-att-previews { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .fb-att-thumb {
+    position: relative; width: 68px; height: 68px;
+    border-radius: 6px; overflow: hidden; border: 1px solid #d0d8e0; cursor: pointer;
+  }
+  .fb-att-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fb-att-remove {
+    position: absolute; top: 2px; right: 2px; width: 17px; height: 17px;
+    background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%;
+    font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .fb-att-remove:hover { background: rgba(180,0,0,0.85); }
+
+  /* --- Edit mode banner --- */
+  .fb-edit-banner {
+    display: none; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 9px 14px; margin-bottom: 14px;
+    background: #fff8e1; border: 1.5px solid #ffd54f; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 600; color: #e65100;
+  }
+  .fb-edit-banner.show { display: flex; }
+  .fb-edit-cancel-btn {
+    background: none; border: none; font-size: 0.82rem; font-weight: 600;
+    color: #e65100; cursor: pointer; text-decoration: underline;
+  }
+
+  /* --- Detail / Delete modals --- */
+  .fb-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 1100; display: none; justify-content: center; align-items: center;
+  }
+  .fb-overlay.open { display: flex; }
+  .fb-modal-box {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    width: 680px; max-width: 94vw;
+    max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .fb-modal-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 22px; border-bottom: 1px solid #eef2f7; flex-shrink: 0;
+  }
+  .fb-modal-hd h3 { font-size: 1rem; font-weight: 700; color: #1a3a6b; }
+  .fb-modal-x {
+    background: none; border: none; font-size: 1.5rem; color: #aaa; cursor: pointer; line-height: 1;
+  }
+  .fb-modal-x:hover { color: #333; }
+  .fb-modal-bd { overflow-y: auto; padding: 18px 22px; }
+  table.fb-dtl-tbl { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  .fb-dtl-tbl th {
+    width: 100px; text-align: right; padding: 7px 14px 7px 0;
+    font-weight: 600; color: #666; vertical-align: top; white-space: nowrap;
+  }
+  .fb-dtl-tbl td {
+    padding: 7px 0; color: #333; vertical-align: top;
+    border-bottom: 1px solid #f0f4f8; line-height: 1.6; word-break: break-word;
+  }
+  .fb-dtl-tbl tr:last-child td { border-bottom: none; }
+  .fb-dtl-att-lbl { font-size: 0.82rem; font-weight: 600; color: #666; margin: 14px 0 8px; }
+  .fb-dtl-att-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .fb-dtl-att-img {
+    width: 130px; height: 98px; object-fit: cover; border-radius: 7px;
+    border: 1px solid #d0d8e0; cursor: pointer; transition: transform 0.15s;
+  }
+  .fb-dtl-att-img:hover { transform: scale(1.05); }
+  .fb-confirm-box {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    padding: 28px 30px; width: 360px; max-width: 90vw;
+  }
+  .fb-confirm-box h3 { font-size: 1rem; font-weight: 700; color: #c62828; margin-bottom: 10px; }
+  .fb-confirm-box p { font-size: 0.87rem; color: #555; line-height: 1.6; }
+  .fb-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+  .fb-cancel-btn2 {
+    padding: 8px 18px; border-radius: 7px; font-size: 0.87rem; font-weight: 600;
+    border: 1.5px solid #d0d8e0; background: #fff; color: #555; cursor: pointer;
+  }
+  .fb-cancel-btn2:hover { background: #f5f5f5; }
+  .fb-del-btn {
+    padding: 8px 18px; border-radius: 7px; font-size: 0.87rem; font-weight: 600;
+    border: none; background: #c62828; color: #fff; cursor: pointer;
+  }
+  .fb-del-btn:hover { background: #b71c1c; }
+  .fb-img-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+  }
+  .fb-img-lightbox.open { display: flex; }
+  .fb-img-lightbox-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .fb-img-lightbox-inner img {
+    display: block;
+    max-width: 85vw;
+    max-height: 85vh;
+    border-radius: 6px;
+    object-fit: contain;
+  }
+  .fb-img-lightbox-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #333;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3001;
+  }
+  .fb-img-lightbox-close:hover { background: #c0392b; }
 </style>
 </head>
 <body>
@@ -1175,6 +1611,38 @@
   <button class="conflict-close" onclick="this.parentElement.classList.remove('visible')">&times;</button>
   <div class="conflict-title">&#9888;&#65039; 儲存失敗：版本衝突</div>
   <div>資料已被他人更新。系統已載入最新版本並重新整理畫面。<br>請確認內容後，重新進行修改並儲存。</div>
+</div>
+
+<div id="fb-toast" class="fb-toast"></div>
+
+<!-- Feedback Detail Modal -->
+<div id="fb-detail-modal" class="fb-overlay" onclick="if(event.target===this)fbCloseDetail()">
+  <div class="fb-modal-box">
+    <div class="fb-modal-hd">
+      <h3>&#128203; 回饋詳細內容</h3>
+      <button class="fb-modal-x" onclick="fbCloseDetail()">&times;</button>
+    </div>
+    <div class="fb-modal-bd" id="fb-detail-body"></div>
+  </div>
+</div>
+
+<!-- Feedback Delete Confirm Modal -->
+<div id="fb-delete-modal" class="fb-overlay" onclick="if(event.target===this)fbCancelDelete()">
+  <div class="fb-confirm-box">
+    <h3>&#128465; 確認刪除</h3>
+    <p>確定要刪除此筆回饋嗎？<br>此操作無法復原。</p>
+    <div class="fb-confirm-actions">
+      <button class="fb-cancel-btn2" onclick="fbCancelDelete()">取消</button>
+      <button class="fb-del-btn" onclick="fbConfirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<div id="fb-img-lightbox" class="fb-img-lightbox" onclick="fbCloseLightbox()">
+  <div class="fb-img-lightbox-inner" onclick="event.stopPropagation()">
+    <button class="fb-img-lightbox-close" onclick="fbCloseLightbox()">&#10005;</button>
+    <img id="fb-img-lightbox-img" src="" alt="截圖">
+  </div>
 </div>
 
 <!-- Lock Warning Modal (SharePoint pessimistic locking) -->
@@ -1217,6 +1685,7 @@
     <button class="tab-btn" onclick="switchTab('complist')">TH/ME-專案元件清單</button>
     <button class="tab-btn" onclick="switchTab('validation')">模擬與實測驗證</button>
     <button class="tab-btn" onclick="switchTab('calc')">凸台&amp;TIM尺寸速算</button>
+    <button class="tab-btn" onclick="switchTab('feedback')">&#128172; 使用者建議與改善</button>
   </div>
 
   <!-- ==================== Tab 3: 模擬與實測驗證 ==================== -->
@@ -1241,6 +1710,8 @@
             </select>
           </div>
           <button class="btn btn-primary" id="vd-load-btn" onclick="vdLoadProjects()">載入專案</button>
+          <button class="btn-export excel" onclick="vdExportExcel()" id="vd-export-excel-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128202; 匯出 Excel</button>
+          <button class="btn-export pdf" onclick="vdExportPdf()" id="vd-export-pdf-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128196; 匯出 PDF</button>
           <button class="btn btn-save" id="vd-save-btn" onclick="vdSaveValidation()" disabled>儲存驗證資料</button>
           <span id="vd-save-status" class="save-status"></span>
         </div>
@@ -1444,7 +1915,9 @@
             <div style="font-size:0.9rem; font-weight:700; color:#1a3a6b;">
               目前專案元件清單
             </div>
-            <div class="sg-comp-save-bar" style="margin:0; padding:0;">
+            <div class="sg-comp-save-bar" style="margin:0; padding:0; gap:8px; display:flex; align-items:center; flex-wrap:wrap;">
+              <button class="btn-export excel" onclick="sgExportExcel()" id="sg-export-excel-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128202; 匯出 Excel</button>
+              <button class="btn-export pdf" onclick="sgExportPdf()" id="sg-export-pdf-btn" style="padding:7px 14px; font-size:0.82rem;" disabled>&#128196; 匯出 PDF</button>
               <button class="btn btn-save" onclick="sgSaveProjectComponents()" id="sg-comp-save-btn" style="padding:7px 18px; font-size:0.85rem;" disabled>儲存元件變更</button>
               <span id="sg-comp-save-status" class="save-status"></span>
             </div>
@@ -1469,6 +1942,303 @@
       <div class="icon">&#128230;</div>
       <p>請先載入專案列表並選擇專案，即可載入元件清單。</p>
       <p style="margin-top:8px; font-size:0.85rem; color:#ccc;">資料庫與 RRU-Component-Spec-List-Auto-Generator 共用</p>
+    </div>
+
+  </div>
+
+  <!-- ==================== Tab 5: 使用者建議與改善 ==================== -->
+  <div id="tab-feedback" class="tab-content">
+
+    <!-- Password Protection Bar (Feedback Tab) -->
+    <div id="fb-protect-bar" class="protect-bar">
+      <span class="protect-status" id="fb-protect-status">&#128274; 密碼保護：啟用中（管理功能需解鎖）</span>
+      <input type="password" id="fb-protect-pwd" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')toggleProtection()">
+      <button class="protect-unlock-btn" id="fb-protect-btn" onclick="toggleProtection()">解鎖</button>
+      <div class="protect-hint">&#9888; 解鎖後可修改回饋狀態與處理備註</div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="fb-page-header">
+      <div class="fb-page-icon">&#128172;</div>
+      <div>
+        <h2>使用者建議與改善</h2>
+        <p>記錄跨部門使用者在操作工具時遇到的問題、改善建議與功能需求</p>
+      </div>
+    </div>
+
+    <!-- Section 1: Quick Actions -->
+    <div class="fb-section">
+      <div class="fb-section-body">
+        <div class="fb-quick-grid">
+          <div class="fb-quick-card" onclick="fbSetType('Bug')">
+            <span class="fb-qc-icon">&#128027;</span>
+            <span class="fb-qc-text">回報 Bug</span>
+            <span class="fb-qc-arrow">&#8250;</span>
+          </div>
+          <div class="fb-quick-card" onclick="fbSetType('改善建議')">
+            <span class="fb-qc-icon">&#128161;</span>
+            <span class="fb-qc-text">提出改善建議</span>
+            <span class="fb-qc-arrow">&#8250;</span>
+          </div>
+          <div class="fb-quick-card" onclick="fbSetType('新功能需求')">
+            <span class="fb-qc-icon">&#10133;</span>
+            <span class="fb-qc-text">新功能需求</span>
+            <span class="fb-qc-arrow">&#8250;</span>
+          </div>
+          <div class="fb-quick-card" onclick="fbSetType('資料欄位問題')">
+            <span class="fb-qc-icon">&#128220;</span>
+            <span class="fb-qc-text">資料欄位問題</span>
+            <span class="fb-qc-arrow">&#8250;</span>
+          </div>
+          <div class="fb-quick-card" onclick="fbSetType('權限/登入/儲存問題')">
+            <span class="fb-qc-icon">&#128274;</span>
+            <span class="fb-qc-text">權限/登入/儲存問題</span>
+            <span class="fb-qc-arrow">&#8250;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Add Feedback Form -->
+    <div class="fb-section" id="fb-form-section">
+      <div class="fb-section-body">
+        <div class="fb-form-card">
+          <div class="fb-edit-banner" id="fb-edit-banner">
+            &#9999; 編輯模式：正在修改此回饋
+            <button class="fb-edit-cancel-btn" onclick="fbCancelEdit()">取消編輯</button>
+          </div>
+          <h3 id="fb-form-title">新增回饋</h3>
+          <div class="fb-form-cols">
+
+            <!-- Left: meta fields -->
+            <div class="fb-form-col">
+              <div class="fb-f">
+                <label>回饋類型 <span class="req">*</span></label>
+                <select id="fb-type" onchange="this.classList.remove('fb-invalid')">
+                  <option value="">請選擇回饋類型</option>
+                  <option>Bug</option>
+                  <option>改善建議</option>
+                  <option>新功能需求</option>
+                  <option>資料欄位問題</option>
+                  <option>權限/登入/儲存問題</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div class="fb-f">
+                <label>發生分頁 <span class="req">*</span></label>
+                <select id="fb-tab-sel" onchange="this.classList.remove('fb-invalid')">
+                  <option value="">請選擇分頁</option>
+                  <option>EE/RF/PWR-專案元件清單</option>
+                  <option>TH/ME-專案元件清單</option>
+                  <option>模擬與實測驗證</option>
+                  <option>凸台&amp;TIM尺寸速算</option>
+                  <option>使用者建議與改善</option>
+                  <option>SharePoint登入/儲存</option>
+                  <option>整體工具</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div class="fb-f">
+                <label>標題 <span class="req">*</span></label>
+                <input type="text" id="fb-title" placeholder="一句話描述（50 字以內）" maxlength="50" oninput="this.classList.remove('fb-invalid')">
+              </div>
+              <div class="fb-f">
+                <label>優先度 <span class="req">*</span></label>
+                <select id="fb-priority" onchange="this.classList.remove('fb-invalid')">
+                  <option value="">請選擇優先度</option>
+                  <option>低</option>
+                  <option>中</option>
+                  <option>高</option>
+                  <option>緊急</option>
+                </select>
+              </div>
+              <div class="fb-f">
+                <label>提出人 <span class="req">*</span></label>
+                <input type="text" id="fb-reporter" placeholder="姓名（部門）" oninput="this.classList.remove('fb-invalid')">
+              </div>
+              <div class="fb-f">
+                <label>聯絡方式</label>
+                <input type="text" id="fb-contact" placeholder="Email 或 Teams ID">
+              </div>
+            </div>
+
+            <!-- Middle: description fields -->
+            <div class="fb-form-col">
+              <div class="fb-f">
+                <label>詳細說明 <span class="req">*</span></label>
+                <textarea id="fb-description" rows="5" style="min-height:108px"
+                  placeholder="請描述問題或建議的詳細情況（重現步驟、情境、錯誤訊息等）"
+                  oninput="this.classList.remove('fb-invalid')"></textarea>
+              </div>
+              <div class="fb-f">
+                <label>目前狀況</label>
+                <textarea id="fb-current-behavior" rows="3" style="min-height:72px"
+                  placeholder="目前的行為或遇到的問題是什麼？"></textarea>
+              </div>
+              <div class="fb-f">
+                <label>期望結果</label>
+                <textarea id="fb-expected-behavior" rows="3" style="min-height:72px"
+                  placeholder="期望的行為或結果是什麼？"></textarea>
+              </div>
+            </div>
+
+            <!-- Right: attachment + note + buttons -->
+            <div class="fb-form-col-right">
+              <div class="fb-f">
+                <label>截圖或附件</label>
+                <div class="fb-img-zone" id="fb-img-zone"
+                  onclick="document.getElementById('fb-file-input').click()"
+                  ondragover="event.preventDefault();this.classList.add('drag-over')"
+                  ondragleave="this.classList.remove('drag-over')"
+                  ondrop="event.preventDefault();this.classList.remove('drag-over');fbHandleDropFiles(event.dataTransfer.files)">
+                  <div class="fb-img-zone-hint">
+                    &#128247; 點擊選擇 &nbsp;·&nbsp; 拖曳 &nbsp;·&nbsp; 或 <strong>Ctrl+V</strong> 貼上截圖
+                  </div>
+                </div>
+                <input type="file" id="fb-file-input" accept="image/*" multiple
+                  style="display:none" onchange="fbHandleFileInput(this.files)">
+                <div class="fb-att-previews" id="fb-att-previews"></div>
+              </div>
+              <div class="fb-f" style="flex:1">
+                <label>備註（選填）</label>
+                <textarea id="fb-note" rows="6" style="min-height:120px"
+                  placeholder="其他補充說明..."></textarea>
+              </div>
+              <div class="fb-form-actions">
+                <button class="fb-btn-clear" onclick="fbClearForm()">清除</button>
+                <button class="fb-btn-submit" id="fb-submit-btn" onclick="fbSubmitFeedback()">送出回饋</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Summary -->
+    <div class="fb-section">
+      <div class="fb-section-body">
+        <div class="fb-summary-grid">
+          <div class="fb-stat-card">
+            <span class="fb-stat-icon">&#128196;</span>
+            <div>
+              <div class="fb-stat-label">新增</div>
+              <div class="fb-stat-count clr-blue" id="fb-stat-pending">0</div>
+            </div>
+          </div>
+          <div class="fb-stat-card">
+            <span class="fb-stat-icon">&#128200;</span>
+            <div>
+              <div class="fb-stat-label">評估中</div>
+              <div class="fb-stat-count clr-orange" id="fb-stat-eval">0</div>
+            </div>
+          </div>
+          <div class="fb-stat-card">
+            <span class="fb-stat-icon">&#128295;</span>
+            <div>
+              <div class="fb-stat-label">修正中</div>
+              <div class="fb-stat-count clr-green" id="fb-stat-fixing">0</div>
+            </div>
+          </div>
+          <div class="fb-stat-card">
+            <span class="fb-stat-icon">&#9989;</span>
+            <div>
+              <div class="fb-stat-label">已完成</div>
+              <div class="fb-stat-count clr-purple" id="fb-stat-done">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Feedback List -->
+    <div class="fb-section">
+      <div class="fb-section-body">
+        <div class="fb-list-card">
+          <div class="fb-list-toolbar">
+            <h3>回饋清單與追蹤狀態</h3>
+            <div class="fb-filter-row">
+              <div class="fb-filter-item">
+                <span>類型</span>
+                <select onchange="fbFilters.type=this.value;fbRenderTable()">
+                  <option>全部</option>
+                  <option>Bug</option>
+                  <option>改善建議</option>
+                  <option>新功能需求</option>
+                  <option>資料欄位問題</option>
+                  <option>權限/登入/儲存問題</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div class="fb-filter-item">
+                <span>狀態</span>
+                <select onchange="fbFilters.status=this.value;fbRenderTable()">
+                  <option>全部</option>
+                  <option>待處理</option>
+                  <option>評估中</option>
+                  <option>修正中</option>
+                  <option>已完成</option>
+                  <option>不採用</option>
+                </select>
+              </div>
+              <div class="fb-filter-item">
+                <span>分頁</span>
+                <select onchange="fbFilters.tab=this.value;fbRenderTable()">
+                  <option>全部</option>
+                  <option>EE/RF/PWR-專案元件清單</option>
+                  <option>TH/ME-專案元件清單</option>
+                  <option>模擬與實測驗證</option>
+                  <option>凸台&amp;TIM尺寸速算</option>
+                  <option>使用者建議與改善</option>
+                  <option>SharePoint登入/儲存</option>
+                  <option>整體工具</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div class="fb-filter-item">
+                <span>優先度</span>
+                <select onchange="fbFilters.priority=this.value;fbRenderTable()">
+                  <option>全部</option>
+                  <option>低</option>
+                  <option>中</option>
+                  <option>高</option>
+                  <option>緊急</option>
+                </select>
+              </div>
+              <div class="fb-search-box">
+                <span class="fb-search-icon">&#128269;</span>
+                <input type="text" placeholder="搜尋標題/提出人"
+                  oninput="fbFilters.keyword=this.value;fbRenderTable()">
+              </div>
+              <button class="fb-export-btn" onclick="fbExportCsv()">&#8675; 匯出清單</button>
+            </div>
+          </div>
+          <div class="fb-table-wrap">
+            <table class="fb-tbl">
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>類型</th>
+                  <th>分頁</th>
+                  <th>標題</th>
+                  <th>提出人</th>
+                  <th>優先度</th>
+                  <th>狀態</th>
+                  <th>完成日期</th>
+                  <th>處理備註</th>
+                  <th style="text-align:center">操作</th>
+                </tr>
+              </thead>
+              <tbody id="fb-table-body">
+                <tr class="fb-empty-row"><td colspan="10">
+                  <div class="fb-empty-icon">&#128203;</div>
+                  <div class="fb-empty-text">載入中...</div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -1547,10 +2317,10 @@ let isProtected = true;          // 預設啟用保護
 
 /* ---- Helpers: apply unlocked/locked UI state ---- */
 function _applyUnlockedUI() {
-  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar'), document.getElementById('vd-protect-bar')].filter(Boolean);
-  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd')].filter(Boolean);
-  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status'), document.getElementById('vd-protect-status')].filter(Boolean);
-  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn')].filter(Boolean);
+  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar'), document.getElementById('vd-protect-bar'), document.getElementById('fb-protect-bar')].filter(Boolean);
+  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd'), document.getElementById('fb-protect-pwd')].filter(Boolean);
+  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status'), document.getElementById('vd-protect-status'), document.getElementById('fb-protect-status')].filter(Boolean);
+  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn'), document.getElementById('fb-protect-btn')].filter(Boolean);
 
   isProtected = false;
   bars.forEach(bar => bar.classList.add('unlocked'));
@@ -1565,13 +2335,14 @@ function _applyUnlockedUI() {
   if (eeImportBtn) { eeImportBtn.disabled = false; eeImportBtn.title = 'EE 匯入 Excel'; }
   const vdSaveBtn = document.getElementById('vd-save-btn');
   if (vdSaveBtn) vdSaveBtn.disabled = false;
+  if (typeof fbRenderTable === 'function') fbRenderTable();
 }
 
 function relock() {
-  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar'), document.getElementById('vd-protect-bar')].filter(Boolean);
-  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd')].filter(Boolean);
-  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status'), document.getElementById('vd-protect-status')].filter(Boolean);
-  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn')].filter(Boolean);
+  const bars = [document.getElementById('protect-bar'), document.getElementById('sg-protect-bar'), document.getElementById('vd-protect-bar'), document.getElementById('fb-protect-bar')].filter(Boolean);
+  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd'), document.getElementById('fb-protect-pwd')].filter(Boolean);
+  const statusEls = [document.getElementById('protect-status'), document.getElementById('sg-protect-status'), document.getElementById('vd-protect-status'), document.getElementById('fb-protect-status')].filter(Boolean);
+  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn'), document.getElementById('fb-protect-btn')].filter(Boolean);
 
   isProtected = true;
   bars.forEach(bar => bar.classList.remove('unlocked'));
@@ -1586,11 +2357,12 @@ function relock() {
   if (eeImportBtn) { eeImportBtn.disabled = true; eeImportBtn.title = '需先解鎖密碼保護才能使用'; }
   const vdSaveBtn = document.getElementById('vd-save-btn');
   if (vdSaveBtn) vdSaveBtn.disabled = true;
+  if (typeof fbRenderTable === 'function') fbRenderTable();
 }
 
 async function toggleProtection() {
-  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd')].filter(Boolean);
-  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn')].filter(Boolean);
+  const pwdInputs = [document.getElementById('protect-pwd'), document.getElementById('sg-protect-pwd'), document.getElementById('vd-protect-pwd'), document.getElementById('fb-protect-pwd')].filter(Boolean);
+  const btns = [document.getElementById('protect-btn'), document.getElementById('sg-protect-btn'), document.getElementById('vd-protect-btn'), document.getElementById('fb-protect-btn')].filter(Boolean);
 
   // Find whichever password input has a value
   const typedPwd = pwdInputs.find(el => el.value) || pwdInputs[0];
@@ -1789,11 +2561,11 @@ window.addEventListener('beforeunload', (event) => {
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  const tabMap = { specgen: 0, complist: 1, validation: 2, calc: 3 };
+  const tabMap = { specgen: 0, complist: 1, validation: 2, calc: 3, feedback: 4 };
   const tabIndex = tabMap[tab] ?? 0;
   document.querySelectorAll('.tab-btn')[tabIndex].classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
-
+  if (tab === 'feedback') fbOnTabActivate();
 }
 
 /* ============================
@@ -2027,12 +2799,8 @@ function renderAllCategories() {
 function renderCategoryTable(catKey, catInfo, items, customItems) {
   customItems = customItems || [];
   const totalCount = items.length + customItems.length;
-  let html = `
-    <div class="category-section">
-      <div class="category-title ${catInfo.css}">${catInfo.icon} ${catInfo.label}\uff08${totalCount} \u9805\uff09</div>
-      <div class="comp-table-wrap">
-      <table class="comp-table">
-        <thead><tr>
+
+  const theadHtml = `<thead><tr>
           <th class="readonly-col hide-col">隱藏</th>
           <th class="readonly-col">#</th>
           <th class="readonly-col name-col">元件名稱</th>
@@ -2048,24 +2816,51 @@ function renderCategoryTable(catKey, catInfo, items, customItems) {
           <th class="editable-col heat-dir-col">散熱方向</th>
           <th class="editable-col ic-hsk-col">IC 距離<br>HSK</th>
           <th class="editable-col note-col">備註</th>
-        </tr></thead>
-        <tbody>`;
+        </tr></thead>`;
 
-  /* 渲染共用資料庫的元件 */
+  /* Split items into visible and hidden */
+  const visibleRows = [];
+  const hiddenRows = [];
+
   items.forEach((comp, idx) => {
-    html += renderComponentRow(comp, idx, false, catKey);
+    const specKey = (comp.Component || '').replace(/ /g, '_').replace(/\//g, '-');
+    const row = renderComponentRow(comp, idx, false, catKey);
+    if (hiddenComponents[specKey]) hiddenRows.push(row);
+    else visibleRows.push(row);
   });
 
-  /* 渲染自訂元件 */
   customItems.forEach((comp, idx) => {
-    html += renderComponentRow(comp, items.length + idx, true, catKey, idx);
+    const specKey = (comp.Component || '').replace(/ /g, '_').replace(/\//g, '-');
+    const row = renderComponentRow(comp, items.length + idx, true, catKey, idx);
+    if (hiddenComponents[specKey]) hiddenRows.push(row);
+    else visibleRows.push(row);
   });
 
-  html += `</tbody></table></div>
-      <button class="add-comp-btn" onclick="openAddModal('${catKey}')">+ \u65b0\u589e\u5143\u4ef6</button>
-    </div>`;
+  let html = `
+    <div class="category-section">
+      <div class="category-title ${catInfo.css}">${catInfo.icon} ${catInfo.label}（${totalCount} 項）</div>
+      <div class="comp-table-wrap">
+      <table class="comp-table">
+        ${theadHtml}
+        <tbody>${visibleRows.join('')}</tbody>
+      </table></div>`;
+
+  if (hiddenRows.length > 0) {
+    html += `
+      <details class="hidden-comp-zone">
+        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
+        <div class="comp-table-wrap">
+        <table class="comp-table">
+          ${theadHtml}
+          <tbody>${hiddenRows.join('')}</tbody>
+        </table></div>
+      </details>`;
+  }
+
+  html += `</div>`;
   return html;
 }
+
 
 /* ---- 渲染單一元件列 ---- */
 function renderComponentRow(comp, idx, isCustom, catKey, customIdx) {
@@ -2530,14 +3325,12 @@ async function saveThermalSpecs() {
 /* ---- 隱藏元件切換 ---- */
 function onToggleHide(el) {
   const compKey = el.dataset.comp;
-  const row = el.closest('tr');
   if (el.checked) {
     hiddenComponents[compKey] = true;
-    row.classList.add('row-hidden');
   } else {
     delete hiddenComponents[compKey];
-    row.classList.remove('row-hidden');
   }
+  renderAllCategories();
 }
 
 /* ---- 收集匯出資料（按分類，排除隱藏元件） ---- */
@@ -2984,7 +3777,6 @@ async function sgOnProjectChange() {
   const select = document.getElementById('sg-project-select');
   sgProjectId = select.value || null;
   sgProjectData = null;
-
   if (!sgProjectId) {
     sgRenderProjectComponents();
     return;
@@ -3047,6 +3839,7 @@ function sgRenderProjectComponents() {
     body.innerHTML = '';
     if (summaryContainer) summaryContainer.style.display = 'none';
     if (emptyEl) emptyEl.style.display = '';
+    ['sg-export-excel-btn','sg-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
     return;
   }
 
@@ -3071,7 +3864,7 @@ function sgRenderProjectComponents() {
       </div>
       <table class="sg-comp-list-table">
         <thead><tr>
-          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th></th>
+          <th>Component</th><th>Type</th><th>Qty</th><th>Pd@${tempLabel}°C(W)</th><th>Pd@25°C(W)</th><th>Thermal Via 內徑(mil)-貫穿型</th><th>Thermal Via Qty</th><th>Temp Sensor</th><th>備註</th><th></th>
         </tr></thead><tbody>`;
 
     items.forEach((comp, idx) => {
@@ -3099,6 +3892,7 @@ function sgRenderProjectComponents() {
             <label>Remote<input type="number" min="0" value="${comp.Remote_Qty ?? ''}" placeholder="0" data-cat="${c}" data-idx="${i}" data-field="Remote_Qty" onchange="sgOnCompEdit(this)"></label>
           </div>
         </div></td>
+        <td class="sg-edit-cell"><input class="sg-cell-input" type="text" value="${escapeHtml(comp.note || '')}" data-cat="${c}" data-idx="${i}" data-field="note" placeholder="—" onchange="sgOnCompEdit(this)"></td>
         <td class="sg-edit-cell" style="text-align:center;"><button class="sg-comp-del-btn" onclick="sgDeleteComp('${c}',${i})" title="刪除此元件">&#10060;</button></td>
       </tr>`;
     });
@@ -3113,6 +3907,7 @@ function sgRenderProjectComponents() {
   }
 
   body.innerHTML = html;
+  ['sg-export-excel-btn','sg-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
   container.style.display = 'block';
 
   // Render power summary (high-temp + room-temp groups)
@@ -3364,6 +4159,44 @@ async function sgSaveProjectComponents() {
   btn.textContent = '儲存元件變更';
 }
 
+/* ---- Tab 1 export ---- */
+function sgExportExcel() {
+  if (!sgProjectData) return;
+  const wb = XLSX.utils.book_new();
+  const selTemp = sgProjectData.param_temp || '55';
+  const tempLabel = selTemp === 'custom' ? (sgProjectData.param_temp_custom || '??') : selTemp;
+  for (const [catKey, catInfo] of Object.entries(SG_CAT_MAP)) {
+    const items = sgProjectData[catInfo.field] || [];
+    const headers = ['Component','Type','Qty',`Pd@${tempLabel}°C(W)`,'Pd@25°C(W)','Thermal Via 內徑(mil)','Thermal Via Qty','Temp Sensor','備註'];
+    const rows = items.map(c => [
+      c.Component||'', c.Type||'', c.Qty??'', c['Power(W)']??'', c['Power_RT(W)']??'',
+      c.TV_ID_mil||'', c.TV_Qty||'', c.Temp_Sensor||'', c.note||''
+    ]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, catKey);
+  }
+  const name = (sgProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  XLSX.writeFile(wb, `${name}_元件清單_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function sgExportPdf() {
+  if (!sgProjectData) return;
+  const body = document.getElementById('sg-project-components-body');
+  if (!body) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const canvas = await html2canvas(body, { scale: 1.5, useCORS: true, backgroundColor: '#fff' });
+  const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const ratio = canvas.width / canvas.height;
+  let w = pageW - 20, h = w / ratio;
+  if (h > pageH - 20) { h = pageH - 20; w = h * ratio; }
+  pdf.addImage(imgData, 'JPEG', 10, 10, w, h);
+  const name = (sgProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  pdf.save(`${name}_元件清單_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
 /* ---- Toggle new project form ---- */
 function sgToggleNewProject() {
   const form = document.getElementById('sg-new-project-form');
@@ -3509,6 +4342,7 @@ async function handlePickDb() {
 let vdProjectId = null;
 let vdProjectData = null;
 let vdValidationData = {};   // { rf: [...], digital: [...], pwr: [...] }
+let vdHiddenComps = {};
 
 const VD_CAT_MAP = {
   RF:      { field: 'rf_data',      label: 'RF 射頻元件',     css: 'rf',      icon: '&#128225;' },
@@ -3558,6 +4392,7 @@ async function vdLoadProjects() {
       vdProjectId = null;
       vdProjectData = null;
       vdValidationData = {};
+      vdHiddenComps = {};
       vdRender();
     }
 
@@ -3579,6 +4414,7 @@ async function vdOnProjectChange() {
   vdProjectId = select.value || null;
   vdProjectData = null;
   vdValidationData = {};
+  vdHiddenComps = {};
 
   if (!vdProjectId) { vdRender(); return; }
 
@@ -3630,6 +4466,7 @@ async function vdOnProjectChange() {
       vdValidationData[catLower] = result;
     }
 
+    vdHiddenComps = vdProjectData.vd_hidden_components || {};
     vdShowStatus('已載入專案：' + (vdProjectData.project_name || vdProjectId), 'success');
     vdRender();
   } catch (e) {
@@ -3690,22 +4527,14 @@ function vdRender() {
   if (!vdProjectData || Object.keys(vdValidationData).length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="icon">&#128202;</div><p>請先載入專案列表並選擇專案，即可載入驗證元件清單。</p></div>`;
     if (legendEl) legendEl.style.display = 'none';
+    ['vd-export-excel-btn','vd-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
     return;
   }
 
   if (legendEl) legendEl.style.display = 'block';
   let html = '';
 
-  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
-    const catLower = catKey.toLowerCase();
-    const items = vdValidationData[catLower] || [];
-
-    html += `<div class="vd-comp-category">
-      <div class="vd-comp-category-header ${catInfo.css}">
-        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
-      </div>
-      <table class="vd-table">
-        <thead><tr>
+  const theadHtml = `<thead><tr>
           <th>元件名稱</th>
           <th>Pd(估值)</th>
           <th>Pd(實測值)</th>
@@ -3716,10 +4545,19 @@ function vdRender() {
           <th>溫度-相對誤差%<br>(模擬校正-實測)</th>
           <th>絕對溫差<br>(模擬校正-實測)</th>
           <th>備註</th>
-          <th></th>
-        </tr></thead><tbody>`;
+          <th style="width:46px">隱藏</th>
+        </tr></thead>`;
+
+  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+    const catLower = catKey.toLowerCase();
+    const items = vdValidationData[catLower] || [];
+
+    const visibleRows = [];
+    const hiddenRows = [];
 
     items.forEach((item, idx) => {
+      const hideKey = `${catLower}|${item.component}`;
+      const isHidden = !!vdHiddenComps[hideKey];
       const pdVal = item.pd_source === 'rt' ? item.pd_est_rt : item.pd_est;
       const pdErr = vdCalcRelError(pdVal, item.pd_meas);
       const tempErr = vdCalcRelError(item.temp_sim_cal, item.temp_meas);
@@ -3731,7 +4569,7 @@ function vdRender() {
           `<option value="rt"${pdSrc === 'rt' ? ' selected' : ''}>${item.pd_est_rt} (常溫)</option></select>`
         : (item.pd_est || '-');
 
-      html += `<tr>
+      const rowHtml = `<tr${isHidden ? ' class="vd-row-hidden"' : ''}>
         <td class="comp-name-cell readonly-cell">${escapeHtml(item.component)}</td>
         <td class="readonly-cell">${pdCell}</td>
         <td><input type="number" step="any" value="${item.pd_meas !== '' && item.pd_meas !== undefined ? item.pd_meas : ''}" data-cat="${catLower}" data-idx="${idx}" data-field="pd_meas" onchange="vdOnEdit(this)"></td>
@@ -3742,11 +4580,36 @@ function vdRender() {
         <td class="${vdErrorClass(tempErr)}">${vdFmtError(tempErr)}</td>
         <td class="${vdTempDiffClass(tempDiff)}">${vdFmtDiff(tempDiff)}</td>
         <td class="note-cell"><textarea data-cat="${catLower}" data-idx="${idx}" data-field="note" onchange="vdOnEdit(this)">${escapeHtml(item.note || '')}</textarea></td>
-        <td><button class="vd-del-btn" onclick="vdDeleteItem('${catLower}',${idx})" title="移除">&#10060;</button></td>
+        <td style="text-align:center;">
+          <input type="checkbox" class="hide-checkbox" data-cat="${catLower}" data-comp="${escapeAttr(item.component)}"
+            ${isHidden ? 'checked' : ''} onchange="vdOnHideToggle(this)"
+            title="勾選以隱藏此元件">
+        </td>
       </tr>`;
+
+      if (isHidden) hiddenRows.push(rowHtml);
+      else visibleRows.push(rowHtml);
     });
 
-    html += `</tbody></table>`;
+    html += `<div class="vd-comp-category">
+      <div class="vd-comp-category-header ${catInfo.css}">
+        ${catInfo.icon} ${catInfo.label}（${items.length} 項）
+      </div>
+      <table class="vd-table">
+        ${theadHtml}
+        <tbody>${visibleRows.join('')}</tbody>
+      </table>`;
+
+    if (hiddenRows.length > 0) {
+      html += `
+      <details class="sg-hidden-comp-zone">
+        <summary>被隱藏的元件（${hiddenRows.length} 項）</summary>
+        <table class="vd-table">
+          ${theadHtml}
+          <tbody>${hiddenRows.join('')}</tbody>
+        </table>
+      </details>`;
+    }
 
     // Add component dropdown
     html += `<div class="vd-add-dropdown" style="margin-top:6px;">
@@ -3757,7 +4620,21 @@ function vdRender() {
     html += `</div>`;
   }
 
+  ['vd-export-excel-btn','vd-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
   container.innerHTML = html;
+}
+
+/* ---- Hide toggle (Tab 3 validation) ---- */
+function vdOnHideToggle(el) {
+  const cat = el.dataset.cat;
+  const compName = el.dataset.comp;
+  const key = `${cat}|${compName}`;
+  if (el.checked) {
+    vdHiddenComps[key] = true;
+  } else {
+    delete vdHiddenComps[key];
+  }
+  vdRender();
 }
 
 function vdOnEdit(el) {
@@ -3852,7 +4729,8 @@ async function vdSaveValidation() {
 
   try {
     await dbAdapter.updateDoc('projects', vdProjectId, {
-      validation_data: vdValidationData
+      validation_data: vdValidationData,
+      vd_hidden_components: vdHiddenComps
     });
 
     if (dbAdapter.isSharePointMode()) {
@@ -3878,6 +4756,533 @@ async function vdSaveValidation() {
 
   btn.disabled = isProtected;
   btn.textContent = '儲存驗證資料';
+}
+
+/* ---- Tab 3 export ---- */
+function vdExportExcel() {
+  if (!vdProjectData) return;
+  const wb = XLSX.utils.book_new();
+  for (const [catKey, catInfo] of Object.entries(VD_CAT_MAP)) {
+    const catLower = catKey.toLowerCase();
+    const items = (vdValidationData[catLower] || []).filter(i => !vdHiddenComps[`${catLower}|${i.component}`]);
+    const headers = ['元件名稱','Pd估值(W)','Pd實測(W)','Pd相對誤差%','溫度初始模擬','溫度實測','溫度模擬校正','溫度相對誤差%','絕對溫差','備註'];
+    const rows = items.map(i => [
+      i.component||'', i.pd_est??'', i.pd_meas??'', '', i.temp_sim??'', i.temp_meas??'', i.temp_sim_cal??'', '', '', i.note||''
+    ]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, catKey);
+  }
+  const name = (vdProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  XLSX.writeFile(wb, `${name}_驗證資料_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function vdExportPdf() {
+  if (!vdProjectData) return;
+  const container = document.getElementById('vd-container');
+  if (!container) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const hiddenZones = container.querySelectorAll('.sg-hidden-comp-zone');
+  hiddenZones.forEach(el => { el.style.display = 'none'; });
+  const canvas = await html2canvas(container, { scale: 1.5, useCORS: true, backgroundColor: '#fff' });
+  hiddenZones.forEach(el => { el.style.display = ''; });
+  const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const ratio = canvas.width / canvas.height;
+  let w = pageW - 20, h = w / ratio;
+  if (h > pageH - 20) { h = pageH - 20; w = h * ratio; }
+  pdf.addImage(imgData, 'JPEG', 10, 10, w, h);
+  const name = (vdProjectData.project_name || 'project').replace(/[\\/*?:[\]]/g,'');
+  pdf.save(`${name}_驗證資料_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+/* ============================
+   Feedback Tab (使用者建議與改善)
+   ============================ */
+
+
+let fbItems = {};
+let fbFilters = { type: '全部', status: '全部', tab: '全部', priority: '全部', keyword: '' };
+let fbLoaded = false;
+let fbAttachments = [];
+let fbEditingId = null;
+let fbDeleteTargetId = null;
+
+function fbFormatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function fbGenId() {
+  const now = new Date();
+  const p = n => String(n).padStart(2, '0');
+  const date = `${now.getFullYear()}${p(now.getMonth()+1)}${p(now.getDate())}`;
+  const time = `${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `FB-${date}-${time}-${rand}`;
+}
+
+function fbGetStatusClass(status) {
+  const map = { '待處理': 'sp', '評估中': 'se', '修正中': 'sf', '已完成': 'sd', '不採用': 'sr' };
+  return map[status] || 'sp';
+}
+
+function fbGetPriorityClass(priority) {
+  const map = { '低': 'pl', '中': 'pm', '高': 'ph', '緊急': 'pu' };
+  return map[priority] || 'pm';
+}
+
+function fbGetTypeClass(type) {
+  const map = { 'Bug': 'tb', '改善建議': 'ti', '新功能需求': 'tf', '資料欄位問題': 'td', '權限/登入/儲存問題': 'ta', '其他': 'to' };
+  return map[type] || 'to';
+}
+
+async function fbLoadItems() {
+  try {
+    if (!dbAdapter.isReady()) {
+      fbItems = {};
+      fbLoaded = true;
+      return;
+    }
+    const col = await dbAdapter.getCollection('feedback_items');
+    fbItems = (col && Object.keys(col).length > 0) ? col : {};
+  } catch (e) {
+    console.error('[fbLoadItems]', e);
+    fbItems = {};
+  }
+  fbLoaded = true;
+}
+
+async function fbSaveItem(id, item) {
+  if (!dbAdapter.isReady()) return;
+  await dbAdapter.setDoc('feedback_items', id, item);
+}
+
+function fbSetType(type) {
+  const sel = document.getElementById('fb-type');
+  if (sel) { sel.value = type; sel.classList.remove('fb-invalid'); }
+  document.getElementById('fb-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fbClearForm() {
+  ['fb-type', 'fb-tab-sel', 'fb-priority'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('fb-invalid'); }
+  });
+  ['fb-title', 'fb-reporter', 'fb-contact', 'fb-description',
+   'fb-current-behavior', 'fb-expected-behavior', 'fb-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('fb-invalid'); }
+  });
+  fbAttachments = [];
+  fbRenderAttachments();
+  const fi = document.getElementById('fb-file-input');
+  if (fi) fi.value = '';
+  // Auto-fill reporter/contact again after clear
+  const acct = dbAdapter.getAccountInfo();
+  if (acct) {
+    const rep = document.getElementById('fb-reporter');
+    const con = document.getElementById('fb-contact');
+    if (rep) rep.value = acct.name || '';
+    if (con) con.value = acct.email || '';
+  }
+}
+
+function fbCancelEdit() {
+  fbEditingId = null;
+  const banner = document.getElementById('fb-edit-banner');
+  if (banner) banner.classList.remove('show');
+  const title = document.getElementById('fb-form-title');
+  if (title) title.textContent = '新增回饋';
+  const btn = document.getElementById('fb-submit-btn');
+  if (btn) btn.textContent = '送出回饋';
+  fbClearForm();
+}
+
+async function fbSubmitFeedback() {
+  const required = [
+    { id: 'fb-type' }, { id: 'fb-tab-sel' }, { id: 'fb-title' },
+    { id: 'fb-priority' }, { id: 'fb-reporter' }, { id: 'fb-description' }
+  ];
+  let valid = true;
+  required.forEach(({ id }) => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) { if (el) el.classList.add('fb-invalid'); valid = false; }
+    else el.classList.remove('fb-invalid');
+  });
+  if (!valid) { fbShowToast('請填寫所有必填欄位（標記 * 的欄位）', 'err'); return; }
+
+  const fields = {
+    type:              document.getElementById('fb-type').value,
+    tab:               document.getElementById('fb-tab-sel').value,
+    title:             document.getElementById('fb-title').value.trim(),
+    priority:          document.getElementById('fb-priority').value,
+    reporter:          document.getElementById('fb-reporter').value.trim(),
+    contact:           document.getElementById('fb-contact').value.trim(),
+    description:       document.getElementById('fb-description').value.trim(),
+    current_behavior:  document.getElementById('fb-current-behavior').value.trim(),
+    expected_behavior: document.getElementById('fb-expected-behavior').value.trim(),
+    attachments:       fbAttachments.slice(),
+    note:              document.getElementById('fb-note').value.trim(),
+    updated_at:        new Date().toISOString()
+  };
+
+  const btn = document.getElementById('fb-submit-btn');
+  btn.disabled = true;
+
+  try {
+    if (fbEditingId && fbItems[fbEditingId]) {
+      btn.textContent = '更新中...';
+      Object.assign(fbItems[fbEditingId], fields);
+      await fbSaveItem(fbEditingId, fbItems[fbEditingId]);
+      fbEditingId = null;
+      document.getElementById('fb-edit-banner')?.classList.remove('show');
+      const t = document.getElementById('fb-form-title');
+      if (t) t.textContent = '新增回饋';
+      fbShowToast('回饋已更新！');
+    } else {
+      btn.textContent = '送出中...';
+      const now = new Date().toISOString();
+      const id = fbGenId();
+      const item = { ...fields, status: '待處理', closed_at: '', admin_note: '', created_at: now };
+      await fbSaveItem(id, item);
+      fbItems[id] = item;
+      fbShowToast('回饋已成功送出！感謝您的回報。');
+    }
+    fbClearForm();
+    fbRenderSummary();
+    fbRenderTable();
+  } catch (e) {
+    fbShowToast('儲存失敗：' + e.message, 'err');
+  }
+  btn.disabled = false;
+  btn.textContent = fbEditingId ? '更新回饋' : '送出回饋';
+}
+
+function fbApplyFilters(items) {
+  return Object.entries(items).filter(([, item]) => {
+    if (fbFilters.type !== '全部' && item.type !== fbFilters.type) return false;
+    if (fbFilters.status !== '全部' && item.status !== fbFilters.status) return false;
+    if (fbFilters.tab !== '全部' && item.tab !== fbFilters.tab) return false;
+    if (fbFilters.priority !== '全部' && item.priority !== fbFilters.priority) return false;
+    if (fbFilters.keyword) {
+      const kw = fbFilters.keyword.toLowerCase();
+      const hay = [item.title, item.reporter, item.description, item.admin_note].join(' ').toLowerCase();
+      if (!hay.includes(kw)) return false;
+    }
+    return true;
+  });
+}
+
+function fbRenderSummary() {
+  const vals = Object.values(fbItems);
+  const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  set('fb-stat-pending', vals.filter(i => i.status === '待處理').length);
+  set('fb-stat-eval',    vals.filter(i => i.status === '評估中').length);
+  set('fb-stat-fixing',  vals.filter(i => i.status === '修正中').length);
+  set('fb-stat-done',    vals.filter(i => i.status === '已完成').length);
+}
+
+function fbRenderTable() {
+  const tbody = document.getElementById('fb-table-body');
+  if (!tbody) return;
+  const filtered = fbApplyFilters(fbItems);
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr class="fb-empty-row"><td colspan="10">
+      <div class="fb-empty-icon">&#128203;</div>
+      <div class="fb-empty-text">目前尚無回饋紀錄。<br>當使用者提交 Bug、改善建議或功能需求後，將顯示在此處。</div>
+    </td></tr>`;
+    return;
+  }
+  filtered.sort((a, b) => new Date(b[1].created_at) - new Date(a[1].created_at));
+  const canEdit = !isProtected;
+  tbody.innerHTML = filtered.map(([id, item]) => {
+    const statusCell = canEdit
+      ? `<select class="fb-status-sel" onchange="fbUpdateStatus('${id}',this.value)">${
+          ['待處理','評估中','修正中','已完成','不採用'].map(s =>
+            `<option${item.status===s?' selected':''}>${s}</option>`).join('')
+        }</select>`
+      : `<span class="fb-badge ${fbGetStatusClass(item.status)}">${item.status}</span>`;
+    const noteCell = canEdit
+      ? `<input class="fb-admin-note-inp" type="text" value="${(item.admin_note||'').replace(/"/g,'&quot;')}" onchange="fbUpdateAdminNote('${id}',this.value)">`
+      : (item.admin_note || '—');
+    return `<tr>
+      <td style="white-space:nowrap;font-size:0.8rem;color:#666;">${fbFormatDate(item.created_at)}</td>
+      <td><span class="fb-badge ${fbGetTypeClass(item.type)}">${item.type}</span></td>
+      <td style="font-size:0.82rem;white-space:nowrap;">${item.tab||'—'}</td>
+      <td style="max-width:200px;word-break:break-word;">${item.title||''}</td>
+      <td style="white-space:nowrap;">${item.reporter||'—'}</td>
+      <td><span class="fb-badge ${fbGetPriorityClass(item.priority)}">${item.priority||'—'}</span></td>
+      <td>${statusCell}</td>
+      <td style="white-space:nowrap;font-size:0.8rem;color:#666;">${item.closed_at?fbFormatDate(item.closed_at):'—'}</td>
+      <td style="min-width:140px;">${noteCell}</td>
+      <td>
+        <div class="fb-action-btns">
+          <button class="fb-action-btn" title="閱讀" onclick="fbShowDetail('${id}')">&#128065;</button>
+          <button class="fb-action-btn" title="修改" onclick="fbEditItem('${id}')">&#9999;&#65039;</button>
+          <button class="fb-action-btn" title="刪除" onclick="fbDeleteItem('${id}')">&#128465;</button>
+          <button class="fb-action-btn fb-teams-btn" title="Teams 聯絡提出人" onclick="fbOpenTeams('${id}')"><svg width="16" height="16" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="28" height="28" rx="6" fill="#6264A7"/><text x="14" y="20" text-anchor="middle" font-size="16" font-weight="bold" fill="white" font-family="Arial">T</text></svg></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function fbUpdateStatus(id, newStatus) {
+  if (!fbItems[id]) return;
+  const now = new Date().toISOString();
+  fbItems[id].status = newStatus;
+  fbItems[id].updated_at = now;
+  if (newStatus === '已完成') { if (!fbItems[id].closed_at) fbItems[id].closed_at = now; }
+  else { fbItems[id].closed_at = ''; }
+  try {
+    await fbSaveItem(id, fbItems[id]);
+    fbRenderSummary();
+    fbRenderTable();
+  } catch (e) { fbShowToast('儲存失敗：' + e.message, 'err'); }
+}
+
+async function fbUpdateAdminNote(id, note) {
+  if (!fbItems[id]) return;
+  fbItems[id].admin_note = note;
+  fbItems[id].updated_at = new Date().toISOString();
+  try { await fbSaveItem(id, fbItems[id]); }
+  catch (e) { fbShowToast('儲存失敗：' + e.message, 'err'); }
+}
+
+function fbOpenTeams(id) {
+  const item = fbItems[id];
+  if (!item) return;
+  const email = (item.contact || '').trim();
+  if (!email) { fbShowToast('此回饋無聯絡方式（Email），無法開啟 Teams'); return; }
+  const msg = (item.admin_note || '').trim();
+  const url = 'https://teams.microsoft.com/l/chat/0/0?users=' + encodeURIComponent(email) + (msg ? '&message=' + encodeURIComponent(msg) : '');
+  window.open(url, '_blank');
+}
+
+function fbExportCsv() {
+  const filtered = fbApplyFilters(fbItems);
+  filtered.sort((a, b) => new Date(b[1].created_at) - new Date(a[1].created_at));
+  const headers = ['日期','類型','分頁','標題','提出人','優先度','狀態','完成日期','處理備註'];
+  const rows = filtered.map(([, item]) => [
+    fbFormatDate(item.created_at), item.type, item.tab, item.title,
+    item.reporter, item.priority, item.status,
+    item.closed_at ? fbFormatDate(item.closed_at) : '',
+    item.admin_note || ''
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `feedback_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function fbShowToast(msg, type) {
+  const t = document.getElementById('fb-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'fb-toast show' + (type === 'err' ? ' err' : '');
+  clearTimeout(t._fbTimer);
+  t._fbTimer = setTimeout(() => { t.className = 'fb-toast'; }, 3500);
+}
+
+/* ---- Image attachment helpers ---- */
+function fbCompressImage(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1200, MAX_H = 900;
+        let w = img.width, h = img.height;
+        if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+        if (h > MAX_H) { w = Math.round(w * MAX_H / h); h = MAX_H; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve({ name: file.name || 'screenshot.jpg', data: canvas.toDataURL('image/jpeg', 0.72) });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function fbHandleImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const att = await fbCompressImage(file);
+  fbAttachments.push(att);
+  fbRenderAttachments();
+}
+
+function fbHandleFileInput(files) {
+  Array.from(files).forEach(fbHandleImageFile);
+  const fi = document.getElementById('fb-file-input');
+  if (fi) fi.value = '';
+}
+
+function fbHandleDropFiles(files) {
+  Array.from(files).forEach(fbHandleImageFile);
+}
+
+function fbRemoveAttachment(idx) {
+  fbAttachments.splice(idx, 1);
+  fbRenderAttachments();
+}
+
+function fbRenderAttachments() {
+  const el = document.getElementById('fb-att-previews');
+  if (!el) return;
+  el.innerHTML = fbAttachments.map((att, i) => `
+    <div class="fb-att-thumb" onclick="fbOpenImage('${att.data}')">
+      <img src="${att.data}" alt="${att.name}">
+      <button class="fb-att-remove" type="button"
+        onclick="event.stopPropagation();fbRemoveAttachment(${i})">&#215;</button>
+    </div>`).join('');
+}
+
+function fbOpenImage(src) {
+  const lb = document.getElementById('fb-img-lightbox');
+  if (!lb) return;
+  document.getElementById('fb-img-lightbox-img').src = src;
+  lb.classList.add('open');
+}
+
+function fbCloseLightbox() {
+  document.getElementById('fb-img-lightbox')?.classList.remove('open');
+  document.getElementById('fb-img-lightbox-img').src = '';
+}
+
+function fbInitPasteListener() {
+  document.addEventListener('paste', e => {
+    const fbTab = document.getElementById('tab-feedback');
+    if (!fbTab || !fbTab.classList.contains('active')) return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) { fbHandleImageFile(file); e.preventDefault(); }
+        break;
+      }
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fbCloseLightbox();
+  });
+}
+
+/* ---- Detail / Edit / Delete ---- */
+function fbShowDetail(id) {
+  const item = fbItems[id];
+  if (!item) return;
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const row = (label, val) => val
+    ? `<tr><th>${label}</th><td>${val}</td></tr>` : '';
+  document.getElementById('fb-detail-body').innerHTML = `
+    <table class="fb-dtl-tbl">
+      ${row('類型',  `<span class="fb-badge ${fbGetTypeClass(item.type)}">${esc(item.type)}</span>`)}
+      ${row('發生分頁', esc(item.tab))}
+      ${row('標題',  `<strong>${esc(item.title)}</strong>`)}
+      ${row('優先度', `<span class="fb-badge ${fbGetPriorityClass(item.priority)}">${esc(item.priority)}</span>`)}
+      ${row('狀態',  `<span class="fb-badge ${fbGetStatusClass(item.status)}">${esc(item.status)}</span>`)}
+      ${row('提出人', esc(item.reporter))}
+      ${row('聯絡方式', esc(item.contact))}
+      ${row('提出日期', fbFormatDate(item.created_at))}
+      ${item.closed_at ? row('完成日期', fbFormatDate(item.closed_at)) : ''}
+      ${row('詳細說明', `<span style="white-space:pre-wrap">${esc(item.description)}</span>`)}
+      ${item.current_behavior ? row('目前狀況', `<span style="white-space:pre-wrap">${esc(item.current_behavior)}</span>`) : ''}
+      ${item.expected_behavior ? row('期望結果', `<span style="white-space:pre-wrap">${esc(item.expected_behavior)}</span>`) : ''}
+      ${item.note ? row('備註', `<span style="white-space:pre-wrap">${esc(item.note)}</span>`) : ''}
+      ${item.admin_note ? row('處理備註', `<span style="white-space:pre-wrap">${esc(item.admin_note)}</span>`) : ''}
+    </table>
+    ${(item.attachments && item.attachments.length) ? `
+      <div class="fb-dtl-att-lbl">截圖/附件（${item.attachments.length} 張）</div>
+      <div class="fb-dtl-att-grid">
+        ${item.attachments.map(a => `<img src="${a.data}" alt="${esc(a.name)}" class="fb-dtl-att-img" onclick="fbOpenImage('${a.data}')">`).join('')}
+      </div>` : ''}`;
+  document.getElementById('fb-detail-modal').classList.add('open');
+}
+
+function fbCloseDetail() {
+  document.getElementById('fb-detail-modal').classList.remove('open');
+}
+
+function fbEditItem(id) {
+  const item = fbItems[id];
+  if (!item) return;
+  fbEditingId = id;
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val || ''; };
+  set('fb-type',             item.type);
+  set('fb-tab-sel',          item.tab);
+  set('fb-title',            item.title);
+  set('fb-priority',         item.priority);
+  set('fb-reporter',         item.reporter);
+  set('fb-contact',          item.contact);
+  set('fb-description',      item.description);
+  set('fb-current-behavior', item.current_behavior);
+  set('fb-expected-behavior',item.expected_behavior);
+  set('fb-note',             item.note);
+  fbAttachments = (item.attachments || []).slice();
+  fbRenderAttachments();
+  const banner = document.getElementById('fb-edit-banner');
+  if (banner) banner.classList.add('show');
+  const title = document.getElementById('fb-form-title');
+  if (title) title.textContent = '修改回饋';
+  const btn = document.getElementById('fb-submit-btn');
+  if (btn) btn.textContent = '更新回饋';
+  document.getElementById('fb-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fbDeleteItem(id) {
+  fbDeleteTargetId = id;
+  document.getElementById('fb-delete-modal').classList.add('open');
+}
+
+function fbCancelDelete() {
+  fbDeleteTargetId = null;
+  document.getElementById('fb-delete-modal').classList.remove('open');
+}
+
+async function fbConfirmDelete() {
+  const id = fbDeleteTargetId;
+  fbDeleteTargetId = null;
+  document.getElementById('fb-delete-modal').classList.remove('open');
+  if (!id || !fbItems[id]) return;
+  const backup = fbItems[id];
+  try {
+    delete fbItems[id];
+    if (dbAdapter.isReady()) await dbAdapter.deleteDoc('feedback_items', id);
+    fbRenderSummary();
+    fbRenderTable();
+    fbShowToast('回饋已刪除');
+  } catch (e) {
+    fbItems[id] = backup;
+    fbShowToast('刪除失敗：' + e.message, 'err');
+  }
+}
+
+/* ---- Tab activation ---- */
+async function fbOnTabActivate() {
+  if (!fbLoaded) {
+    await fbLoadItems();
+    fbInitPasteListener();
+  }
+  // Auto-fill reporter/contact from logged-in account
+  const acct = dbAdapter.getAccountInfo();
+  if (acct) {
+    const rep = document.getElementById('fb-reporter');
+    const con = document.getElementById('fb-contact');
+    if (rep && !rep.value) rep.value = acct.name || '';
+    if (con && !con.value) con.value = acct.email || '';
+  }
+  fbRenderSummary();
+  fbRenderTable();
 }
 </script>
 </body>
