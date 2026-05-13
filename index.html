@@ -1228,7 +1228,7 @@
   .sg-power-chip.rt-total   { background: #1a3a6b; }
   .sg-power-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .sg-power-group {
-    border: 2px dashed rgba(255,255,255,0.25);
+    border: 2px dashed #b0c4de;
     border-radius: 10px;
     padding: 10px 14px;
     margin-bottom: 10px;
@@ -3909,6 +3909,59 @@ function sgRenderProjectComponents() {
   body.innerHTML = html;
   ['sg-export-excel-btn','sg-export-pdf-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
   container.style.display = 'block';
+
+  // Render power summary (high-temp + room-temp groups)
+  if (summaryContainer) {
+    summaryContainer.style.display = 'block';
+    try {
+    const fmt = v => Number.isInteger(v) ? v : v.toFixed(2);
+    const totalPwr = (catPower.RF || 0) + (catPower.Digital || 0) + (catPower.PWR || 0);
+    const totalPwrRT = (catPowerRT.RF || 0) + (catPowerRT.Digital || 0) + (catPowerRT.PWR || 0);
+
+    const pTemp = sgProjectData.param_temp || '55';
+    const pTempCustom = sgProjectData.param_temp_custom || '';
+    const pBackoff = sgProjectData.param_backoff ?? '';
+    const pDuplex = sgProjectData.param_duplex || 'TDD 75%';
+    const pBackoffRT = sgProjectData.param_backoff_rt ?? '';
+    const pDuplexRT = sgProjectData.param_duplex_rt || 'TDD 75%';
+
+    const hotRow = document.getElementById('sg-power-row-hot');
+    const rtRow = document.getElementById('sg-power-row-rt');
+
+    if (hotRow) hotRow.innerHTML =
+      `<div class="sg-param-chip">環溫(°C) <select id="sg-sel-temp" onchange="sgOnParamChange()">` +
+        `<option value="45"${pTemp === '45' ? ' selected' : ''}>45°C</option>` +
+        `<option value="55"${pTemp === '55' ? ' selected' : ''}>55°C</option>` +
+        `<option value="custom"${pTemp === 'custom' ? ' selected' : ''}>自訂</option>` +
+      `</select><input type="number" class="sg-temp-custom${pTemp === 'custom' ? ' visible' : ''}" id="sg-temp-custom" value="${pTempCustom}" placeholder="℃" onchange="sgOnParamChange()"></div>` +
+      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff" value="${pBackoff}" placeholder="0"> dB</div>` +
+      `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex" onchange="sgOnParamChange()">` +
+        `<option value="TDD 75%"${pDuplex === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
+        `<option value="FDD 100%"${pDuplex === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
+      `</select></div>` +
+      `<div class="sg-power-chip rf">RF : ${fmt(catPower.RF || 0)} W</div>` +
+      `<div class="sg-power-chip digital">Digital : ${fmt(catPower.Digital || 0)} W</div>` +
+      `<div class="sg-power-chip pwr">PWR : ${fmt(catPower.PWR || 0)} W</div>` +
+      `<div class="sg-power-chip total">Total : ${fmt(totalPwr)} W</div>`;
+
+    if (rtRow) rtRow.innerHTML =
+      `<div class="sg-param-chip">環溫(°C) <select disabled><option>25°C</option></select></div>` +
+      `<div class="sg-param-chip">Backoff <input type="number" step="any" id="sg-param-backoff-rt" value="${pBackoffRT || '0'}" placeholder="0"> dB</div>` +
+      `<div class="sg-param-chip">Duplex Mode <select id="sg-sel-duplex-rt" onchange="sgOnParamChange()">` +
+        `<option value="TDD 75%"${pDuplexRT === 'TDD 75%' ? ' selected' : ''}>TDD 75%</option>` +
+        `<option value="FDD 100%"${pDuplexRT === 'FDD 100%' ? ' selected' : ''}>FDD 100%</option>` +
+      `</select></div>` +
+      `<div class="sg-power-chip rt-rf">RF : ${fmt(catPowerRT.RF || 0)} W</div>` +
+      `<div class="sg-power-chip rt-digital">Digital : ${fmt(catPowerRT.Digital || 0)} W</div>` +
+      `<div class="sg-power-chip rt-pwr">PWR : ${fmt(catPowerRT.PWR || 0)} W</div>` +
+      `<div class="sg-power-chip rt-total">Total : ${fmt(totalPwrRT)} W</div>`;
+
+    const boInput = document.getElementById('sg-param-backoff');
+    if (boInput) boInput.addEventListener('change', sgOnParamChange);
+    const boInputRT = document.getElementById('sg-param-backoff-rt');
+    if (boInputRT) boInputRT.addEventListener('change', sgOnParamChange);
+    } catch (err) { console.warn('[sgRender] power summary error:', err); }
+  }
 }
 
 /* ---- Type dropdown change handler ---- */
