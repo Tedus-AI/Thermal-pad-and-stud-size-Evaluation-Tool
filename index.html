@@ -5081,6 +5081,22 @@ async function handlePickDb() {
   }
 }
 
+async function handleLoadOfflineDb() {
+  try {
+    const result = await fileDb.pickFile();
+    if (!result || !result.success) return;
+    // Redirect all dbAdapter reads/writes to the local fileDb
+    dbAdapter._backend = () => fileDb;
+    updateDbStatusText('✅ 離線 ｜ ' + result.filename, 'success');
+    await loadProjects();
+    if (typeof sgLoadProjects === 'function') await sgLoadProjects();
+    if (typeof vdLoadProjects === 'function') await vdLoadProjects();
+  } catch (e) {
+    console.error('[handleLoadOfflineDb]', e);
+    alert('載入離線資料庫失敗：' + (e.message || e));
+  }
+}
+
 /* ============================
    Tab 3: 模擬與實測驗證
    ============================ */
@@ -6050,6 +6066,15 @@ async function fbOnTabActivate() {
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
       <polyline points="7 10 12 15 17 10"/>
       <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </button>
+  <button type="button" data-tip="載入離線資料庫 (.json)" onclick="handleLoadOfflineDb()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+      <path d="M3 5v14a9 3 0 0 0 18 0V5"/>
+      <path d="M3 12a9 3 0 0 0 18 0"/>
+      <polyline points="9 14 12 17 15 14"/>
+      <line x1="12" y1="17" x2="12" y2="11"/>
     </svg>
   </button>
   <div class="gm-rail-divider"></div>
