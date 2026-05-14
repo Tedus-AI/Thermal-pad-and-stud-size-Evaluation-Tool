@@ -2276,6 +2276,11 @@
     transition: opacity 0.15s ease;
   }
   .gm-action-rail button:hover::after { opacity: 1; }
+  .gm-action-rail button.gm-dim {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+  }
   @media (max-width: 1100px) { .gm-action-rail { display: none; } }
 
   /* AI mini-modal (placeholder for the sparkle button) */
@@ -6065,12 +6070,24 @@ async function fbOnTabActivate() {
     </svg>
   </button>
   <div class="gm-rail-divider"></div>
-  <button type="button" data-tip="回到頂部" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <button id="btn-scroll-top" type="button" data-tip="回到頂部" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="gm-dim">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 15 12 9 6 15"/>
     </svg>
   </button>
 </aside>
+<script>
+(function() {
+  var btn = document.getElementById('btn-scroll-top');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 200) {
+      btn.classList.remove('gm-dim');
+    } else {
+      btn.classList.add('gm-dim');
+    }
+  }, { passive: true });
+})();
+</script>
 
 <div id="gm-ai-popover" class="gm-ai-popover">
   <div class="gm-ai-popover-title">
