@@ -4,6 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thermal & Component Spec Management Tool</title>
+<template id="__bundler_thumbnail" data-bg-color="#eef3fb">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="chip" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1d4ed8"/>
+        <stop offset="1" stop-color="#4338ca"/>
+      </linearGradient>
+    </defs>
+    <!-- IC chip body -->
+    <rect x="430" y="280" width="340" height="240" rx="32" fill="url(#chip)"/>
+    <!-- pins -->
+    <g fill="#1d4ed8" opacity="0.5">
+      <rect x="380" y="320" width="50" height="14" rx="3"/>
+      <rect x="380" y="360" width="50" height="14" rx="3"/>
+      <rect x="380" y="400" width="50" height="14" rx="3"/>
+      <rect x="380" y="440" width="50" height="14" rx="3"/>
+      <rect x="380" y="480" width="50" height="14" rx="3"/>
+      <rect x="770" y="320" width="50" height="14" rx="3"/>
+      <rect x="770" y="360" width="50" height="14" rx="3"/>
+      <rect x="770" y="400" width="50" height="14" rx="3"/>
+      <rect x="770" y="440" width="50" height="14" rx="3"/>
+      <rect x="770" y="480" width="50" height="14" rx="3"/>
+    </g>
+    <!-- heat waves above -->
+    <g fill="none" stroke="#1d4ed8" stroke-width="10" stroke-linecap="round" opacity="0.55">
+      <path d="M520 240 Q540 200 560 240 T600 240"/>
+      <path d="M620 220 Q640 180 660 220 T700 220"/>
+      <path d="M580 180 Q600 140 620 180 T660 180"/>
+    </g>
+    <!-- sparkle -->
+    <g fill="#1d4ed8">
+      <path d="M870 230 l8 22 l22 8 l-22 8 l-8 22 l-8 -22 l-22 -8 l22 -8 z"/>
+    </g>
+  </svg>
+</template>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -1604,6 +1639,711 @@
     z-index: 3001;
   }
   .fb-img-lightbox-close:hover { background: #c0392b; }
+
+  /* ======================================================================
+     ✦ GAMMA-STYLE VISUAL OVERRIDE LAYER ✦
+     ────────────────────────────────────────────────────────────────────
+     This block re-skins the app with a Gamma-inspired aesthetic:
+       · Soft blue-tinted background, generous whitespace
+       · Pill-shaped primary buttons in deep blue (#1d4ed8)
+       · Larger card radii (18px) with diffused shadows
+       · Tab chips inside a white "segmented control" container
+       · Floating right-side icon rail
+     All HTML/JS/IDs/handlers are preserved — visual only.
+  ====================================================================== */
+
+  :root {
+    --gm-bg:        #eef3fb;
+    --gm-bg-soft:   #f6f9fd;
+    --gm-surface:   #ffffff;
+    --gm-primary:   #1d4ed8;
+    --gm-primary-2: #1e40af;
+    --gm-primary-3: #1838a6;
+    --gm-tint:      #e8efff;
+    --gm-tint-2:    #f3f6fd;
+    --gm-text:      #0f172a;
+    --gm-text-2:    #475569;
+    --gm-text-3:    #94a3b8;
+    --gm-border:    #e2e8f0;
+    --gm-border-2:  #eef1f6;
+    --gm-warn:      #f97316;
+    --gm-danger:    #dc2626;
+    --gm-success:   #059669;
+    --gm-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --gm-shadow:    0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 28px -16px rgba(29, 78, 216, 0.12);
+    --gm-shadow-lg: 0 24px 56px -16px rgba(15, 23, 42, 0.18);
+  }
+
+  /* ── Base ─────────────────────────────────────────────────── */
+  body {
+    background:
+      radial-gradient(1200px 600px at 50% -120px, #dee9fb 0%, transparent 60%),
+      var(--gm-bg);
+    color: var(--gm-text);
+    padding: 22px 28px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC',
+                 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .container { max-width: 1480px; }
+
+  /* ── Top "browser" chrome bar (home + title + right pill buttons) ── */
+  .header {
+    text-align: left;
+    margin-bottom: 22px;
+    padding: 10px 4px 14px;
+    border-bottom: 1px solid var(--gm-border-2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .header::before {
+    content: '';
+    display: inline-block;
+    width: 32px; height: 32px;
+    flex: 0 0 32px;
+    border-radius: 10px;
+    background: var(--gm-tint);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d4ed8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5 12 3l9 7.5'/><path d='M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px;
+  }
+  .header h1 {
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
+    color: var(--gm-text) !important;
+    margin: 0 !important;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+  }
+  .header p {
+    font-size: 0.78rem !important;
+    color: var(--gm-text-3) !important;
+    margin: 0 0 0 6px !important;
+    padding-left: 10px;
+    border-left: 1px solid var(--gm-border);
+    white-space: nowrap;
+  }
+  @media (max-width: 1100px) {
+    .header p { display: none !important; }
+  }
+  .header-db-bar {
+    position: static !important;
+    margin: 0 0 0 auto !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-db-bar span#db-status-text {
+    font-size: 0.74rem;
+    color: var(--gm-text-3);
+    padding: 0 6px;
+  }
+  .header-db-bar button {
+    font-size: 0.78rem !important;
+    padding: 7px 14px !important;
+    border-radius: 999px !important;
+    border: 1px solid var(--gm-border) !important;
+    background: var(--gm-surface) !important;
+    color: var(--gm-text-2) !important;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    box-shadow: var(--gm-shadow-sm);
+    white-space: nowrap !important;
+    flex-shrink: 0;
+  }
+  .header-db-bar button:hover {
+    background: var(--gm-tint-2) !important;
+    border-color: #cbd6e8 !important;
+    color: var(--gm-primary) !important;
+  }
+  #btn-sp-login {
+    background: var(--gm-primary) !important;
+    border-color: var(--gm-primary) !important;
+    color: #fff !important;
+  }
+  #btn-sp-login:hover {
+    background: var(--gm-primary-2) !important;
+    color: #fff !important;
+  }
+
+  /* ── Tab navigation → Gamma-style segmented pill control ── */
+  .tab-nav {
+    border-bottom: none !important;
+    padding: 5px !important;
+    margin-bottom: 24px;
+    background: var(--gm-surface);
+    border: 1px solid var(--gm-border-2);
+    border-radius: 14px;
+    box-shadow: var(--gm-shadow-sm);
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    gap: 2px !important;
+  }
+  .tab-btn {
+    padding: 8px 18px !important;
+    border-radius: 9px !important;
+    border-bottom: 3px solid transparent !important;
+    margin-bottom: 0 !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    color: var(--gm-text-2) !important;
+    letter-spacing: -0.005em;
+    transition: all 0.18s ease;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+  }
+  .tab-btn:hover {
+    background: var(--gm-tint-2);
+    color: var(--gm-primary) !important;
+    border-bottom-color: transparent !important;
+  }
+  .tab-btn.active {
+    background: var(--gm-primary) !important;
+    color: #fff !important;
+    border-bottom-color: transparent !important;
+    box-shadow: 0 1px 2px rgba(29, 78, 216, 0.25);
+  }
+
+  /* ── Cards, panels, rules card, sg-panel ── */
+  .card,
+  .rules-card,
+  .sg-panel,
+  .fb-form-card,
+  .fb-stat-card,
+  .fb-list-card {
+    border-radius: 18px !important;
+    box-shadow: var(--gm-shadow) !important;
+    border: 1px solid var(--gm-border-2);
+  }
+
+  .card-header,
+  .sg-panel-header,
+  .rules-header {
+    padding: 16px 22px !important;
+    border-bottom: 1px solid var(--gm-border-2);
+    font-size: 0.95rem !important;
+  }
+  .card-header.blue,
+  .rules-header,
+  .sg-panel-header {
+    background: var(--gm-surface) !important;
+    color: var(--gm-text) !important;
+  }
+  .card-header.green {
+    background: #ecfdf5 !important;
+    color: var(--gm-success) !important;
+  }
+  .card-body, .sg-panel-body { padding: 22px !important; }
+
+  /* Rules card subtle striping → soft */
+  .rule-row:nth-child(odd)  { background: var(--gm-bg-soft) !important; }
+  .rule-row:nth-child(even) { background: #fff !important; }
+  .rule-row { color: var(--gm-text) !important; }
+
+  /* ── Inputs ── */
+  .field input, .field select,
+  .modal-field input,
+  .fb-f input, .fb-f select, .fb-f textarea,
+  .protect-bar input,
+  .cell-input, .cell-select {
+    border-radius: 10px !important;
+    border-color: var(--gm-border) !important;
+    transition: all 0.15s ease;
+  }
+  .field input:focus, .field select:focus,
+  .modal-field input:focus,
+  .fb-f input:focus, .fb-f select:focus, .fb-f textarea:focus,
+  .protect-bar input:focus {
+    border-color: var(--gm-primary) !important;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12) !important;
+  }
+  .field input, .field select {
+    color: var(--gm-text) !important;
+    font-weight: 500 !important;
+  }
+  .field label, .fb-f label, .modal-field label {
+    color: var(--gm-text-2) !important;
+    font-weight: 600 !important;
+  }
+
+  /* ── Buttons: pill-shaped, Gamma blue ── */
+  .btn,
+  .btn-primary,
+  .btn-save,
+  .modal-confirm-btn,
+  .modal-cancel-btn,
+  .protect-bar button,
+  .btn-export,
+  .fb-btn-clear,
+  .fb-btn-submit,
+  .fb-export-btn,
+  .lock-modal-btn,
+  .fb-cancel-btn2,
+  .fb-del-btn {
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    transition: all 0.15s ease !important;
+    letter-spacing: -0.005em;
+  }
+  .btn-primary,
+  .modal-confirm-btn,
+  .protect-unlock-btn,
+  .fb-btn-submit {
+    background: var(--gm-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 2px rgba(29, 78, 216, 0.25);
+  }
+  .btn-primary:hover,
+  .modal-confirm-btn:hover,
+  .protect-unlock-btn:hover,
+  .fb-btn-submit:hover {
+    background: var(--gm-primary-2) !important;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled,
+  .btn:disabled,
+  .fb-btn-submit:disabled {
+    background: #cbd5e1 !important;
+    color: #fff !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .btn-save {
+    background: var(--gm-warn) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 2px rgba(249, 115, 22, 0.25);
+  }
+  .btn-save:hover {
+    background: #ea580c !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  }
+  .modal-cancel-btn,
+  .fb-btn-clear,
+  .fb-cancel-btn2,
+  .fb-export-btn,
+  .lock-modal-btn {
+    background: var(--gm-surface) !important;
+    color: var(--gm-text-2) !important;
+    border: 1px solid var(--gm-border) !important;
+  }
+  .modal-cancel-btn:hover,
+  .fb-btn-clear:hover,
+  .fb-cancel-btn2:hover,
+  .fb-export-btn:hover,
+  .lock-modal-btn:hover {
+    background: var(--gm-tint-2) !important;
+    border-color: #cbd6e8 !important;
+  }
+  .fb-del-btn { background: var(--gm-danger) !important; color: #fff !important; }
+  .fb-del-btn:hover { background: #b91c1c !important; }
+  .lock-modal-teams-btn {
+    background: #4f46e5 !important;
+    color: #fff !important;
+    border-color: #4f46e5 !important;
+  }
+  .lock-modal-teams-btn:hover { background: #4338ca !important; }
+
+  /* ── Export buttons: Gamma-style colored pills (matches export-modal screenshot) ── */
+  .btn-export {
+    padding: 8px 16px !important;
+    font-size: 0.83rem !important;
+    border: 1px solid transparent !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .btn-export.pdf {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border-color: #fecaca !important;
+  }
+  .btn-export.pdf:hover { background: #fecaca !important; }
+  .btn-export.excel {
+    background: #d1fae5 !important;
+    color: #047857 !important;
+    border-color: #a7f3d0 !important;
+  }
+  .btn-export.excel:hover { background: #a7f3d0 !important; }
+  .btn-export.ee-export {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+    border-color: #bfdbfe !important;
+  }
+  .btn-export.ee-export:hover { background: #bfdbfe !important; }
+  .btn-export.ee-import {
+    background: #fce7f3 !important;
+    color: #be185d !important;
+    border-color: #fbcfe8 !important;
+  }
+  .btn-export.ee-import:hover { background: #fbcfe8 !important; }
+
+  /* "+ 新增專案" green button - keep semantic green but softer */
+  .sg-panel-body button[onclick*="sgToggleNewProject"] {
+    background: #ecfdf5 !important;
+    color: var(--gm-success) !important;
+    border: 1px solid #a7f3d0 !important;
+  }
+  .sg-panel-body button[onclick*="sgToggleNewProject"]:hover {
+    background: #d1fae5 !important;
+  }
+
+  /* ── Protect bar: softer, more banner-like ── */
+  .protect-bar {
+    background: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 14px !important;
+    padding: 12px 18px !important;
+  }
+  .protect-bar.unlocked {
+    background: #ecfdf5 !important;
+    border-color: #a7f3d0 !important;
+  }
+  .protect-bar input {
+    border-radius: 8px !important;
+    border-color: #f5cccc !important;
+    background: #fff !important;
+  }
+  .protect-bar.unlocked input { border-color: #a7f3d0 !important; }
+  .protect-hint { color: #b91c1c !important; }
+  .protect-unlock-btn,
+  .protect-lock-btn {
+    padding: 6px 18px !important;
+  }
+  .protect-lock-btn { background: #fff !important; border: 1px solid var(--gm-border) !important; }
+
+  /* ── Modal boxes ── */
+  .modal-box,
+  .lock-modal-box,
+  .fb-modal-box,
+  .fb-confirm-box {
+    border-radius: 20px !important;
+    box-shadow: var(--gm-shadow-lg) !important;
+    border: 1px solid var(--gm-border-2);
+  }
+  .modal-overlay,
+  .lock-modal-overlay,
+  .fb-overlay {
+    background: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(4px);
+  }
+  .modal-box h3,
+  .fb-modal-hd h3 {
+    color: var(--gm-text) !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+  }
+  .lock-modal-title { color: var(--gm-danger) !important; }
+  .lock-modal-info {
+    background: #fef3c7 !important;
+    border-left-color: var(--gm-warn) !important;
+    border-radius: 10px !important;
+  }
+
+  /* ── Tables: lighter headers ── */
+  .comp-table th,
+  .vd-comp-table th,
+  .fb-tbl th {
+    background: var(--gm-bg-soft) !important;
+    color: var(--gm-text-2) !important;
+    border-bottom: 1px solid var(--gm-border) !important;
+    font-weight: 600 !important;
+  }
+  .comp-table th.editable-col {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+  }
+  .comp-table tr:hover td,
+  .fb-tbl tr:hover td {
+    background: var(--gm-tint-2) !important;
+  }
+  .comp-table td.name-cell {
+    color: var(--gm-primary) !important;
+  }
+  .comp-table-wrap {
+    border-radius: 14px !important;
+    border: 1px solid var(--gm-border-2);
+    box-shadow: var(--gm-shadow-sm) !important;
+  }
+
+  /* Category title bars: slightly softer */
+  .category-title,
+  .vd-comp-category-header,
+  .sg-comp-category-header {
+    border-radius: 12px 12px 0 0 !important;
+    font-size: 0.92rem !important;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Power chips / param chips ── */
+  .sg-power-chip,
+  .sg-param-chip {
+    border-radius: 999px !important;
+    height: 36px;
+    font-weight: 600;
+    box-shadow: var(--gm-shadow-sm);
+  }
+  .sg-power-group {
+    border: 1px solid var(--gm-border) !important;
+    border-radius: 16px !important;
+    background: var(--gm-bg-soft);
+    padding: 14px 18px !important;
+  }
+  .sg-power-group-label {
+    color: var(--gm-text) !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* ── Feedback tab refinements ── */
+  .fb-page-icon {
+    background: var(--gm-primary) !important;
+    border-radius: 14px !important;
+  }
+  .fb-page-header h2 {
+    color: var(--gm-text) !important;
+    letter-spacing: -0.01em;
+  }
+  .fb-quick-card {
+    border-radius: 14px !important;
+    border-color: var(--gm-border) !important;
+    box-shadow: var(--gm-shadow-sm) !important;
+    transition: all 0.18s ease;
+  }
+  .fb-quick-card:hover {
+    border-color: var(--gm-primary) !important;
+    background: var(--gm-tint-2) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -8px rgba(29, 78, 216, 0.18) !important;
+  }
+  .fb-qc-text { color: var(--gm-text) !important; }
+  .fb-section-num {
+    background: var(--gm-primary) !important;
+    border-radius: 10px !important;
+    width: 28px !important; height: 28px !important;
+    font-size: 0.85rem !important;
+  }
+  .fb-stat-card { padding: 20px 22px !important; }
+
+  /* ── Result values, badges ── */
+  .power-badge {
+    border-radius: 999px !important;
+    padding: 4px 12px !important;
+  }
+  .power-badge.high { background: #fee2e2 !important; color: #b91c1c !important; }
+  .power-badge.low  { background: #d1fae5 !important; color: var(--gm-success) !important; }
+  .result-value { color: var(--gm-danger) !important; }
+  .result-value.blue-val { color: var(--gm-primary) !important; }
+  .note-box {
+    background: var(--gm-bg-soft) !important;
+    border: 1px solid var(--gm-border) !important;
+    border-radius: 12px !important;
+  }
+  .custom-badge {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+    border-radius: 999px !important;
+  }
+
+  /* Add-component dashed button → softer */
+  .add-comp-btn,
+  .sg-comp-add-btn {
+    background: var(--gm-tint-2) !important;
+    color: var(--gm-primary) !important;
+    border: 1.5px dashed #93b5f0 !important;
+    border-radius: 10px !important;
+  }
+  .add-comp-btn:hover,
+  .sg-comp-add-btn:hover {
+    background: var(--gm-tint) !important;
+    border-color: var(--gm-primary) !important;
+  }
+
+  /* delete buttons */
+  .delete-comp-btn,
+  .sg-comp-del-btn {
+    border-radius: 8px !important;
+    background: #fef2f2 !important;
+    color: var(--gm-danger) !important;
+    border: 1px solid #fecaca !important;
+  }
+  .delete-comp-btn:hover,
+  .sg-comp-del-btn:hover { background: #fee2e2 !important; }
+
+  /* Hidden zone (warm yellow) → softer */
+  .hidden-comp-zone,
+  .sg-hidden-comp-zone {
+    border-radius: 12px !important;
+    border-color: #fcd34d !important;
+    background: #fffbeb !important;
+  }
+
+  /* Status / save indicators */
+  .comp-status {
+    border-radius: 12px !important;
+    background: #fef3c7 !important;
+    border-color: #fcd34d !important;
+    color: #92400e !important;
+  }
+  .comp-status.success { background: #d1fae5 !important; border-color: #a7f3d0 !important; color: var(--gm-success) !important; }
+  .comp-status.error   { background: #fee2e2 !important; border-color: #fecaca !important; color: #b91c1c !important; }
+
+  .save-status { border-radius: 999px !important; font-weight: 600; }
+  .save-status.saving { background: #fef3c7 !important; color: #b45309 !important; }
+  .save-status.saved  { background: #d1fae5 !important; color: var(--gm-success) !important; }
+  .save-status.err    { background: #fee2e2 !important; color: #b91c1c !important; }
+
+  /* Conflict toast */
+  .conflict-toast {
+    border-radius: 16px !important;
+    border-color: var(--gm-warn) !important;
+    box-shadow: var(--gm-shadow-lg) !important;
+  }
+
+  /* Feedback badges → pill */
+  .fb-badge { border-radius: 999px !important; padding: 3px 10px !important; }
+
+  /* Empty state */
+  .empty-state .icon { opacity: 0.5; }
+  .empty-state p { color: var(--gm-text-3) !important; }
+
+  /* ── Right-side floating action rail (Gamma signature element) ── */
+  .gm-action-rail {
+    position: fixed;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    background: var(--gm-surface);
+    border: 1px solid var(--gm-border-2);
+    border-radius: 18px;
+    box-shadow: var(--gm-shadow);
+  }
+  .gm-action-rail button {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: var(--gm-text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+  .gm-action-rail button:hover {
+    background: var(--gm-tint);
+    color: var(--gm-primary);
+  }
+  .gm-action-rail button.gm-ai {
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+    color: var(--gm-primary);
+  }
+  .gm-action-rail button.gm-ai:hover {
+    background: linear-gradient(135deg, #bfdbfe 0%, #c7d2fe 100%);
+  }
+  .gm-action-rail .gm-rail-divider {
+    height: 1px;
+    background: var(--gm-border-2);
+    margin: 2px 6px;
+  }
+  .gm-action-rail svg { width: 20px; height: 20px; }
+  .gm-action-rail button::after {
+    content: attr(data-tip);
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--gm-text);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .gm-action-rail button:hover::after { opacity: 1; }
+  @media (max-width: 1100px) { .gm-action-rail { display: none; } }
+
+  /* AI mini-modal (placeholder for the sparkle button) */
+  .gm-ai-popover {
+    position: fixed;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%) translateX(20px);
+    z-index: 60;
+    width: 320px;
+    background: var(--gm-surface);
+    border: 1px solid var(--gm-border-2);
+    border-radius: 18px;
+    box-shadow: var(--gm-shadow-lg);
+    padding: 18px 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+  .gm-ai-popover.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+  }
+  .gm-ai-popover-title {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; color: var(--gm-text); font-size: 0.98rem;
+    margin-bottom: 8px;
+  }
+  .gm-ai-popover-title .gm-sparkle {
+    width: 22px; height: 22px;
+    background: linear-gradient(135deg, var(--gm-primary), #6366f1);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+  .gm-ai-popover-body {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--gm-text-2);
+  }
+  .gm-ai-popover-tip {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--gm-tint-2);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: var(--gm-text-2);
+  }
+
+  /* Slight refinement for select arrows */
+  .field select, .fb-f select, .protect-bar select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 36px !important;
+  }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+    border: 2px solid var(--gm-bg);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
 </head>
 <body>
@@ -1641,7 +2381,7 @@
 <div id="fb-img-lightbox" class="fb-img-lightbox" onclick="fbCloseLightbox()">
   <div class="fb-img-lightbox-inner" onclick="event.stopPropagation()">
     <button class="fb-img-lightbox-close" onclick="fbCloseLightbox()">&#10005;</button>
-    <img id="fb-img-lightbox-img" src="" alt="截圖">
+    <img id="fb-img-lightbox-img" alt="截圖">
   </div>
 </div>
 
@@ -5284,6 +6024,84 @@ async function fbOnTabActivate() {
   fbRenderSummary();
   fbRenderTable();
 }
+</script>
+
+<!-- ✦ GAMMA-STYLE FLOATING ACTION RAIL ✦ (decorative + mirrors existing header actions) -->
+<aside class="gm-action-rail" aria-label="快速動作">
+  <button type="button" class="gm-ai" data-tip="關於此工具" onclick="gmToggleAiPopover()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>
+      <path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75z"/>
+    </svg>
+  </button>
+  <div class="gm-rail-divider"></div>
+  <button type="button" data-tip="資料庫目錄" onclick="if(typeof handlePickDb==='function')handlePickDb()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+    </svg>
+  </button>
+  <button type="button" data-tip="備份資料庫" onclick="if(window.dbAdapter&&dbAdapter.exportBackup)dbAdapter.exportBackup()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </button>
+  <div class="gm-rail-divider"></div>
+  <button type="button" data-tip="切換到 凸台&TIM 速算" onclick="switchTab('calc')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="2"/>
+      <line x1="8" y1="7" x2="16" y2="7"/>
+      <line x1="8" y1="11" x2="10" y2="11"/>
+      <line x1="13" y1="11" x2="16" y2="11"/>
+      <line x1="8" y1="15" x2="10" y2="15"/>
+      <line x1="13" y1="15" x2="16" y2="15"/>
+      <line x1="8" y1="18" x2="10" y2="18"/>
+    </svg>
+  </button>
+  <button type="button" data-tip="切換到 使用者建議" onclick="switchTab('feedback')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    </svg>
+  </button>
+  <div class="gm-rail-divider"></div>
+  <button type="button" data-tip="回到頂部" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  </button>
+</aside>
+
+<div id="gm-ai-popover" class="gm-ai-popover">
+  <div class="gm-ai-popover-title">
+    <span class="gm-sparkle">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg>
+    </span>
+    Thermal &amp; Component Spec Tool
+  </div>
+  <div class="gm-ai-popover-body">
+    AI 輔助散熱與元件規格管理，整合 5 大模組：EE/RF/PWR 清單、TH/ME 熱設計、模擬實測驗證、凸台/TIM 速算、使用者建議。
+  </div>
+  <div class="gm-ai-popover-tip">
+    💡 <strong>提示：</strong>點選右側功能列即可快速切換 Tab，所有原本的功能與按鈕都保留可用。
+  </div>
+</div>
+
+<script>
+  function gmToggleAiPopover() {
+    var el = document.getElementById('gm-ai-popover');
+    if (!el) return;
+    el.classList.toggle('open');
+    if (el.classList.contains('open')) {
+      var closeOnClickOutside = function(e) {
+        if (!el.contains(e.target) && !e.target.closest('.gm-action-rail .gm-ai')) {
+          el.classList.remove('open');
+          document.removeEventListener('click', closeOnClickOutside);
+        }
+      };
+      setTimeout(function() { document.addEventListener('click', closeOnClickOutside); }, 0);
+    }
+  }
 </script>
 </body>
 </html>
