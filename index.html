@@ -280,6 +280,35 @@
     -moz-osx-font-smoothing: grayscale;
   }
   .protect-bar.unlocked .protect-hint { display: none; }
+
+  /* ── Lock status bar ── */
+  #lock-status-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #fff8e1;
+    border: 1px solid #f59e0b;
+    border-radius: 10px;
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    color: #78350f;
+    flex-wrap: wrap;
+  }
+  #lock-status-bar .lock-status-icon { font-size: 1.1rem; }
+  #lock-status-bar strong { color: #92400e; }
+  #lock-status-bar .lock-status-meta { color: #a16207; font-size: 0.82rem; }
+  #lock-status-bar .lock-status-teams {
+    margin-left: auto;
+    padding: 4px 12px;
+    background: #6264a7;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  #lock-status-bar .lock-status-teams:hover { background: #4f5197; }
   .protect-lock-btn {
     background: #e0e0e0;
     color: #555;
@@ -3328,6 +3357,17 @@
     </div>
   </div>
 
+  <!-- Lock status bar (shows when another user holds the edit lock) -->
+  <div id="lock-status-bar">
+    <span class="lock-status-icon">🔒</span>
+    <div>
+      <strong id="lock-status-name"></strong>
+      <span class="lock-status-meta">（<span id="lock-status-email"></span>）正在編輯中</span>
+      <div class="lock-status-meta">鎖定於 <span id="lock-status-time"></span>，預計 <span id="lock-status-expires"></span> 自動解鎖</div>
+    </div>
+    <a id="lock-status-teams-btn" class="lock-status-teams" href="#" target="_blank" rel="noopener">📩 傳送 Teams 訊息</a>
+  </div>
+
   <!-- Tab Navigation -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('specgen')">EE/RF/PWR-專案元件清單</button>
@@ -4119,6 +4159,7 @@ async function initDatabase() {
       await loadProjects();
       if (typeof sgLoadProjects === 'function') await sgLoadProjects();
       if (typeof vdLoadProjects === 'function') await vdLoadProjects();
+      updateLockStatusBar();
       return;
     }
     // SharePoint：未登入 → 顯示登入按鈕
@@ -4172,6 +4213,7 @@ async function handleSpLogin() {
       await loadProjects();
       if (typeof sgLoadProjects === 'function') await sgLoadProjects();
       if (typeof vdLoadProjects === 'function') await vdLoadProjects();
+      updateLockStatusBar();
     } else if (result && result.reason === 'cancelled') {
       // user cancelled, do nothing
     }
@@ -4192,6 +4234,14 @@ async function handleSpLogout() {
 }
 
 initDatabase();
+
+// Poll lock status every 60 s (re-reads SharePoint file for freshness)
+setInterval(async () => {
+  if (DB_MODE === 'sharepoint' && dbAdapter.isSignedIn && dbAdapter.isSignedIn()) {
+    try { await dbAdapter.peekLock(); } catch (e) { return; }
+    updateLockStatusBar();
+  }
+}, 60000);
 
 // Warn user before leaving if they hold an editing lock
 window.addEventListener('beforeunload', (event) => {
@@ -5965,6 +6015,27 @@ function showLockWarning(lockError) {
 function closeLockWarning() {
   const modal = document.getElementById('lock-warning-modal');
   if (modal) modal.style.display = 'none';
+}
+
+function updateLockStatusBar() {
+  const bar = document.getElementById('lock-status-bar');
+  if (!bar) return;
+  const lock = dbAdapter.getLockInfo ? dbAdapter.getLockInfo() : null;
+  const myEmail = dbAdapter.getAccountInfo ? dbAdapter.getAccountInfo()?.email : null;
+  const fmt = iso => { try { return new Date(iso).toLocaleString('zh-TW', { hour12: false }); } catch { return iso || '-'; } };
+
+  if (lock && lock.lockedByEmail && new Date(lock.expiresAt) > new Date() && lock.lockedByEmail !== myEmail) {
+    document.getElementById('lock-status-name').textContent    = lock.lockedBy    || '-';
+    document.getElementById('lock-status-email').textContent   = lock.lockedByEmail || '-';
+    document.getElementById('lock-status-time').textContent    = fmt(lock.lockedAt);
+    document.getElementById('lock-status-expires').textContent = fmt(lock.expiresAt);
+    const teamsMsg = encodeURIComponent(`Hi ${lock.lockedBy}，我想使用 Component Spec Management Tool 編輯資料庫，請你完成後通知我，謝謝！`);
+    document.getElementById('lock-status-teams-btn').href =
+      `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(lock.lockedByEmail)}&message=${teamsMsg}`;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
 }
 
 function updateDbStatusText(message, type) {
