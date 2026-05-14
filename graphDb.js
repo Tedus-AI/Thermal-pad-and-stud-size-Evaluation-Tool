@@ -269,6 +269,15 @@ const graphDb = {
     return currentLock !== null;
   },
 
+  getLockInfo() {
+    return dbCache.lock || null;
+  },
+
+  async peekLock() {
+    await this._readFile();
+    return dbCache.lock || null;
+  },
+
   /* ─── Collection/Document API (mirrors fileDb) ────────── */
   async openFile() {
     if (!msalInstance) await this.initMsal();
