@@ -3282,6 +3282,228 @@
     border: 2px solid var(--gm-bg);
   }
   ::-webkit-scrollbar-thumb:hover { background: #b8b09a; }
+
+  /* ── Teams Quick Contact FAB ── */
+  .tc-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 200;
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    border: 1px solid rgba(98,100,167,0.35);
+    background: linear-gradient(180deg, #7b7ec4 0%, #6264a7 100%);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.25),
+      inset 0 -2px 0 rgba(0,0,0,0.15),
+      0 2px 6px rgba(98,100,167,0.3),
+      0 8px 20px -6px rgba(98,100,167,0.45);
+    transition: all 0.15s ease;
+  }
+  .tc-fab:hover {
+    background: linear-gradient(180deg, #8385cc 0%, #6d6fb8 100%);
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.3),
+      inset 0 -2px 0 rgba(0,0,0,0.12),
+      0 4px 10px rgba(98,100,167,0.35),
+      0 14px 32px -8px rgba(98,100,167,0.5);
+  }
+  .tc-fab:active { transform: translateY(1px); }
+  .tc-fab svg { width: 26px; height: 26px; }
+  .tc-fab::after {
+    content: '快速聯絡專案成員';
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--gm-text, #333);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .tc-fab:hover::after { opacity: 1; }
+  @media (max-width: 1100px) { .tc-fab { display: none; } }
+
+  /* ── Teams Contact Modal ── */
+  .tc-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1500;
+    justify-content: center;
+    align-items: center;
+  }
+  .tc-overlay.active { display: flex; }
+  .tc-modal {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    width: 480px;
+    max-width: 94vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+    overflow: hidden;
+  }
+  #tc-spinner {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.72);
+    justify-content: center;
+    align-items: center;
+    border-radius: 16px;
+    z-index: 10;
+  }
+  .tc-spinner-ring {
+    width: 36px; height: 36px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #6264a7;
+    border-radius: 50%;
+    animation: tc-spin 0.7s linear infinite;
+  }
+  @keyframes tc-spin { to { transform: rotate(360deg); } }
+  .tc-modal-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #eaeaea;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .tc-modal-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a3a6b;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .tc-modal-subtitle {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #888;
+  }
+  .tc-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: color 0.15s, background 0.15s;
+  }
+  .tc-modal-close:hover { color: #333; background: #f0f0f0; }
+  .tc-tabs-bar {
+    display: flex;
+    gap: 2px;
+    padding: 10px 20px 0;
+    border-bottom: 2px solid #eaeaea;
+    flex-shrink: 0;
+  }
+  .tc-tab-btn {
+    padding: 7px 16px;
+    border: none;
+    background: transparent;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tc-tab-btn:hover:not(.tc-tab-empty) { color: #6264a7; }
+  .tc-tab-btn.active { color: #6264a7; border-bottom-color: #6264a7; }
+  .tc-tab-btn.tc-tab-empty { color: #ccc; cursor: default; }
+  .tc-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 80px;
+  }
+  .tc-member-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    gap: 12px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .tc-member-card:hover { border-color: #c5c7e8; box-shadow: 0 2px 8px rgba(98,100,167,0.1); }
+  .tc-member-info { display: flex; flex-direction: column; gap: 3px; }
+  .tc-member-name { font-size: 0.92rem; font-weight: 600; color: #222; }
+  .tc-member-email { font-size: 0.8rem; color: #888; }
+  .tc-send-btn {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    background: linear-gradient(180deg, #7b7ec4 0%, #6264a7 100%);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .tc-send-btn:hover {
+    background: linear-gradient(180deg, #8385cc 0%, #6d6fb8 100%);
+    transform: translateY(-1px);
+  }
+  .tc-empty {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9rem;
+    padding: 36px 0;
+  }
+  .tc-modal-footer {
+    padding: 10px 20px 16px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+  }
+  .tc-preview-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .tc-msg-preview {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #d0d8e0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: #333;
+    resize: vertical;
+    font-family: 'Segoe UI', 'Arial Unicode MS', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .tc-msg-preview:focus { border-color: #6264a7; }
 </style>
 </head>
 <body>
@@ -3946,6 +4168,7 @@
 <script src="fileDb.js"></script>
 <script src="graphDb.js"></script>
 <script src="dbAdapter.js"></script>
+<script src="teamsContact.js"></script>
 
 <!-- SheetJS for Excel export -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -7076,6 +7299,41 @@ async function fbOnTabActivate() {
     </svg>
   </button>
 </aside>
+
+<!-- Teams Quick Contact FAB -->
+<button id="tc-fab" class="tc-fab" type="button" aria-label="快速聯絡專案成員">
+  <!-- Microsoft Teams icon: T block + person silhouette -->
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- T block (rounded rect background) -->
+    <rect x="1.5" y="1.5" width="14" height="14" rx="3.5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    <!-- T letter -->
+    <path d="M4.5 5h8v2H9.5v7.5h-2.5V7H4.5z" fill="white"/>
+    <!-- Person head -->
+    <circle cx="18.5" cy="9" r="3" fill="white" opacity="0.92"/>
+    <!-- Person body -->
+    <path d="M13.5 21v-.5c0-2.5 2.3-4.5 5-4.5s5 2 5 4.5v.5H13.5z" fill="white" opacity="0.92"/>
+  </svg>
+</button>
+
+<!-- Teams Contact Modal -->
+<div id="tc-modal-overlay" class="tc-overlay" role="dialog" aria-modal="true" aria-label="聯絡專案成員">
+  <div class="tc-modal">
+    <div id="tc-spinner"><div class="tc-spinner-ring"></div></div>
+    <div class="tc-modal-header">
+      <div class="tc-modal-title">
+        聯絡專案成員
+        <span class="tc-modal-subtitle">專案：<span id="tc-project-title"></span></span>
+      </div>
+      <button class="tc-modal-close" id="tc-modal-close" type="button" aria-label="關閉">✕</button>
+    </div>
+    <div class="tc-tabs-bar" id="tc-tabs"></div>
+    <div class="tc-modal-body" id="tc-modal-body"></div>
+    <div class="tc-modal-footer">
+      <div class="tc-preview-label">訊息預覽（可編輯）：</div>
+      <textarea class="tc-msg-preview" id="tc-msg-preview" rows="4"></textarea>
+    </div>
+  </div>
+</div>
 
 <div id="gm-ai-popover" class="gm-ai-popover">
   <div class="gm-ai-popover-title">
