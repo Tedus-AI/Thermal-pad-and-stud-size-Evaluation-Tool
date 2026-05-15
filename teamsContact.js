@@ -55,7 +55,9 @@
 
     const siteId = await _getSiteId();
     const listId = await _getListId();
-    const filter = encodeURIComponent(`fields/Title eq '${projectId}' and fields/IsActive eq true`);
+    // Filter by ProjectID only on the server; IsActive is checked client-side
+    // (if the IsActive column doesn't exist yet, server-side eq true returns 0 rows)
+    const filter = encodeURIComponent(`fields/Title eq '${projectId}'`);
     const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items?$expand=fields&$filter=${filter}`;
 
     const token = await graphDb._getAccessToken();
@@ -75,11 +77,13 @@
     }
 
     const data = await resp.json();
-    const members = (data.value || []).map(item => ({
-      name:  item.fields.MemberName,
-      email: item.fields.MemberEmail,
-      func:  item.fields.Function,
-    }));
+    const members = (data.value || [])
+      .filter(item => item.fields.IsActive !== false)  // keep if true or field absent
+      .map(item => ({
+        name:  item.fields.MemberName,
+        email: item.fields.MemberEmail,
+        func:  item.fields.Function || 'TH/ME',  // default if Function column absent
+      }));
 
     _membersCache[projectId] = members;
     return members;
