@@ -23,7 +23,7 @@
   }
 
   function _buildPreviewText(name, projectId) {
-    return `Hi ${name}，\n${projectId} ${_getSelectedAction()}\n${window.location.href}`;
+    return `Hi ${name}，\n${projectId} ${_getSelectedAction()}\n[查看工具頁面](${window.location.href})`;
   }
 
   function _refreshPreview(name) {
