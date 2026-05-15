@@ -2,15 +2,9 @@
   /* ---- Constants ---- */
   const FUNCTIONS = ['TH/ME', 'EE', 'RF'];
 
-  const MESSAGE_TEMPLATES = {
-    'TH/ME': 'Hi {name}，\n{projectId} 熱模擬/結構相關資料已更新，請協助確認：\n{url}',
-    'EE':    'Hi {name}，\n{projectId} EE 相關元件規格已填寫，請協助 review：\n{url}',
-    'RF':    'Hi {name}，\n{projectId} RF 元件規格已填寫，請協助 review：\n{url}',
-  };
-
   /* ---- Module state ---- */
-  let _siteId   = null;
-  let _listId   = null;
+  let _siteId       = null;
+  let _listId       = null;
   let _membersCache = {};
   let _isModalOpen  = false;
 
@@ -21,6 +15,23 @@
       if (el && el.value) return el.value;
     }
     return null;
+  }
+
+  function _getSelectedAction() {
+    const sel = document.getElementById('tc-action-select');
+    return sel ? sel.value : '';
+  }
+
+  function _buildPreviewText(name, projectId) {
+    return `Hi ${name}，\n${projectId} ${_getSelectedAction()}\n${window.location.href}`;
+  }
+
+  function _refreshPreview(name) {
+    const previewEl  = document.getElementById('tc-msg-preview');
+    const projectId  = document.getElementById('tc-project-title');
+    if (previewEl && projectId && projectId.textContent) {
+      previewEl.value = _buildPreviewText(name, projectId.textContent);
+    }
   }
 
   /* ---- Graph API helpers ---- */
@@ -55,8 +66,6 @@
 
     const siteId = await _getSiteId();
     const listId = await _getListId();
-    // Filter by ProjectID only on the server; IsActive is checked client-side
-    // (if the IsActive column doesn't exist yet, server-side eq true returns 0 rows)
     const filter = encodeURIComponent(`fields/Title eq '${projectId}'`);
     const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items?$expand=fields&$filter=${filter}`;
 
@@ -78,11 +87,11 @@
 
     const data = await resp.json();
     const members = (data.value || [])
-      .filter(item => item.fields.IsActive !== false)  // keep if true or field absent
+      .filter(item => item.fields.IsActive !== false)
       .map(item => ({
         name:  item.fields.MemberName,
         email: item.fields.MemberEmail,
-        func:  item.fields.Function || 'TH/ME',  // default if Function column absent
+        func:  item.fields.Function || 'TH/ME',
       }));
 
     _membersCache[projectId] = members;
@@ -123,8 +132,6 @@
   }
 
   function _buildMemberCard(member, projectId) {
-    const template = MESSAGE_TEMPLATES[member.func] || MESSAGE_TEMPLATES['TH/ME'];
-
     const card = document.createElement('div');
     card.className = 'tc-member-card';
     card.innerHTML = `
@@ -135,13 +142,14 @@
       <button class="tc-send-btn" type="button">\u{1F4E8} 傳訊息</button>
     `;
 
+    // Hover → fill this member's name into preview
+    card.addEventListener('mouseenter', () => _refreshPreview(member.name));
+
+    // Send → substitute [Name] with actual name (covers case where user didn't hover)
     card.querySelector('.tc-send-btn').addEventListener('click', () => {
       const previewEl = document.getElementById('tc-msg-preview');
-      const rawMsg = previewEl ? previewEl.value : template;
-      const msg = rawMsg
-        .replace(/\{name\}/g, member.name)
-        .replace(/\{projectId\}/g, projectId)
-        .replace(/\{url\}/g, window.location.href);
+      let msg = previewEl ? previewEl.value : _buildPreviewText(member.name, projectId);
+      msg = msg.replace(/\[Name\]/g, member.name);
       openTeamsChat(member.email, msg);
     });
 
@@ -150,7 +158,6 @@
 
   function _renderTab(tab, groups, projectId) {
     const body = document.getElementById('tc-modal-body');
-    const previewEl = document.getElementById('tc-msg-preview');
     if (!body) return;
 
     body.innerHTML = '';
@@ -162,13 +169,7 @@
       members.forEach(m => body.appendChild(_buildMemberCard(m, projectId)));
     }
 
-    if (previewEl) {
-      const template = MESSAGE_TEMPLATES[tab] || MESSAGE_TEMPLATES['TH/ME'];
-      previewEl.value = template
-        .replace(/\{name\}/g, '[Name]')
-        .replace(/\{projectId\}/g, projectId)
-        .replace(/\{url\}/g, window.location.href);
-    }
+    _refreshPreview('[Name]');
 
     document.querySelectorAll('.tc-tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.func === tab);
@@ -232,7 +233,6 @@
     try {
       const members = await fetchMembers(projectId);
       if (!members.length) {
-        if (titleEl) titleEl.textContent = projectId;
         _showError('該專案尚未維護成員名單，請聯絡 PM');
         const previewEl = document.getElementById('tc-msg-preview');
         if (previewEl) previewEl.value = '';
@@ -270,6 +270,12 @@
       overlay.addEventListener('click', e => {
         if (e.target === overlay) closeModal();
       });
+    }
+
+    // Dropdown change → refresh preview (keeps current [Name] placeholder)
+    const actionSelect = document.getElementById('tc-action-select');
+    if (actionSelect) {
+      actionSelect.addEventListener('change', () => _refreshPreview('[Name]'));
     }
 
     // Invalidate member cache + refresh modal when project selection changes
