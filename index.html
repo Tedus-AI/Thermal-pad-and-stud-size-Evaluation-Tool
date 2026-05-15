@@ -3334,7 +3334,41 @@
     transition: opacity 0.15s ease;
   }
   .tc-fab:hover::after { opacity: 1; }
-  @media (max-width: 1100px) { .tc-fab { display: none; } }
+  /* Wrapper: stacks FAB above the rail as one fixed unit */
+  .tc-rail-wrapper {
+    position: fixed;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+  }
+  .tc-rail-wrapper .gm-action-rail,
+  .tc-rail-wrapper .tc-fab {
+    position: static;
+    right: auto; top: auto; bottom: auto;
+    transform: none;
+    z-index: auto;
+  }
+  @media (max-width: 1100px) { .tc-rail-wrapper { display: none; } }
+
+  /* Message-type dropdown */
+  .tc-action-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #d0d8e0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #333;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .tc-action-select:focus { border-color: #6264a7; }
 
   /* ── Teams Contact Modal ── */
   .tc-overlay {
@@ -7245,7 +7279,19 @@ async function fbOnTabActivate() {
 }
 </script>
 
-<!-- ✦ GAMMA-STYLE FLOATING ACTION RAIL ✦ (decorative + mirrors existing header actions) -->
+<div class="tc-rail-wrapper">
+
+<!-- Teams Quick Contact FAB (above rail) -->
+<button id="tc-fab" class="tc-fab" type="button" aria-label="快速聯絡專案成員">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1.5" y="1.5" width="14" height="14" rx="3.5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    <path d="M4.5 5h8v2H9.5v7.5h-2.5V7H4.5z" fill="white"/>
+    <circle cx="18.5" cy="9" r="3" fill="white" opacity="0.92"/>
+    <path d="M13.5 21v-.5c0-2.5 2.3-4.5 5-4.5s5 2 5 4.5v.5H13.5z" fill="white" opacity="0.92"/>
+  </svg>
+</button>
+
+<!-- ✦ GAMMA-STYLE FLOATING ACTION RAIL ✦ -->
 <aside class="gm-action-rail" aria-label="快速動作">
   <button type="button" class="gm-ai" data-tip="關於此工具" onclick="gmToggleAiPopover()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -7300,20 +7346,7 @@ async function fbOnTabActivate() {
   </button>
 </aside>
 
-<!-- Teams Quick Contact FAB -->
-<button id="tc-fab" class="tc-fab" type="button" aria-label="快速聯絡專案成員">
-  <!-- Microsoft Teams icon: T block + person silhouette -->
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- T block (rounded rect background) -->
-    <rect x="1.5" y="1.5" width="14" height="14" rx="3.5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-    <!-- T letter -->
-    <path d="M4.5 5h8v2H9.5v7.5h-2.5V7H4.5z" fill="white"/>
-    <!-- Person head -->
-    <circle cx="18.5" cy="9" r="3" fill="white" opacity="0.92"/>
-    <!-- Person body -->
-    <path d="M13.5 21v-.5c0-2.5 2.3-4.5 5-4.5s5 2 5 4.5v.5H13.5z" fill="white" opacity="0.92"/>
-  </svg>
-</button>
+</div><!-- /.tc-rail-wrapper -->
 
 <!-- Teams Contact Modal -->
 <div id="tc-modal-overlay" class="tc-overlay" role="dialog" aria-modal="true" aria-label="聯絡專案成員">
@@ -7329,8 +7362,14 @@ async function fbOnTabActivate() {
     <div class="tc-tabs-bar" id="tc-tabs"></div>
     <div class="tc-modal-body" id="tc-modal-body"></div>
     <div class="tc-modal-footer">
-      <div class="tc-preview-label">訊息預覽（可編輯）：</div>
-      <textarea class="tc-msg-preview" id="tc-msg-preview" rows="4"></textarea>
+      <div class="tc-preview-label">訊息類型：</div>
+      <select id="tc-action-select" class="tc-action-select">
+        <option value="EE相關資料已更新，請協助確認">EE相關資料已更新，請協助確認</option>
+        <option value="RF相關資料已更新，請協助確認">RF相關資料已更新，請協助確認</option>
+        <option value="凸台&amp;TIM相關資料已更新，請協助確認並繪圖">凸台&TIM相關資料已更新，請協助確認並繪圖</option>
+      </select>
+      <div class="tc-preview-label" style="margin-top:10px;">訊息預覽（可編輯）：</div>
+      <textarea class="tc-msg-preview" id="tc-msg-preview" rows="3"></textarea>
     </div>
   </div>
 </div>
