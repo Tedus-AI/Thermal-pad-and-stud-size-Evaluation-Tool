@@ -1290,6 +1290,67 @@
   .tcp-placement-btn.digital:hover { background: #245a9a; box-shadow: 0 2px 8px rgba(46,107,181,0.28); }
   .tcp-placement-btn.pwr   { background: #e67e22; }
   .tcp-placement-btn.pwr:hover   { background: #ca6f1e; box-shadow: 0 2px 8px rgba(230,126,34,0.28); }
+
+  /* ── TCP Placement Modal ── */
+  .tcp-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+  }
+  .tcp-modal-overlay.active { display: flex; }
+  .tcp-modal-box {
+    background: var(--gm-surface, #fff);
+    border-radius: 12px;
+    box-shadow: var(--gm-shadow-lg, 0 24px 56px -16px rgba(15,23,42,0.22));
+    width: 90vw;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .tcp-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gm-border, #e2e8f0);
+    flex-shrink: 0;
+    background: var(--gm-bg-soft, #f6f9fd);
+  }
+  .tcp-modal-title {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: var(--gm-text, #0f172a);
+  }
+  .tcp-modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--gm-text-2, #475569);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .tcp-modal-close:hover { background: var(--gm-border, #e2e8f0); }
+  .tcp-modal-body {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--gm-text-3, #94a3b8);
+    font-size: 1rem;
+  }
   .sg-comp-save-bar {
     display: flex;
     align-items: center;
@@ -6022,10 +6083,30 @@ function sgOnCompEdit(el) {
 }
 
 /* ---- TC Placement Modal ---- */
+let _tcpCategory = null;
+
 function tcpOpenModal(category) {
-  // Phase 1 Step 3+ will implement this
-  alert('TC Placement [功能建置中]: ' + category);
+  if (!sgProjectData) { alert('請先選擇或建立一個專案'); return; }
+  _tcpCategory = category;
+  const catLabels = { RF: 'RF', Digital: 'Digital', PWR: 'PWR' };
+  const projectName = getProjectName() || 'Untitled';
+  document.getElementById('tcp-modal-title').textContent =
+    `${projectName} ${catLabels[category] || category} Component Location`;
+  document.getElementById('tcp-modal-overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
+
+function tcpCloseModal() {
+  document.getElementById('tcp-modal-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+  _tcpCategory = null;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('tcp-modal-overlay').classList.contains('active')) {
+    tcpCloseModal();
+  }
+});
 
 /* ---- Delete component from list ---- */
 function sgDeleteComp(cat, idx) {
@@ -7440,6 +7521,19 @@ async function fbOnTabActivate() {
     }
   }
 </script>
+
+<!-- ── TC Placement Modal ── -->
+<div id="tcp-modal-overlay" class="tcp-modal-overlay" onclick="if(event.target===this)tcpCloseModal()">
+  <div class="tcp-modal-box">
+    <div class="tcp-modal-header">
+      <span class="tcp-modal-title" id="tcp-modal-title">元件位置標註</span>
+      <button class="tcp-modal-close" onclick="tcpCloseModal()" title="關閉 (ESC)">✕</button>
+    </div>
+    <div class="tcp-modal-body" id="tcp-modal-body">
+      <span>功能建置中…</span>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
