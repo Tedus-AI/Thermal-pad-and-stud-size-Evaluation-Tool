@@ -1343,13 +1343,93 @@
   .tcp-modal-close:hover { background: var(--gm-border, #e2e8f0); }
   .tcp-modal-body {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .tcp-content {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+  }
+  .tcp-editor-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .tcp-workspace-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #e8edf4;
+  }
+  .tcp-photo-zone {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    color: var(--gm-text-3, #94a3b8);
-    font-size: 1rem;
+    border: 2px dashed var(--gm-border, #e2e8f0);
+    border-radius: 8px;
+    background: var(--gm-surface, #fff);
+    transition: border-color 0.15s, background 0.15s;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  .tcp-photo-zone.has-photo { border: 1.5px solid var(--gm-border-2, #eef1f6); }
+  .tcp-photo-zone.dragover  { border-color: var(--gm-primary, #1d4ed8); background: var(--gm-tint-2, #f3f6fd); }
+  .tcp-photo-zone img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+  .tcp-photo-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    color: var(--gm-text-3, #94a3b8); text-align: center; padding: 20px;
+    pointer-events: none;
+  }
+  .tcp-photo-placeholder .icon { font-size: 2.5rem; }
+  .tcp-browse-btn {
+    pointer-events: all;
+    padding: 6px 16px;
+    background: var(--gm-tint, #e8efff);
+    color: var(--gm-primary, #1d4ed8);
+    border: 1.5px solid var(--gm-primary, #1d4ed8);
+    border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .tcp-browse-btn:hover { background: var(--gm-primary, #1d4ed8); color: #fff; }
+  .tcp-replace-btn {
+    position: absolute; top: 8px; right: 8px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.92);
+    color: var(--gm-text-2, #475569);
+    border: 1px solid var(--gm-border, #e2e8f0);
+    border-radius: 5px; font-size: 0.78rem; cursor: pointer;
+    display: none; transition: background 0.15s;
+  }
+  .tcp-photo-zone.has-photo:hover .tcp-replace-btn { display: block; }
+  .tcp-replace-btn:hover { background: #fff; }
+  .tcp-svg-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+  }
+  .tcp-svg-overlay line {
+    stroke: #dc2626; stroke-width: 1.5; pointer-events: none;
+  }
+  .tcp-drag-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 11;
+  }
+  .tcp-drag-svg line {
+    stroke: #dc2626; stroke-width: 1.5; stroke-dasharray: 5 3; pointer-events: none;
   }
   .sg-comp-save-bar {
     display: flex;
@@ -6082,29 +6162,168 @@ function sgOnCompEdit(el) {
   sgProjectData[fieldKey][idx][field] = val;
 }
 
-/* ---- TC Placement Modal ---- */
-let _tcpCategory = null;
+/* ======================================================
+   TC Placement Modal  (tcp-*)
+   ====================================================== */
 
+let _tcpCategory = null;
+let _tcpPagesData = {};      // { RF: [{id,title,imageData,annotations,isCustomTitle},...], ... }
+let _tcpActivePage = null;   // current page object reference
+let _tcpDragState  = null;   // { markerId, dotAbsX, dotAbsY }
+
+/* ── open / close ── */
 function tcpOpenModal(category) {
   if (!sgProjectData) { alert('請先選擇或建立一個專案'); return; }
   _tcpCategory = category;
-  const catLabels = { RF: 'RF', Digital: 'Digital', PWR: 'PWR' };
+
+  // Init category storage if first open
+  if (!_tcpPagesData[category]) {
+    _tcpPagesData[category] = [{
+      id: 'p_' + Date.now(),
+      title: '',
+      imageData: '',
+      annotations: [],
+      isCustomTitle: false
+    }];
+  }
+  _tcpActivePage = _tcpPagesData[category][0];
+
+  // Set header title
   const projectName = getProjectName() || 'Untitled';
   document.getElementById('tcp-modal-title').textContent =
-    `${projectName} ${catLabels[category] || category} Component Location`;
+    `${projectName} ${category} Component Location`;
+
   document.getElementById('tcp-modal-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
+  tcpRenderEditor();
 }
 
 function tcpCloseModal() {
   document.getElementById('tcp-modal-overlay').classList.remove('active');
   document.body.style.overflow = '';
-  _tcpCategory = null;
+  _tcpDragState = null;
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && document.getElementById('tcp-modal-overlay').classList.contains('active')) {
+  if (e.key === 'Escape' &&
+      document.getElementById('tcp-modal-overlay').classList.contains('active')) {
     tcpCloseModal();
+  }
+});
+
+/* ── render editor ── */
+function tcpRenderEditor() {
+  const body = document.getElementById('tcp-modal-body');
+  if (!body || !_tcpActivePage) return;
+
+  const page = _tcpActivePage;
+  const hasPhoto = !!page.imageData;
+
+  body.innerHTML = `
+    <div class="tcp-content">
+      <div class="tcp-editor-main">
+        <div class="tcp-workspace-wrap" id="tcp-workspace">
+          <div class="tcp-photo-zone${hasPhoto ? ' has-photo' : ''}" id="tcp-photo-zone">
+            ${hasPhoto
+              ? `<img src="${page.imageData}" alt="PCB layout" id="tcp-photo-img">
+                 <button class="tcp-replace-btn" id="tcp-replace-btn">📷 更換</button>`
+              : `<div class="tcp-photo-placeholder">
+                   <span class="icon">📷</span>
+                   <span>拖拉 PCB 圖至此區域</span>
+                   <button class="tcp-browse-btn" id="tcp-browse-btn">瀏覽檔案</button>
+                   <span style="font-size:0.78rem;margin-top:2px;">或 Ctrl+V 貼上圖片</span>
+                 </div>`
+            }
+            <input type="file" id="tcp-file-input" accept="image/*" style="display:none">
+          </div>
+          <svg class="tcp-svg-overlay" id="tcp-svg"></svg>
+          <svg class="tcp-drag-svg" id="tcp-drag-svg" style="display:none">
+            <line x1="0" y1="0" x2="0" y2="0"/>
+          </svg>
+        </div>
+      </div>
+    </div>`;
+
+  tcpSetupPhotoHandlers(page);
+}
+
+/* ── image compression ── */
+function tcpCompressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 2000, QUALITY = 0.85;
+        let w = img.width, h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          const scale = MAX_DIM / Math.max(w, h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', QUALITY));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function tcpHandlePhoto(page, file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const data = await tcpCompressImage(file);
+  page.imageData = data;
+  tcpRenderEditor();
+}
+
+/* ── photo zone event handlers ── */
+function tcpSetupPhotoHandlers(page) {
+  const zone      = document.getElementById('tcp-photo-zone');
+  const fileInput = document.getElementById('tcp-file-input');
+  if (!zone || !fileInput) return;
+
+  const browseBtn  = document.getElementById('tcp-browse-btn');
+  const replaceBtn = document.getElementById('tcp-replace-btn');
+
+  if (browseBtn)  browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
+  if (replaceBtn) {
+    replaceBtn.addEventListener('click',     (e) => { e.stopPropagation(); fileInput.click(); });
+    replaceBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+  }
+
+  fileInput.addEventListener('change', async () => {
+    if (fileInput.files[0]) await tcpHandlePhoto(page, fileInput.files[0]);
+  });
+
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) await tcpHandlePhoto(page, file);
+  });
+}
+
+/* ── Ctrl+V paste support ── */
+document.addEventListener('paste', async function(e) {
+  if (!document.getElementById('tcp-modal-overlay').classList.contains('active')) return;
+  if (!_tcpActivePage) return;
+  const el = document.activeElement;
+  if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) return;
+
+  const dt = e.clipboardData;
+  if (!dt) return;
+  if (dt.items) {
+    for (const item of dt.items) {
+      if (item.type.startsWith('image/') && item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) { e.preventDefault(); await tcpHandlePhoto(_tcpActivePage, file); return; }
+      }
+    }
   }
 });
 
@@ -7529,9 +7748,7 @@ async function fbOnTabActivate() {
       <span class="tcp-modal-title" id="tcp-modal-title">元件位置標註</span>
       <button class="tcp-modal-close" onclick="tcpCloseModal()" title="關閉 (ESC)">✕</button>
     </div>
-    <div class="tcp-modal-body" id="tcp-modal-body">
-      <span>功能建置中…</span>
-    </div>
+    <div class="tcp-modal-body" id="tcp-modal-body"></div>
   </div>
 </div>
 
