@@ -1264,6 +1264,32 @@
     transition: background 0.2s;
   }
   .sg-comp-add-btn:hover { background: #d4e6f9; }
+  .sg-comp-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tcp-placement-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .tcp-placement-btn.rf    { background: #c0392b; }
+  .tcp-placement-btn.rf:hover    { background: #a93226; box-shadow: 0 2px 8px rgba(192,57,43,0.28); }
+  .tcp-placement-btn.digital { background: #2e6bb5; }
+  .tcp-placement-btn.digital:hover { background: #245a9a; box-shadow: 0 2px 8px rgba(46,107,181,0.28); }
+  .tcp-placement-btn.pwr   { background: #e67e22; }
+  .tcp-placement-btn.pwr:hover   { background: #ca6f1e; box-shadow: 0 2px 8px rgba(230,126,34,0.28); }
   .sg-comp-save-bar {
     display: flex;
     align-items: center;
@@ -5854,7 +5880,10 @@ function sgRenderProjectComponents() {
     });
 
     html += `</tbody></table>
-      <button class="sg-comp-add-btn" onclick="sgAddCompRow('${catKey}')">&#10133; 新增 ${catInfo.label}</button>
+      <div class="sg-comp-footer">
+        <button class="sg-comp-add-btn" onclick="sgAddCompRow('${catKey}')">&#10133; 新增 ${catInfo.label}</button>
+        <button class="tcp-placement-btn ${catInfo.css}" onclick="tcpOpenModal('${catKey}')" title="${catInfo.label} 元件位置標註">📍 元件位置標註</button>
+      </div>
     </div>`;
   }
 
@@ -5990,6 +6019,12 @@ function sgOnCompEdit(el) {
   if (el.type === 'number' && val !== '') val = parseFloat(val);
 
   sgProjectData[fieldKey][idx][field] = val;
+}
+
+/* ---- TC Placement Modal ---- */
+function tcpOpenModal(category) {
+  // Phase 1 Step 3+ will implement this
+  alert('TC Placement [功能建置中]: ' + category);
 }
 
 /* ---- Delete component from list ---- */
