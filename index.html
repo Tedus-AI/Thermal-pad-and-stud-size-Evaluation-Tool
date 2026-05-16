@@ -6503,6 +6503,53 @@ function tcpRenderMarkers(page) {
         tcpRenderMarkers(page);
       });
 
+      /* drag label (pendingDrag pattern: start only after 5px move) */
+      let labelDragging = false;
+      let pendingDrag   = null;
+      let lblOffX = 0, lblOffY = 0;
+
+      label.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        pendingDrag = {
+          startX: e.clientX, startY: e.clientY,
+          offX: e.clientX - wrap.getBoundingClientRect().left,
+          offY: e.clientY - wrap.getBoundingClientRect().top
+        };
+      });
+
+      const onLabelMove = (e) => {
+        if (pendingDrag && !labelDragging) {
+          if (Math.hypot(e.clientX - pendingDrag.startX, e.clientY - pendingDrag.startY) > 5) {
+            labelDragging = true;
+            lblOffX = pendingDrag.offX;
+            lblOffY = pendingDrag.offY;
+            label.blur();
+          }
+        }
+        if (!labelDragging) return;
+        const wr = workspace.getBoundingClientRect();
+        const newX = Math.max(0, Math.min(wr.width  - wrap.offsetWidth,  e.clientX - wr.left - lblOffX));
+        const newY = Math.max(0, Math.min(wr.height - wrap.offsetHeight, e.clientY - wr.top  - lblOffY));
+        wrap.style.left = newX + 'px';
+        wrap.style.top  = newY + 'px';
+        tcpUpdateLine(svg, anno.id, dotX, dotY,
+          newX + wrap.offsetWidth / 2, newY + wrap.offsetHeight / 2);
+      };
+
+      const onLabelUp = () => {
+        pendingDrag = null;
+        if (!labelDragging) return;
+        labelDragging = false;
+        const wr = workspace.getBoundingClientRect();
+        anno.labelX = (parseFloat(wrap.style.left) / wr.width)  * 100;
+        anno.labelY = (parseFloat(wrap.style.top)  / wr.height) * 100;
+        tcpRenderMarkers(page);
+      };
+
+      document.addEventListener('mousemove', onLabelMove);
+      document.addEventListener('mouseup',   onLabelUp);
+
       wrap.appendChild(label);
       wrap.appendChild(delBtn);
       workspace.appendChild(wrap);
