@@ -1274,7 +1274,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    margin-top: 6px;
+    margin-left: auto;
     padding: 5px 14px;
     border-radius: 6px;
     font-size: 0.82rem;
@@ -1416,6 +1416,17 @@
     display: none; transition: background 0.15s;
   }
   .tcp-photo-zone.has-photo:hover .tcp-replace-btn { display: block; }
+  .tcp-delete-photo-btn {
+    position: absolute; top: 8px; right: 80px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.92);
+    color: var(--gm-danger, #dc2626);
+    border: 1px solid var(--gm-danger, #dc2626);
+    border-radius: 5px; font-size: 0.78rem; cursor: pointer;
+    display: none; transition: background 0.15s, color 0.15s;
+  }
+  .tcp-photo-zone.has-photo:hover .tcp-delete-photo-btn { display: block; }
+  .tcp-delete-photo-btn:hover { background: var(--gm-danger, #dc2626); color: #fff; }
   .tcp-replace-btn:hover { background: #fff; }
   .tcp-svg-overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -6329,7 +6340,7 @@ function tcpOpenModal(category) {
   _tcpActivePage = pages[_tcpActivePageIdx];
 
   // Set header title
-  const projectName = getProjectName() || 'Untitled';
+  const projectName = sgProjectData?.project_name || sgProjectId || getProjectName() || 'Untitled';
   document.getElementById('tcp-modal-title').textContent =
     `${projectName} ${category} Component Location`;
 
@@ -6358,7 +6369,7 @@ function tcpRenderEditor() {
 
   const page = _tcpActivePage;
   const hasPhoto = !!page.imageData;
-  const projectName = getProjectName() || 'Untitled';
+  const projectName = sgProjectData?.project_name || sgProjectId || getProjectName() || 'Untitled';
   const titleVal = page.isCustomTitle ? page.title : `${projectName} ${_tcpCategory} Component Location`;
 
   body.innerHTML = `
@@ -6374,6 +6385,7 @@ function tcpRenderEditor() {
           <div class="tcp-photo-zone${hasPhoto ? ' has-photo' : ''}" id="tcp-photo-zone">
             ${hasPhoto
               ? `<img src="${page.imageData}" alt="PCB layout" id="tcp-photo-img">
+                 <button class="tcp-delete-photo-btn" id="tcp-delete-photo-btn">🗑 刪除</button>
                  <button class="tcp-replace-btn" id="tcp-replace-btn">📷 更換</button>`
               : `<div class="tcp-photo-placeholder">
                    <span class="icon">📷</span>
@@ -6416,7 +6428,7 @@ function tcpRenderPageList() {
   if (!listEl || !_tcpCategory) return;
   const catKey = _tcpCategory.toLowerCase();
   const pages = sgProjectData.tcPlacement?.[catKey]?.pages || [];
-  const projectName = getProjectName() || 'Untitled';
+  const projectName = sgProjectData?.project_name || sgProjectId || getProjectName() || 'Untitled';
 
   let html = `<div class="tcp-page-list-header">頁面</div>`;
   pages.forEach((p, i) => {
@@ -6502,13 +6514,24 @@ function tcpSetupPhotoHandlers(page) {
   const fileInput = document.getElementById('tcp-file-input');
   if (!zone || !fileInput) return;
 
-  const browseBtn  = document.getElementById('tcp-browse-btn');
-  const replaceBtn = document.getElementById('tcp-replace-btn');
+  const browseBtn     = document.getElementById('tcp-browse-btn');
+  const replaceBtn    = document.getElementById('tcp-replace-btn');
+  const deletePhotoBtn = document.getElementById('tcp-delete-photo-btn');
 
   if (browseBtn)  browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
   if (replaceBtn) {
     replaceBtn.addEventListener('click',     (e) => { e.stopPropagation(); fileInput.click(); });
     replaceBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+  }
+  if (deletePhotoBtn) {
+    deletePhotoBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    deletePhotoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!confirm('刪除此頁圖片？標記資料將一併清除。')) return;
+      page.imageData = '';
+      page.annotations = [];
+      tcpRenderEditor();
+    });
   }
 
   fileInput.addEventListener('change', async () => {
@@ -6535,7 +6558,8 @@ function tcpSetupClickHandler(page) {
     if (e.button !== 0 || !page.imageData) return;
     if (e.target.closest('.tcp-marker-dot') ||
         e.target.closest('.tcp-marker-label-wrap') ||
-        e.target.closest('.tcp-replace-btn')) return;
+        e.target.closest('.tcp-replace-btn') ||
+        e.target.closest('.tcp-delete-photo-btn')) return;
 
     const rect = zone.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
