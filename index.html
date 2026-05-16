@@ -523,6 +523,7 @@
   .comp-table .ic-hsk-col { min-width: 90px; }
   .comp-table .note-col { min-width: 150px; }
   .comp-table .power-col { min-width: 90px; }
+  .auto-calc-hint { background: #fffde7 !important; }
   .comp-table th.readonly-col.name-col { min-width: 220px; }
   .comp-table td.name-cell { min-width: 220px; }
 
@@ -4875,6 +4876,23 @@ function fmt(n) {
   return Number.isInteger(n) ? n.toString() : parseFloat(n.toFixed(1)).toString();
 }
 
+/* ── Tab4 公式提取（純函式，只處理 P ≤ 5W）── */
+function calcBossResult(L, W) {
+  const mx = Math.max(L, W);
+  let bossSize, timSize;
+
+  if (mx < 6)                    bossSize = '6×6';
+  else if (Math.abs(L - W) > 1.5) bossSize = `${fmt(L)}×${fmt(W)}`;
+  else                            bossSize = `${fmt(mx)}×${fmt(mx)}`;
+
+  if      (mx <= 6)  timSize = '6×6';
+  else if (mx <= 10) timSize = '10×10';
+  else if (mx <= 14) timSize = '14×14';
+  else               timSize = '';
+
+  return { bossSize, timSize };
+}
+
 function calc() {
   const L = parseFloat(document.getElementById('L').value) || 0;
   const W = parseFloat(document.getElementById('W').value) || 0;
@@ -5333,6 +5351,15 @@ function onCellChange(el) {
   }
 
   el.classList.toggle('changed', !!value);
+
+  // 若修改的是元件大小，且該行 TIM Type 已是 Pad，重新套用自動計算
+  if (field === 'heatSourceSize') {
+    const row = el.closest('tr');
+    if (row) {
+      const timSel = row.querySelector('[data-field="timType"]');
+      if (timSel && timSel.value === 'Pad') applyPadAutoCalc(row, compKey);
+    }
+  }
 }
 
 /* ---- IC距離HSK 下拉變更（支援自訂） ---- */
@@ -5377,6 +5404,61 @@ function onIcToHskCustomInput(el) {
 }
 
 /* ---- TIM 種類變更 → 連動預設 TIM厚度 / IC距離HSK / TIM Size 啟用 ---- */
+/* ── 選 Pad 時自動套用凸台/TIM尺寸公式（P ≤ 5W 才自動計算） ── */
+function applyPadAutoCalc(row, compKey) {
+  // 解析元件大小 L×W
+  const heatInput = row.querySelector('[data-field="heatSourceSize"]');
+  if (!heatInput || !heatInput.value) return;
+  const m = heatInput.value.match(/(\d+\.?\d*)[×x*](\d+\.?\d*)/i);
+  if (!m) return;
+  const L = parseFloat(m[1]), W = parseFloat(m[2]);
+  if (!L || !W) return;
+
+  // 取得元件功率
+  let P = 0;
+  if (currentProjectData) {
+    for (const catInfo of Object.values(CATEGORIES)) {
+      const found = (currentProjectData[catInfo.field] || [])
+        .find(c => (c.Component || '').replace(/ /g,'_').replace(/\//g,'-') === compKey
+                || c.Component === compKey);
+      if (found) { P = parseFloat(found['Power(W)']) || 0; break; }
+    }
+  }
+  if (P > 5) return; // 高功率由使用者自行填寫
+
+  const { bossSize, timSize } = calcBossResult(L, W);
+
+  // 設定 bossSizeType → '自訂'，啟用 bossSize 輸入框
+  const bossSizeTypeEl = row.querySelector('[data-field="bossSizeType"]');
+  if (bossSizeTypeEl && bossSizeTypeEl.value !== '自訂') {
+    bossSizeTypeEl.value = '自訂';
+    onBossSizeChange(bossSizeTypeEl);
+  }
+
+  // 填入 bossSize
+  const bossSizeEl = row.querySelector('[data-field="bossSize"]');
+  if (bossSizeEl) {
+    bossSizeEl.value = bossSize;
+    bossSizeEl.disabled = false;
+    if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+    thermalSpecs[compKey].bossSize = bossSize;
+    bossSizeEl.classList.add('changed', 'auto-calc-hint');
+    bossSizeEl.addEventListener('input', () => bossSizeEl.classList.remove('auto-calc-hint'), { once: true });
+  }
+
+  // 填入 timSize（若非空白）
+  if (timSize) {
+    const timSizeEl = row.querySelector('[data-field="timSize"]');
+    if (timSizeEl && !timSizeEl.disabled) {
+      timSizeEl.value = timSize;
+      if (!thermalSpecs[compKey]) thermalSpecs[compKey] = {};
+      thermalSpecs[compKey].timSize = timSize;
+      timSizeEl.classList.add('changed', 'auto-calc-hint');
+      timSizeEl.addEventListener('input', () => timSizeEl.classList.remove('auto-calc-hint'), { once: true });
+    }
+  }
+}
+
 function onTimTypeChange(el) {
   const compKey = el.dataset.comp;
   const timType = el.value;
@@ -5416,6 +5498,9 @@ function onTimTypeChange(el) {
       }
     }
   }
+
+  // 自動套用凸台/TIM尺寸公式（P ≤ 5W）
+  if (timType === 'Pad') applyPadAutoCalc(row, compKey);
 }
 
 /* ---- 元件名稱變更 ---- */
