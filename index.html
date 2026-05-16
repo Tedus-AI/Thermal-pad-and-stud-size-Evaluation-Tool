@@ -1431,6 +1431,54 @@
   .tcp-drag-svg line {
     stroke: #dc2626; stroke-width: 1.5; stroke-dasharray: 5 3; pointer-events: none;
   }
+  .tcp-marker-dot {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transform: translate(-50%, -50%);
+    cursor: grab; z-index: 15;
+    user-select: none;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(220,38,38,0.4);
+    transition: transform 0.12s;
+  }
+  .tcp-marker-dot:hover { transform: translate(-50%,-50%) scale(1.2); }
+  .tcp-marker-label-wrap {
+    position: absolute; z-index: 20;
+    display: flex; align-items: stretch;
+  }
+  .tcp-marker-label {
+    width: 80px; min-width: 50px;
+    padding: 4px 7px;
+    background: #fff;
+    border: 1.5px solid #334155;
+    border-radius: 4px 0 0 4px;
+    font-size: 11px; font-weight: 500;
+    color: #0f172a;
+    outline: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+    cursor: text;
+  }
+  .tcp-marker-label:focus { border-color: var(--gm-primary, #1d4ed8); }
+  .tcp-marker-del-btn {
+    position: absolute; top: -8px; right: -8px;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    background: #dc2626; color: #fff;
+    border: 1.5px solid #fff;
+    font-size: 11px; line-height: 1; font-weight: 700;
+    cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    padding: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    z-index: 21;
+  }
+  .tcp-marker-label-wrap:hover .tcp-marker-del-btn { display: flex; }
+  .tcp-marker-del-btn:hover { background: #b91c1c; transform: scale(1.15); }
   .sg-comp-save-bar {
     display: flex;
     align-items: center;
@@ -6245,6 +6293,10 @@ function tcpRenderEditor() {
     </div>`;
 
   tcpSetupPhotoHandlers(page);
+  if (hasPhoto) {
+    tcpSetupClickHandler(page);
+    if (page.annotations.length > 0) tcpRenderMarkers(page);
+  }
 }
 
 /* ── image compression ── */
@@ -6306,6 +6358,179 @@ function tcpSetupPhotoHandlers(page) {
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) await tcpHandlePhoto(page, file);
   });
+}
+
+/* ── click-to-add marker ── */
+function tcpSetupClickHandler(page) {
+  const zone      = document.getElementById('tcp-photo-zone');
+  const workspace = document.getElementById('tcp-workspace');
+  if (!zone || !workspace) return;
+
+  zone.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || !page.imageData) return;
+    if (e.target.closest('.tcp-marker-dot') ||
+        e.target.closest('.tcp-marker-label-wrap') ||
+        e.target.closest('.tcp-replace-btn')) return;
+
+    const rect = zone.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const id = 'a_' + Date.now();
+    page.annotations.push({ id, x, y, label: '', labelX: -1, labelY: -1 });
+
+    const wsRect = workspace.getBoundingClientRect();
+    const dotAbsX = e.clientX - wsRect.left;
+    const dotAbsY = e.clientY - wsRect.top;
+    _tcpDragState = { annoId: id, dotAbsX, dotAbsY };
+
+    const dragSvg = document.getElementById('tcp-drag-svg');
+    dragSvg.style.display = 'block';
+    const ln = dragSvg.querySelector('line');
+    ln.setAttribute('x1', dotAbsX); ln.setAttribute('y1', dotAbsY);
+    ln.setAttribute('x2', dotAbsX); ln.setAttribute('y2', dotAbsY);
+
+    tcpRenderMarkers(page);
+  });
+
+  workspace.addEventListener('mousemove', (e) => {
+    if (!_tcpDragState) return;
+    const wsRect = workspace.getBoundingClientRect();
+    const dragSvg = document.getElementById('tcp-drag-svg');
+    const ln = dragSvg.querySelector('line');
+    ln.setAttribute('x2', e.clientX - wsRect.left);
+    ln.setAttribute('y2', e.clientY - wsRect.top);
+  });
+
+  workspace.addEventListener('mouseup', (e) => {
+    if (!_tcpDragState) return;
+    const ds = _tcpDragState;
+    _tcpDragState = null;
+    const dragSvg = document.getElementById('tcp-drag-svg');
+    dragSvg.style.display = 'none';
+
+    const wsRect   = workspace.getBoundingClientRect();
+    const labelAbsX = e.clientX - wsRect.left;
+    const labelAbsY = e.clientY - wsRect.top;
+    const lxPct = (labelAbsX / wsRect.width) * 100;
+    const lyPct = (labelAbsY / wsRect.height) * 100;
+
+    const anno = page.annotations.find(a => a.id === ds.annoId);
+    if (anno) {
+      const dist = Math.hypot(labelAbsX - ds.dotAbsX, labelAbsY - ds.dotAbsY);
+      if (dist < 15) {
+        const zone2 = document.getElementById('tcp-photo-zone');
+        const zRect  = zone2.getBoundingClientRect();
+        anno.labelX = (ds.dotAbsX + wsRect.left) < zRect.left + zRect.width / 2 ? 70 : 3;
+        anno.labelY = Math.max(2, Math.min(88, lyPct));
+      } else {
+        anno.labelX = Math.max(0, Math.min(91, lxPct));
+        anno.labelY = Math.max(0, Math.min(91, lyPct));
+      }
+    }
+
+    tcpRenderMarkers(page);
+    setTimeout(() => {
+      const el = document.querySelector(`.tcp-marker-label[data-id="${ds.annoId}"]`);
+      if (el) el.focus();
+    }, 50);
+  });
+}
+
+/* ── render markers (dots + lines + labels) ── */
+function tcpRenderMarkers(page) {
+  const workspace = document.getElementById('tcp-workspace');
+  const zone      = document.getElementById('tcp-photo-zone');
+  const svg       = document.getElementById('tcp-svg');
+  if (!workspace || !zone || !svg) return;
+
+  workspace.querySelectorAll('.tcp-marker-dot, .tcp-marker-label-wrap').forEach(el => el.remove());
+  svg.innerHTML = '';
+
+  const zoneRect = zone.getBoundingClientRect();
+  const wsRect   = workspace.getBoundingClientRect();
+  const offX = zoneRect.left - wsRect.left;
+  const offY = zoneRect.top  - wsRect.top;
+
+  page.annotations.forEach((anno, idx) => {
+    const dotX = offX + (anno.x / 100) * zoneRect.width;
+    const dotY = offY + (anno.y / 100) * zoneRect.height;
+
+    /* dot */
+    const dot = document.createElement('div');
+    dot.className = 'tcp-marker-dot';
+    dot.style.left = dotX + 'px';
+    dot.style.top  = dotY + 'px';
+    dot.dataset.id = anno.id;
+    dot.textContent = idx + 1;
+    dot.addEventListener('contextmenu', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (confirm(`刪除標記 #${idx + 1}？`)) {
+        page.annotations = page.annotations.filter(a => a.id !== anno.id);
+        tcpRenderMarkers(page);
+      }
+    });
+    dot.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+    workspace.appendChild(dot);
+
+    /* label (only if placed) */
+    if (anno.labelX >= 0 && anno.labelY >= 0) {
+      const labelX = (anno.labelX / 100) * wsRect.width;
+      const labelY = (anno.labelY / 100) * wsRect.height;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'tcp-marker-label-wrap';
+      wrap.style.left = labelX + 'px';
+      wrap.style.top  = labelY + 'px';
+      wrap.dataset.id = anno.id;
+
+      const label = document.createElement('input');
+      label.type = 'text';
+      label.className = 'tcp-marker-label';
+      label.placeholder = `TC${idx + 1}`;
+      label.value = anno.label || '';
+      label.dataset.id = anno.id;
+      label.addEventListener('input', () => { anno.label = label.value; });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'tcp-marker-del-btn';
+      delBtn.textContent = '×';
+      delBtn.title = '刪除';
+      delBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+      delBtn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        page.annotations = page.annotations.filter(a => a.id !== anno.id);
+        tcpRenderMarkers(page);
+      });
+
+      wrap.appendChild(label);
+      wrap.appendChild(delBtn);
+      workspace.appendChild(wrap);
+
+      /* SVG leader line (draw after label is in DOM for size) */
+      requestAnimationFrame(() => {
+        const centerX = labelX + (wrap.offsetWidth  || 86) / 2;
+        const centerY = labelY + (wrap.offsetHeight || 26) / 2;
+        tcpDrawLine(svg, anno.id, dotX, dotY, centerX, centerY);
+      });
+    }
+  });
+}
+
+function tcpDrawLine(svg, annoId, x1, y1, x2, y2) {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  line.dataset.annoId = annoId;
+  svg.appendChild(line);
+}
+
+function tcpUpdateLine(svg, annoId, x1, y1, x2, y2) {
+  const ln = svg.querySelector(`line[data-anno-id="${annoId}"]`);
+  if (ln) {
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+  }
 }
 
 /* ── Ctrl+V paste support ── */
