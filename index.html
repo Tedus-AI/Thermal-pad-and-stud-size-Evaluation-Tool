@@ -1451,17 +1451,17 @@
     display: flex; align-items: stretch;
   }
   .tcp-marker-label {
-    width: 80px; min-width: 50px;
-    padding: 4px 7px;
+    min-width: 120px; max-width: 200px;
+    padding: 4px 6px;
     background: #fff;
     border: 1.5px solid #334155;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
     font-size: 11px; font-weight: 500;
     color: #0f172a;
     outline: none;
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
     box-sizing: border-box;
-    cursor: text;
+    cursor: default;
   }
   .tcp-marker-label:focus { border-color: var(--gm-primary, #1d4ed8); }
   .tcp-marker-del-btn {
@@ -1479,6 +1479,88 @@
   }
   .tcp-marker-label-wrap:hover .tcp-marker-del-btn { display: flex; }
   .tcp-marker-del-btn:hover { background: #b91c1c; transform: scale(1.15); }
+
+  /* TCP Page sidebar */
+  .tcp-page-list {
+    width: 130px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--gm-border, #e2e8f0);
+    background: var(--gm-bg, #f8fafc);
+    overflow-y: auto;
+    padding: 6px 0;
+    gap: 3px;
+  }
+  .tcp-page-list-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gm-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px 6px;
+  }
+  .tcp-page-item {
+    margin: 0 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--gm-text, #1e293b);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.12s;
+  }
+  .tcp-page-item:hover { background: var(--gm-border, #e2e8f0); }
+  .tcp-page-item.active { background: var(--gm-primary-tint, #e8effc); color: var(--gm-primary, #1d4ed8); font-weight: 600; }
+  .tcp-page-item .page-del {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--gm-text-muted, #94a3b8);
+    display: none;
+    background: none; border: none; cursor: pointer; padding: 0 2px;
+  }
+  .tcp-page-item:hover .page-del { display: inline; }
+  .tcp-page-item .page-del:hover { color: var(--gm-danger, #dc2626); }
+  .tcp-add-page-btn {
+    margin: 6px 6px 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gm-primary, #1d4ed8);
+    background: none;
+    border: 1.5px dashed var(--gm-primary-light, #93b4f0);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.12s;
+  }
+  .tcp-add-page-btn:hover { background: var(--gm-primary-tint, #e8effc); }
+
+  /* TCP Title bar */
+  .tcp-title-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--gm-border, #e2e8f0);
+    background: var(--gm-surface, #fff);
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .tcp-title-input {
+    flex: 1;
+    padding: 5px 10px;
+    border: 1.5px solid var(--gm-border, #e2e8f0);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: var(--gm-bg, #f8fafc);
+    color: var(--gm-text, #1e293b);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .tcp-title-input:focus { border-color: var(--gm-primary, #1d4ed8); background: #fff; }
+
   .sg-comp-save-bar {
     display: flex;
     align-items: center;
@@ -6136,6 +6218,8 @@ function sgRenderProjectComponents() {
     if (boInputRT) boInputRT.addEventListener('change', sgOnParamChange);
     } catch (err) { console.warn('[sgRender] power summary error:', err); }
   }
+
+  tcpRefreshDropdowns();
 }
 
 /* ---- Type dropdown change handler ---- */
@@ -6215,26 +6299,34 @@ function sgOnCompEdit(el) {
    ====================================================== */
 
 let _tcpCategory = null;
-let _tcpPagesData = {};      // { RF: [{id,title,imageData,annotations,isCustomTitle},...], ... }
+let _tcpActivePageIdx = 0;   // current page index within category
 let _tcpActivePage = null;   // current page object reference
 let _tcpDragState  = null;   // { markerId, dotAbsX, dotAbsY }
 
 /* ── open / close ── */
 function tcpOpenModal(category) {
   if (!sgProjectData) { alert('請先選擇或建立一個專案'); return; }
-  _tcpCategory = category;
 
-  // Init category storage if first open
-  if (!_tcpPagesData[category]) {
-    _tcpPagesData[category] = [{
-      id: 'p_' + Date.now(),
-      title: '',
-      imageData: '',
-      annotations: [],
-      isCustomTitle: false
-    }];
+  // If switching categories, reset page index; else keep current index if same category
+  if (_tcpCategory !== category) {
+    _tcpActivePageIdx = 0;
   }
-  _tcpActivePage = _tcpPagesData[category][0];
+  _tcpCategory = category;
+  const catKey = category.toLowerCase();
+
+  // Init persistence structure if needed
+  if (!sgProjectData.tcPlacement) {
+    sgProjectData.tcPlacement = { rf: { pages: [] }, digital: { pages: [] }, pwr: { pages: [] } };
+  }
+  if (!sgProjectData.tcPlacement[catKey]) {
+    sgProjectData.tcPlacement[catKey] = { pages: [] };
+  }
+  const pages = sgProjectData.tcPlacement[catKey].pages;
+  if (pages.length === 0) {
+    pages.push({ id: 'p_' + Date.now(), title: '', imageData: '', annotations: [], isCustomTitle: false });
+  }
+  if (_tcpActivePageIdx >= pages.length) _tcpActivePageIdx = 0;
+  _tcpActivePage = pages[_tcpActivePageIdx];
 
   // Set header title
   const projectName = getProjectName() || 'Untitled';
@@ -6266,10 +6358,18 @@ function tcpRenderEditor() {
 
   const page = _tcpActivePage;
   const hasPhoto = !!page.imageData;
+  const projectName = getProjectName() || 'Untitled';
+  const titleVal = page.isCustomTitle ? page.title : `${projectName} ${_tcpCategory} Component Location`;
 
   body.innerHTML = `
     <div class="tcp-content">
+      <div class="tcp-page-list" id="tcp-page-list">
+        <!-- rendered by tcpRenderPageList() -->
+      </div>
       <div class="tcp-editor-main">
+        <div class="tcp-title-bar">
+          <input class="tcp-title-input" id="tcp-title-input" type="text" value="${titleVal.replace(/"/g,'&quot;')}" placeholder="標題">
+        </div>
         <div class="tcp-workspace-wrap" id="tcp-workspace">
           <div class="tcp-photo-zone${hasPhoto ? ' has-photo' : ''}" id="tcp-photo-zone">
             ${hasPhoto
@@ -6292,11 +6392,76 @@ function tcpRenderEditor() {
       </div>
     </div>`;
 
+  // Wire up title input
+  const titleInput = document.getElementById('tcp-title-input');
+  if (titleInput) {
+    titleInput.addEventListener('input', () => {
+      page.title = titleInput.value;
+      page.isCustomTitle = true;
+    });
+  }
+
   tcpSetupPhotoHandlers(page);
   if (hasPhoto) {
     tcpSetupClickHandler(page);
     if (page.annotations.length > 0) tcpRenderMarkers(page);
   }
+
+  tcpRenderPageList();
+}
+
+/* ── page list ── */
+function tcpRenderPageList() {
+  const listEl = document.getElementById('tcp-page-list');
+  if (!listEl || !_tcpCategory) return;
+  const catKey = _tcpCategory.toLowerCase();
+  const pages = sgProjectData.tcPlacement?.[catKey]?.pages || [];
+  const projectName = getProjectName() || 'Untitled';
+
+  let html = `<div class="tcp-page-list-header">頁面</div>`;
+  pages.forEach((p, i) => {
+    const label = p.isCustomTitle && p.title ? p.title : `頁面 ${i + 1}`;
+    const activeClass = i === _tcpActivePageIdx ? ' active' : '';
+    html += `<div class="tcp-page-item${activeClass}" onclick="tcpSelectPage(${i})">
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+      <button class="tcp-page-del-btn" onclick="event.stopPropagation();tcpDeletePage(${i})" title="刪除此頁">×</button>
+    </div>`;
+  });
+  html += `<button class="tcp-add-page-btn" onclick="tcpAddPage()">＋ 新增次頁</button>`;
+  listEl.innerHTML = html;
+}
+
+function tcpSelectPage(idx) {
+  if (!_tcpCategory) return;
+  const pages = sgProjectData.tcPlacement[_tcpCategory.toLowerCase()].pages;
+  if (!pages[idx]) return;
+  _tcpActivePageIdx = idx;
+  _tcpActivePage = pages[idx];
+  tcpRenderEditor();
+}
+
+function tcpAddPage() {
+  if (!_tcpCategory) return;
+  const pages = sgProjectData.tcPlacement[_tcpCategory.toLowerCase()].pages;
+  pages.push({ id: 'p_' + Date.now(), title: '', imageData: '', annotations: [], isCustomTitle: false });
+  tcpSelectPage(pages.length - 1);
+}
+
+function tcpDeletePage(idx) {
+  if (!_tcpCategory) return;
+  const pages = sgProjectData.tcPlacement[_tcpCategory.toLowerCase()].pages;
+  if (pages.length <= 1) { alert('至少保留 1 頁'); return; }
+  if (!confirm('確定刪除此頁面？')) return;
+  pages.splice(idx, 1);
+  if (_tcpActivePageIdx >= pages.length) _tcpActivePageIdx = pages.length - 1;
+  _tcpActivePage = pages[_tcpActivePageIdx];
+  tcpRenderEditor();
+}
+
+/* ── reactive dropdown refresh ── */
+function tcpRefreshDropdowns() {
+  if (!document.getElementById('tcp-modal-overlay').classList.contains('active')) return;
+  if (_tcpActivePage) tcpRenderMarkers(_tcpActivePage);
 }
 
 /* ── image compression ── */
@@ -6377,7 +6542,7 @@ function tcpSetupClickHandler(page) {
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     const id = 'a_' + Date.now();
-    page.annotations.push({ id, x, y, label: '', labelX: -1, labelY: -1 });
+    page.annotations.push({ id, x, y, componentRef: '', labelX: -1, labelY: -1 });
 
     const wsRect = workspace.getBoundingClientRect();
     const dotAbsX = e.clientX - wsRect.left;
@@ -6432,7 +6597,7 @@ function tcpSetupClickHandler(page) {
     tcpRenderMarkers(page);
     setTimeout(() => {
       const el = document.querySelector(`.tcp-marker-label[data-id="${ds.annoId}"]`);
-      if (el) el.focus();
+      if (el && el.tagName !== 'SELECT') el.focus();
     }, 50);
   });
 }
@@ -6484,13 +6649,37 @@ function tcpRenderMarkers(page) {
       wrap.style.top  = labelY + 'px';
       wrap.dataset.id = anno.id;
 
-      const label = document.createElement('input');
-      label.type = 'text';
+      const label = document.createElement('select');
       label.className = 'tcp-marker-label';
-      label.placeholder = `TC${idx + 1}`;
-      label.value = anno.label || '';
       label.dataset.id = anno.id;
-      label.addEventListener('input', () => { anno.label = label.value; });
+
+      // Build options from category components
+      const compOptions = (sgProjectData[SG_CAT_MAP[_tcpCategory]?.field] || [])
+        .map(c => c.Component).filter(Boolean);
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '-- 選擇元件 --';
+      label.appendChild(placeholder);
+
+      // If anno.componentRef exists but not in options, add a warning option
+      if (anno.componentRef && !compOptions.includes(anno.componentRef)) {
+        const warnOpt = document.createElement('option');
+        warnOpt.value = anno.componentRef;
+        warnOpt.textContent = `⚠ ${anno.componentRef}`;
+        warnOpt.disabled = true;
+        warnOpt.selected = true;
+        label.appendChild(warnOpt);
+      }
+
+      compOptions.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        if (anno.componentRef === c) opt.selected = true;
+        label.appendChild(opt);
+      });
+
+      label.addEventListener('change', () => { anno.componentRef = label.value; });
 
       const delBtn = document.createElement('button');
       delBtn.className = 'tcp-marker-del-btn';
@@ -6607,7 +6796,24 @@ function sgDeleteComp(cat, idx) {
 
   const comp = sgProjectData[fieldKey][idx];
   const name = comp?.Component || '(unnamed)';
-  if (!confirm(`確定要刪除元件「${name}」嗎？`)) return;
+
+  // Count annotations referencing this component across all pages
+  const catKey = cat.toLowerCase();
+  let affectedCount = 0;
+  const pages = sgProjectData.tcPlacement?.[catKey]?.pages || [];
+  pages.forEach(p => {
+    p.annotations.forEach(a => { if (a.componentRef === name) affectedCount++; });
+  });
+
+  const extra = affectedCount > 0 ? `\n（同時清除 ${affectedCount} 個元件位置標註）` : '';
+  if (!confirm(`確定要刪除元件「${name}」嗎？${extra}`)) return;
+
+  // Remove annotations referencing this component
+  if (affectedCount > 0) {
+    pages.forEach(p => {
+      p.annotations = p.annotations.filter(a => a.componentRef !== name);
+    });
+  }
 
   sgProjectData[fieldKey].splice(idx, 1);
   sgRenderProjectComponents();
@@ -6679,7 +6885,8 @@ async function sgSaveProjectComponents() {
       param_backoff: sgProjectData.param_backoff || '',
       param_duplex: sgProjectData.param_duplex || 'TDD 75%',
       param_backoff_rt: sgProjectData.param_backoff_rt || '',
-      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%'
+      param_duplex_rt: sgProjectData.param_duplex_rt || 'TDD 75%',
+      tcPlacement: sgProjectData.tcPlacement || {}
     });
 
     // Update library entries for each component
