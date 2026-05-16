@@ -1444,19 +1444,17 @@
   }
   .tcp-marker-dot {
     position: absolute;
-    width: 20px; height: 20px;
+    width: 14px; height: 14px;
     border-radius: 50%;
     background: #dc2626;
-    color: #fff;
-    font-size: 10px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
     transform: translate(-50%, -50%);
     cursor: grab; z-index: 15;
     user-select: none;
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(220,38,38,0.4);
-    transition: transform 0.12s;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.85), 0 0 10px rgba(220,38,38,0.65);
+    transition: box-shadow 0.12s;
   }
-  .tcp-marker-dot:hover { transform: translate(-50%,-50%) scale(1.2); }
+  .tcp-marker-dot:hover { box-shadow: 0 0 0 3px rgba(255,255,255,0.9), 0 0 14px rgba(220,38,38,0.85); }
+  .tcp-marker-dot.dragging { cursor: grabbing; box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 0 18px rgba(220,38,38,1); }
   .tcp-marker-label-wrap {
     position: absolute; z-index: 20;
     display: flex; align-items: stretch;
@@ -1571,6 +1569,44 @@
     transition: border-color 0.15s;
   }
   .tcp-title-input:focus { border-color: var(--gm-primary, #1d4ed8); background: #fff; }
+
+  /* TCP component status bar */
+  .tcp-comp-bar {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--gm-border, #e2e8f0);
+    background: var(--gm-surface, #fff);
+    flex-shrink: 0;
+    min-height: 36px;
+  }
+  .tcp-comp-bar-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gm-text-muted, #64748b);
+    white-space: nowrap;
+    margin-right: 2px;
+  }
+  .tcp-comp-chip {
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: rgba(220,38,38,0.07);
+    color: var(--gm-text, #1e293b);
+    border: 1px solid rgba(220,38,38,0.28);
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .tcp-comp-chip.annotated {
+    background: transparent;
+    color: var(--gm-text-muted, #94a3b8);
+    border-color: var(--gm-border, #e2e8f0);
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
 
   .sg-comp-save-bar {
     display: flex;
@@ -6381,6 +6417,7 @@ function tcpRenderEditor() {
         <div class="tcp-title-bar">
           <input class="tcp-title-input" id="tcp-title-input" type="text" value="${titleVal.replace(/"/g,'&quot;')}" placeholder="標題">
         </div>
+        <div class="tcp-comp-bar" id="tcp-comp-bar"></div>
         <div class="tcp-workspace-wrap" id="tcp-workspace">
           <div class="tcp-photo-zone${hasPhoto ? ' has-photo' : ''}" id="tcp-photo-zone">
             ${hasPhoto
@@ -6419,6 +6456,7 @@ function tcpRenderEditor() {
     if (page.annotations.length > 0) tcpRenderMarkers(page);
   }
 
+  tcpRenderCompBar();
   tcpRenderPageList();
 }
 
@@ -6645,21 +6683,60 @@ function tcpRenderMarkers(page) {
     const dotX = offX + (anno.x / 100) * zoneRect.width;
     const dotY = offY + (anno.y / 100) * zoneRect.height;
 
-    /* dot */
+    /* dot — plain laser-style red dot, draggable */
     const dot = document.createElement('div');
     dot.className = 'tcp-marker-dot';
     dot.style.left = dotX + 'px';
     dot.style.top  = dotY + 'px';
     dot.dataset.id = anno.id;
-    dot.textContent = idx + 1;
+    dot.title = anno.componentRef || `標記 ${idx + 1}`;
     dot.addEventListener('contextmenu', (e) => {
       e.preventDefault(); e.stopPropagation();
-      if (confirm(`刪除標記 #${idx + 1}？`)) {
+      if (confirm(`刪除標記${anno.componentRef ? ' (' + anno.componentRef + ')' : ' #' + (idx + 1)}？`)) {
         page.annotations = page.annotations.filter(a => a.id !== anno.id);
         tcpRenderMarkers(page);
       }
     });
-    dot.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+    dot.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault(); e.stopPropagation();
+      let dragging = false;
+      const startX = e.clientX, startY = e.clientY;
+      dot.classList.add('dragging');
+
+      const onMove = (me) => {
+        if (!dragging && Math.hypot(me.clientX - startX, me.clientY - startY) < 4) return;
+        dragging = true;
+        const zRect2  = zone.getBoundingClientRect();
+        const wsRect2 = workspace.getBoundingClientRect();
+        const rawX = me.clientX - zRect2.left;
+        const rawY = me.clientY - zRect2.top;
+        anno.x = Math.max(0, Math.min(100, (rawX / zRect2.width)  * 100));
+        anno.y = Math.max(0, Math.min(100, (rawY / zRect2.height) * 100));
+        const offX2 = zRect2.left - wsRect2.left;
+        const offY2 = zRect2.top  - wsRect2.top;
+        const newDX = offX2 + (anno.x / 100) * zRect2.width;
+        const newDY = offY2 + (anno.y / 100) * zRect2.height;
+        dot.style.left = newDX + 'px';
+        dot.style.top  = newDY + 'px';
+        if (anno.labelX >= 0) {
+          const lWrap = workspace.querySelector(`.tcp-marker-label-wrap[data-id="${anno.id}"]`);
+          if (lWrap) {
+            const lx = parseFloat(lWrap.style.left) + (lWrap.offsetWidth  || 80) / 2;
+            const ly = parseFloat(lWrap.style.top)  + (lWrap.offsetHeight || 26) / 2;
+            tcpUpdateLine(svg, anno.id, newDX, newDY, lx, ly);
+          }
+        }
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup',   onUp);
+        dot.classList.remove('dragging');
+        if (dragging) tcpRenderMarkers(page);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup',   onUp);
+    });
     workspace.appendChild(dot);
 
     /* label (only if placed) */
@@ -6703,7 +6780,11 @@ function tcpRenderMarkers(page) {
         label.appendChild(opt);
       });
 
-      label.addEventListener('change', () => { anno.componentRef = label.value; });
+      label.addEventListener('change', () => {
+        anno.componentRef = label.value;
+        dot.title = label.value || `標記 ${idx + 1}`;
+        tcpRenderCompBar();
+      });
 
       const delBtn = document.createElement('button');
       delBtn.className = 'tcp-marker-del-btn';
@@ -6775,6 +6856,36 @@ function tcpRenderMarkers(page) {
       });
     }
   });
+
+  tcpRenderCompBar();
+}
+
+/* ── component status bar (shows which components have/haven't been placed) ── */
+function tcpRenderCompBar() {
+  const barEl = document.getElementById('tcp-comp-bar');
+  if (!barEl || !_tcpCategory || !sgProjectData) return;
+  const catKey = _tcpCategory.toLowerCase();
+
+  const allComps = (sgProjectData[SG_CAT_MAP[_tcpCategory]?.field] || [])
+    .map(c => c.Component).filter(Boolean);
+
+  if (allComps.length === 0) {
+    barEl.innerHTML = '<span class="tcp-comp-bar-label">尚無元件資料</span>';
+    return;
+  }
+
+  // Collect annotated componentRefs across ALL pages in this category
+  const pages = sgProjectData.tcPlacement?.[catKey]?.pages || [];
+  const annotated = new Set(
+    pages.flatMap(p => p.annotations.map(a => a.componentRef)).filter(Boolean)
+  );
+
+  const chips = allComps.map(name => {
+    const done = annotated.has(name);
+    return `<span class="tcp-comp-chip${done ? ' annotated' : ''}" title="${done ? '已標註' : '未標註'}">${name}</span>`;
+  }).join('');
+
+  barEl.innerHTML = `<span class="tcp-comp-bar-label">元件：</span>${chips}`;
 }
 
 function tcpDrawLine(svg, annoId, x1, y1, x2, y2) {
