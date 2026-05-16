@@ -1264,6 +1264,221 @@
     transition: background 0.2s;
   }
   .sg-comp-add-btn:hover { background: #d4e6f9; }
+  .sg-comp-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tcp-placement-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .tcp-placement-btn.rf    { background: #c0392b; }
+  .tcp-placement-btn.rf:hover    { background: #a93226; box-shadow: 0 2px 8px rgba(192,57,43,0.28); }
+  .tcp-placement-btn.digital { background: #2e6bb5; }
+  .tcp-placement-btn.digital:hover { background: #245a9a; box-shadow: 0 2px 8px rgba(46,107,181,0.28); }
+  .tcp-placement-btn.pwr   { background: #e67e22; }
+  .tcp-placement-btn.pwr:hover   { background: #ca6f1e; box-shadow: 0 2px 8px rgba(230,126,34,0.28); }
+
+  /* ── TCP Placement Modal ── */
+  .tcp-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+  }
+  .tcp-modal-overlay.active { display: flex; }
+  .tcp-modal-box {
+    background: var(--gm-surface, #fff);
+    border-radius: 12px;
+    box-shadow: var(--gm-shadow-lg, 0 24px 56px -16px rgba(15,23,42,0.22));
+    width: 90vw;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .tcp-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gm-border, #e2e8f0);
+    flex-shrink: 0;
+    background: var(--gm-bg-soft, #f6f9fd);
+  }
+  .tcp-modal-title {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: var(--gm-text, #0f172a);
+  }
+  .tcp-modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--gm-text-2, #475569);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .tcp-modal-close:hover { background: var(--gm-border, #e2e8f0); }
+  .tcp-modal-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .tcp-content {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+  }
+  .tcp-editor-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .tcp-workspace-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #e8edf4;
+  }
+  .tcp-photo-zone {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--gm-border, #e2e8f0);
+    border-radius: 8px;
+    background: var(--gm-surface, #fff);
+    transition: border-color 0.15s, background 0.15s;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  .tcp-photo-zone.has-photo { border: 1.5px solid var(--gm-border-2, #eef1f6); }
+  .tcp-photo-zone.dragover  { border-color: var(--gm-primary, #1d4ed8); background: var(--gm-tint-2, #f3f6fd); }
+  .tcp-photo-zone img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+  .tcp-photo-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    color: var(--gm-text-3, #94a3b8); text-align: center; padding: 20px;
+    pointer-events: none;
+  }
+  .tcp-photo-placeholder .icon { font-size: 2.5rem; }
+  .tcp-browse-btn {
+    pointer-events: all;
+    padding: 6px 16px;
+    background: var(--gm-tint, #e8efff);
+    color: var(--gm-primary, #1d4ed8);
+    border: 1.5px solid var(--gm-primary, #1d4ed8);
+    border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .tcp-browse-btn:hover { background: var(--gm-primary, #1d4ed8); color: #fff; }
+  .tcp-replace-btn {
+    position: absolute; top: 8px; right: 8px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.92);
+    color: var(--gm-text-2, #475569);
+    border: 1px solid var(--gm-border, #e2e8f0);
+    border-radius: 5px; font-size: 0.78rem; cursor: pointer;
+    display: none; transition: background 0.15s;
+  }
+  .tcp-photo-zone.has-photo:hover .tcp-replace-btn { display: block; }
+  .tcp-replace-btn:hover { background: #fff; }
+  .tcp-svg-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+  }
+  .tcp-svg-overlay line {
+    stroke: #dc2626; stroke-width: 1.5; pointer-events: none;
+  }
+  .tcp-drag-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 11;
+  }
+  .tcp-drag-svg line {
+    stroke: #dc2626; stroke-width: 1.5; stroke-dasharray: 5 3; pointer-events: none;
+  }
+  .tcp-marker-dot {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transform: translate(-50%, -50%);
+    cursor: grab; z-index: 15;
+    user-select: none;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(220,38,38,0.4);
+    transition: transform 0.12s;
+  }
+  .tcp-marker-dot:hover { transform: translate(-50%,-50%) scale(1.2); }
+  .tcp-marker-label-wrap {
+    position: absolute; z-index: 20;
+    display: flex; align-items: stretch;
+  }
+  .tcp-marker-label {
+    width: 80px; min-width: 50px;
+    padding: 4px 7px;
+    background: #fff;
+    border: 1.5px solid #334155;
+    border-radius: 4px 0 0 4px;
+    font-size: 11px; font-weight: 500;
+    color: #0f172a;
+    outline: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+    cursor: text;
+  }
+  .tcp-marker-label:focus { border-color: var(--gm-primary, #1d4ed8); }
+  .tcp-marker-del-btn {
+    position: absolute; top: -8px; right: -8px;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    background: #dc2626; color: #fff;
+    border: 1.5px solid #fff;
+    font-size: 11px; line-height: 1; font-weight: 700;
+    cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    padding: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    z-index: 21;
+  }
+  .tcp-marker-label-wrap:hover .tcp-marker-del-btn { display: flex; }
+  .tcp-marker-del-btn:hover { background: #b91c1c; transform: scale(1.15); }
   .sg-comp-save-bar {
     display: flex;
     align-items: center;
@@ -5854,7 +6069,10 @@ function sgRenderProjectComponents() {
     });
 
     html += `</tbody></table>
-      <button class="sg-comp-add-btn" onclick="sgAddCompRow('${catKey}')">&#10133; 新增 ${catInfo.label}</button>
+      <div class="sg-comp-footer">
+        <button class="sg-comp-add-btn" onclick="sgAddCompRow('${catKey}')">&#10133; 新增 ${catInfo.label}</button>
+        <button class="tcp-placement-btn ${catInfo.css}" onclick="tcpOpenModal('${catKey}')" title="${catInfo.label} 元件位置標註">📍 元件位置標註</button>
+      </div>
     </div>`;
   }
 
@@ -5991,6 +6209,395 @@ function sgOnCompEdit(el) {
 
   sgProjectData[fieldKey][idx][field] = val;
 }
+
+/* ======================================================
+   TC Placement Modal  (tcp-*)
+   ====================================================== */
+
+let _tcpCategory = null;
+let _tcpPagesData = {};      // { RF: [{id,title,imageData,annotations,isCustomTitle},...], ... }
+let _tcpActivePage = null;   // current page object reference
+let _tcpDragState  = null;   // { markerId, dotAbsX, dotAbsY }
+
+/* ── open / close ── */
+function tcpOpenModal(category) {
+  if (!sgProjectData) { alert('請先選擇或建立一個專案'); return; }
+  _tcpCategory = category;
+
+  // Init category storage if first open
+  if (!_tcpPagesData[category]) {
+    _tcpPagesData[category] = [{
+      id: 'p_' + Date.now(),
+      title: '',
+      imageData: '',
+      annotations: [],
+      isCustomTitle: false
+    }];
+  }
+  _tcpActivePage = _tcpPagesData[category][0];
+
+  // Set header title
+  const projectName = getProjectName() || 'Untitled';
+  document.getElementById('tcp-modal-title').textContent =
+    `${projectName} ${category} Component Location`;
+
+  document.getElementById('tcp-modal-overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  tcpRenderEditor();
+}
+
+function tcpCloseModal() {
+  document.getElementById('tcp-modal-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+  _tcpDragState = null;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' &&
+      document.getElementById('tcp-modal-overlay').classList.contains('active')) {
+    tcpCloseModal();
+  }
+});
+
+/* ── render editor ── */
+function tcpRenderEditor() {
+  const body = document.getElementById('tcp-modal-body');
+  if (!body || !_tcpActivePage) return;
+
+  const page = _tcpActivePage;
+  const hasPhoto = !!page.imageData;
+
+  body.innerHTML = `
+    <div class="tcp-content">
+      <div class="tcp-editor-main">
+        <div class="tcp-workspace-wrap" id="tcp-workspace">
+          <div class="tcp-photo-zone${hasPhoto ? ' has-photo' : ''}" id="tcp-photo-zone">
+            ${hasPhoto
+              ? `<img src="${page.imageData}" alt="PCB layout" id="tcp-photo-img">
+                 <button class="tcp-replace-btn" id="tcp-replace-btn">📷 更換</button>`
+              : `<div class="tcp-photo-placeholder">
+                   <span class="icon">📷</span>
+                   <span>拖拉 PCB 圖至此區域</span>
+                   <button class="tcp-browse-btn" id="tcp-browse-btn">瀏覽檔案</button>
+                   <span style="font-size:0.78rem;margin-top:2px;">或 Ctrl+V 貼上圖片</span>
+                 </div>`
+            }
+            <input type="file" id="tcp-file-input" accept="image/*" style="display:none">
+          </div>
+          <svg class="tcp-svg-overlay" id="tcp-svg"></svg>
+          <svg class="tcp-drag-svg" id="tcp-drag-svg" style="display:none">
+            <line x1="0" y1="0" x2="0" y2="0"/>
+          </svg>
+        </div>
+      </div>
+    </div>`;
+
+  tcpSetupPhotoHandlers(page);
+  if (hasPhoto) {
+    tcpSetupClickHandler(page);
+    if (page.annotations.length > 0) tcpRenderMarkers(page);
+  }
+}
+
+/* ── image compression ── */
+function tcpCompressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 2000, QUALITY = 0.85;
+        let w = img.width, h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          const scale = MAX_DIM / Math.max(w, h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', QUALITY));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function tcpHandlePhoto(page, file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const data = await tcpCompressImage(file);
+  page.imageData = data;
+  tcpRenderEditor();
+}
+
+/* ── photo zone event handlers ── */
+function tcpSetupPhotoHandlers(page) {
+  const zone      = document.getElementById('tcp-photo-zone');
+  const fileInput = document.getElementById('tcp-file-input');
+  if (!zone || !fileInput) return;
+
+  const browseBtn  = document.getElementById('tcp-browse-btn');
+  const replaceBtn = document.getElementById('tcp-replace-btn');
+
+  if (browseBtn)  browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
+  if (replaceBtn) {
+    replaceBtn.addEventListener('click',     (e) => { e.stopPropagation(); fileInput.click(); });
+    replaceBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+  }
+
+  fileInput.addEventListener('change', async () => {
+    if (fileInput.files[0]) await tcpHandlePhoto(page, fileInput.files[0]);
+  });
+
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) await tcpHandlePhoto(page, file);
+  });
+}
+
+/* ── click-to-add marker ── */
+function tcpSetupClickHandler(page) {
+  const zone      = document.getElementById('tcp-photo-zone');
+  const workspace = document.getElementById('tcp-workspace');
+  if (!zone || !workspace) return;
+
+  zone.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || !page.imageData) return;
+    if (e.target.closest('.tcp-marker-dot') ||
+        e.target.closest('.tcp-marker-label-wrap') ||
+        e.target.closest('.tcp-replace-btn')) return;
+
+    const rect = zone.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const id = 'a_' + Date.now();
+    page.annotations.push({ id, x, y, label: '', labelX: -1, labelY: -1 });
+
+    const wsRect = workspace.getBoundingClientRect();
+    const dotAbsX = e.clientX - wsRect.left;
+    const dotAbsY = e.clientY - wsRect.top;
+    _tcpDragState = { annoId: id, dotAbsX, dotAbsY };
+
+    const dragSvg = document.getElementById('tcp-drag-svg');
+    dragSvg.style.display = 'block';
+    const ln = dragSvg.querySelector('line');
+    ln.setAttribute('x1', dotAbsX); ln.setAttribute('y1', dotAbsY);
+    ln.setAttribute('x2', dotAbsX); ln.setAttribute('y2', dotAbsY);
+
+    tcpRenderMarkers(page);
+  });
+
+  workspace.addEventListener('mousemove', (e) => {
+    if (!_tcpDragState) return;
+    const wsRect = workspace.getBoundingClientRect();
+    const dragSvg = document.getElementById('tcp-drag-svg');
+    const ln = dragSvg.querySelector('line');
+    ln.setAttribute('x2', e.clientX - wsRect.left);
+    ln.setAttribute('y2', e.clientY - wsRect.top);
+  });
+
+  workspace.addEventListener('mouseup', (e) => {
+    if (!_tcpDragState) return;
+    const ds = _tcpDragState;
+    _tcpDragState = null;
+    const dragSvg = document.getElementById('tcp-drag-svg');
+    dragSvg.style.display = 'none';
+
+    const wsRect   = workspace.getBoundingClientRect();
+    const labelAbsX = e.clientX - wsRect.left;
+    const labelAbsY = e.clientY - wsRect.top;
+    const lxPct = (labelAbsX / wsRect.width) * 100;
+    const lyPct = (labelAbsY / wsRect.height) * 100;
+
+    const anno = page.annotations.find(a => a.id === ds.annoId);
+    if (anno) {
+      const dist = Math.hypot(labelAbsX - ds.dotAbsX, labelAbsY - ds.dotAbsY);
+      if (dist < 15) {
+        const zone2 = document.getElementById('tcp-photo-zone');
+        const zRect  = zone2.getBoundingClientRect();
+        anno.labelX = (ds.dotAbsX + wsRect.left) < zRect.left + zRect.width / 2 ? 70 : 3;
+        anno.labelY = Math.max(2, Math.min(88, lyPct));
+      } else {
+        anno.labelX = Math.max(0, Math.min(91, lxPct));
+        anno.labelY = Math.max(0, Math.min(91, lyPct));
+      }
+    }
+
+    tcpRenderMarkers(page);
+    setTimeout(() => {
+      const el = document.querySelector(`.tcp-marker-label[data-id="${ds.annoId}"]`);
+      if (el) el.focus();
+    }, 50);
+  });
+}
+
+/* ── render markers (dots + lines + labels) ── */
+function tcpRenderMarkers(page) {
+  const workspace = document.getElementById('tcp-workspace');
+  const zone      = document.getElementById('tcp-photo-zone');
+  const svg       = document.getElementById('tcp-svg');
+  if (!workspace || !zone || !svg) return;
+
+  workspace.querySelectorAll('.tcp-marker-dot, .tcp-marker-label-wrap').forEach(el => el.remove());
+  svg.innerHTML = '';
+
+  const zoneRect = zone.getBoundingClientRect();
+  const wsRect   = workspace.getBoundingClientRect();
+  const offX = zoneRect.left - wsRect.left;
+  const offY = zoneRect.top  - wsRect.top;
+
+  page.annotations.forEach((anno, idx) => {
+    const dotX = offX + (anno.x / 100) * zoneRect.width;
+    const dotY = offY + (anno.y / 100) * zoneRect.height;
+
+    /* dot */
+    const dot = document.createElement('div');
+    dot.className = 'tcp-marker-dot';
+    dot.style.left = dotX + 'px';
+    dot.style.top  = dotY + 'px';
+    dot.dataset.id = anno.id;
+    dot.textContent = idx + 1;
+    dot.addEventListener('contextmenu', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (confirm(`刪除標記 #${idx + 1}？`)) {
+        page.annotations = page.annotations.filter(a => a.id !== anno.id);
+        tcpRenderMarkers(page);
+      }
+    });
+    dot.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+    workspace.appendChild(dot);
+
+    /* label (only if placed) */
+    if (anno.labelX >= 0 && anno.labelY >= 0) {
+      const labelX = (anno.labelX / 100) * wsRect.width;
+      const labelY = (anno.labelY / 100) * wsRect.height;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'tcp-marker-label-wrap';
+      wrap.style.left = labelX + 'px';
+      wrap.style.top  = labelY + 'px';
+      wrap.dataset.id = anno.id;
+
+      const label = document.createElement('input');
+      label.type = 'text';
+      label.className = 'tcp-marker-label';
+      label.placeholder = `TC${idx + 1}`;
+      label.value = anno.label || '';
+      label.dataset.id = anno.id;
+      label.addEventListener('input', () => { anno.label = label.value; });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'tcp-marker-del-btn';
+      delBtn.textContent = '×';
+      delBtn.title = '刪除';
+      delBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+      delBtn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        page.annotations = page.annotations.filter(a => a.id !== anno.id);
+        tcpRenderMarkers(page);
+      });
+
+      /* drag label (pendingDrag pattern: start only after 5px move) */
+      let labelDragging = false;
+      let pendingDrag   = null;
+      let lblOffX = 0, lblOffY = 0;
+
+      label.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        pendingDrag = {
+          startX: e.clientX, startY: e.clientY,
+          offX: e.clientX - wrap.getBoundingClientRect().left,
+          offY: e.clientY - wrap.getBoundingClientRect().top
+        };
+      });
+
+      const onLabelMove = (e) => {
+        if (pendingDrag && !labelDragging) {
+          if (Math.hypot(e.clientX - pendingDrag.startX, e.clientY - pendingDrag.startY) > 5) {
+            labelDragging = true;
+            lblOffX = pendingDrag.offX;
+            lblOffY = pendingDrag.offY;
+            label.blur();
+          }
+        }
+        if (!labelDragging) return;
+        const wr = workspace.getBoundingClientRect();
+        const newX = Math.max(0, Math.min(wr.width  - wrap.offsetWidth,  e.clientX - wr.left - lblOffX));
+        const newY = Math.max(0, Math.min(wr.height - wrap.offsetHeight, e.clientY - wr.top  - lblOffY));
+        wrap.style.left = newX + 'px';
+        wrap.style.top  = newY + 'px';
+        tcpUpdateLine(svg, anno.id, dotX, dotY,
+          newX + wrap.offsetWidth / 2, newY + wrap.offsetHeight / 2);
+      };
+
+      const onLabelUp = () => {
+        pendingDrag = null;
+        if (!labelDragging) return;
+        labelDragging = false;
+        const wr = workspace.getBoundingClientRect();
+        anno.labelX = (parseFloat(wrap.style.left) / wr.width)  * 100;
+        anno.labelY = (parseFloat(wrap.style.top)  / wr.height) * 100;
+        tcpRenderMarkers(page);
+      };
+
+      document.addEventListener('mousemove', onLabelMove);
+      document.addEventListener('mouseup',   onLabelUp);
+
+      wrap.appendChild(label);
+      wrap.appendChild(delBtn);
+      workspace.appendChild(wrap);
+
+      /* SVG leader line (draw after label is in DOM for size) */
+      requestAnimationFrame(() => {
+        const centerX = labelX + (wrap.offsetWidth  || 86) / 2;
+        const centerY = labelY + (wrap.offsetHeight || 26) / 2;
+        tcpDrawLine(svg, anno.id, dotX, dotY, centerX, centerY);
+      });
+    }
+  });
+}
+
+function tcpDrawLine(svg, annoId, x1, y1, x2, y2) {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  line.dataset.annoId = annoId;
+  svg.appendChild(line);
+}
+
+function tcpUpdateLine(svg, annoId, x1, y1, x2, y2) {
+  const ln = svg.querySelector(`line[data-anno-id="${annoId}"]`);
+  if (ln) {
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+  }
+}
+
+/* ── Ctrl+V paste support ── */
+document.addEventListener('paste', async function(e) {
+  if (!document.getElementById('tcp-modal-overlay').classList.contains('active')) return;
+  if (!_tcpActivePage) return;
+  const el = document.activeElement;
+  if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) return;
+
+  const dt = e.clipboardData;
+  if (!dt) return;
+  if (dt.items) {
+    for (const item of dt.items) {
+      if (item.type.startsWith('image/') && item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) { e.preventDefault(); await tcpHandlePhoto(_tcpActivePage, file); return; }
+      }
+    }
+  }
+});
 
 /* ---- Delete component from list ---- */
 function sgDeleteComp(cat, idx) {
@@ -7405,6 +8012,17 @@ async function fbOnTabActivate() {
     }
   }
 </script>
+
+<!-- ── TC Placement Modal ── -->
+<div id="tcp-modal-overlay" class="tcp-modal-overlay" onclick="if(event.target===this)tcpCloseModal()">
+  <div class="tcp-modal-box">
+    <div class="tcp-modal-header">
+      <span class="tcp-modal-title" id="tcp-modal-title">元件位置標註</span>
+      <button class="tcp-modal-close" onclick="tcpCloseModal()" title="關閉 (ESC)">✕</button>
+    </div>
+    <div class="tcp-modal-body" id="tcp-modal-body"></div>
+  </div>
+</div>
 
 </body>
 </html>
